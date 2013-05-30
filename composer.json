@@ -1,5 +1,5 @@
 {
-    "name": "turnaev/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter",
+    "name": "turnaev/mysql-workbench-schema-exporter",
     "type": "cli",
     "description": "MySQL Workbench Schema Exporter",
     "keywords": ["mysql","workbench","database","doctrine","cli"],
