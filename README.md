@@ -319,7 +319,7 @@ Example
 
     <?php
 
-    // enable autoloading of classes
+    // enable autoloading of classes  
     $libDir = __DIR__.'/lib';
     require_once($libDir.'/MwbExporter/SplClassLoader.php');
 
