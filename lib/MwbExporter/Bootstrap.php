@@ -153,4 +153,24 @@ class Bootstrap
             return $document;
         }
     }
+
+    /**
+     * @param FormatterInterface $formatter
+     * @param Document $document
+     */
+    public function preCompileModels(FormatterInterface $formatter, Document $document)
+    {
+        $compiler = new Compiler($formatter, $document);
+        $compiler->preCompileModels();
+    }
+
+    /**
+     * @param FormatterInterface $formatter
+     * @param Document $document
+     */
+    public function postCompileModels(FormatterInterface $formatter, Document $document)
+    {
+        $compiler = new Compiler($formatter, $document);
+        $compiler->postCompileModels();
+    }
 }

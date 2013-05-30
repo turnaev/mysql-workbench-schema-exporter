@@ -93,6 +93,18 @@ class Column extends Base
     }
 
     /**
+     * Get raw column name.
+     *
+     * @return string
+     */
+    public function getPhpColumnName()
+    {
+        $name = $this->columnNameBeautifier($this->getColumnName());
+        $name = lcfirst($name);
+        return $name;
+    }
+
+    /**
      * Get column type, either by its simpleType or userType.
      *
      * @return string

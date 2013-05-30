@@ -90,7 +90,7 @@ class Column extends BaseColumn
                         'name'                 => $foreign->getForeign()->getColumnName(),
                         'referencedColumnName' => $foreign->getLocal()->getColumnName(),
                         'onDelete'             => $formatter->getDeleteRule($foreign->getLocal()->getParameters()->get('deleteRule')),
-                        'nullable'             => !$foreign->getForeign()->isNotNull() ? null : false,
+                        'nullable'             => !$foreign->getForeign()->isNotNull() ? true : false,
                     ),
                 );
             } else {
@@ -104,7 +104,7 @@ class Column extends BaseColumn
                         'name'                 => $foreign->getForeign()->getColumnName(),
                         'referencedColumnName' => $foreign->getLocal()->getColumnName(),
                         'onDelete'             => $formatter->getDeleteRule($foreign->getLocal()->getParameters()->get('deleteRule')),
-                        'nullable'             => !$foreign->getForeign()->isNotNull() ? null : false,
+                        'nullable'             => !$foreign->getForeign()->isNotNull() ? true : false,
                     ),
                 );
             }
@@ -128,7 +128,7 @@ class Column extends BaseColumn
                         'name'                 => $this->local->getForeign()->getColumnName(),
                         'referencedColumnName' => $this->local->getLocal()->getColumnName(),
                         'onDelete'             => $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule')),
-                        'nullable'             => !$this->local->getForeign()->isNotNull() ? null : false,
+                        'nullable'             => !$this->local->getForeign()->isNotNull() ? true : false,
                     ),
                 );
             } else {
@@ -142,7 +142,7 @@ class Column extends BaseColumn
                         'name'                 => $this->local->getForeign()->getColumnName(),
                         'referencedColumnName' => $this->local->getLocal()->getColumnName(),
                         'onDelete'             => $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule')),
-                        'nullable'             => !$this->local->getForeign()->isNotNull() ? null : false,
+                        'nullable'             => !$this->local->getForeign()->isNotNull() ? true : false,
                     ),
                 );
             }

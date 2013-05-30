@@ -37,6 +37,11 @@ class Formatter extends BaseFormatter
     const CFG_GENERATE_ENTITY_SERIALIZATION  = 'generateEntitySerialization';
     const CFG_QUOTE_IDENTIFIER               = 'quoteIdentifier';
 
+    const CFG_BASE_NAMESPASE                 = 'baseNamespace';
+    const CFG_BUNDELE_NAMESPACE              = 'bundleNamespace';
+    const CFG_BUNDELE_NAMESPACE_TO           = 'bundleNamespaceTo';
+
+
     protected function init()
     {
         parent::init();
@@ -47,6 +52,10 @@ class Formatter extends BaseFormatter
             static::CFG_SKIP_GETTER_SETTER            => false,
             static::CFG_GENERATE_ENTITY_SERIALIZATION => true,
             static::CFG_QUOTE_IDENTIFIER              => false,
+
+            static::CFG_BASE_NAMESPASE                => 'VN',
+            static::CFG_BUNDELE_NAMESPACE             => 'Sandbox\\GeneratedBundle',
+            static::CFG_BUNDELE_NAMESPACE_TO          => '',
         ));
     }
 

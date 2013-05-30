@@ -41,6 +41,11 @@ interface FormatterInterface {
     const CFG_LOG_TO_CONSOLE         = 'logToConsole';
     const CFG_LOG_FILE               = 'logFile';
 
+    const CFG_BASE_NAMESPASE         = 'baseNamespace';
+    const CFG_BUNDELE_NAMESPACE      = 'bundleNamespace';
+    const CFG_BUNDELE_NAMESPACE_TO   = 'bundleNamespaceTo';
+
+
     /**
      * Get the registry object.
      *

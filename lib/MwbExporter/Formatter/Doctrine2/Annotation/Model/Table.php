@@ -164,12 +164,19 @@ class Table extends BaseTable
      */
     public function getJoinColumnAnnotation($local, $foreign, $deleteRule = null)
     {
-        return $this->getAnnotation('JoinColumn', array('name' => $local, 'referencedColumnName' => $foreign, 'onDelete' => $this->getDocument()->getFormatter()->getDeleteRule($deleteRule)));
+        return $this->getAnnotation('JoinColumn', array('name' => $local, 'referencedColumnName' => $foreign,
+                                                       'onDelete' => $this->getDocument()->getFormatter()->getDeleteRule($deleteRule)));
     }
 
     public function writeTable(WriterInterface $writer)
     {
         if (!$this->isExternal()) {
+
+            if(strpos( $this->quoteIdentifier($this->getRawTableName()), '_2_') !== false ) {
+                return self::WRITE_M2M;
+            }
+
+
             $namespace = $this->getEntityNamespace();
             if ($repositoryNamespace = $this->getDocument()->getConfig()->get(Formatter::CFG_REPOSITORY_NAMESPACE)) {
                 $repositoryNamespace .= '\\';
@@ -182,6 +189,9 @@ class Table extends BaseTable
             $writer
                 ->open($this->getTableFileName())
                 ->write('<?php')
+                ->write('/**')
+                ->write(' * !!!WARNING. This code was automatically generated, it can be overwritten at any time.')
+                ->write(' */')
                 ->write('')
                 ->write('namespace %s;', $namespace)
                 ->write('')
@@ -189,11 +199,11 @@ class Table extends BaseTable
                     $_this->writeUsedClasses($writer);
                 })
                 ->write('/**')
-                ->write(' * '.$this->getNamespace(null, false))
+                //->write(' * '.$this->getNamespace(null, false))
                 ->write(' *')
                 ->writeIf($comment, $comment)
-                ->write(' * '.$this->getAnnotation('Entity', array('repositoryClass' => $this->getDocument()->getConfig()->get(Formatter::CFG_AUTOMATIC_REPOSITORY) ? $repositoryNamespace.$this->getModelName().'Repository' : null)))
                 ->write(' * '.$this->getAnnotation('Table', array('name' => $this->quoteIdentifier($this->getRawTableName()), 'indexes' => $this->getIndexesAnnotation(), 'uniqueConstraints' => $this->getUniqueConstraintsAnnotation())))
+                ->write(' * '.$this->getAnnotation('Entity', array('repositoryClass' => $this->getDocument()->getConfig()->get(Formatter::CFG_AUTOMATIC_REPOSITORY) ? $repositoryNamespace.$this->getModelName().'Repository' : null)))
                 ->writeIf($lifecycleCallbacks, ' * @HasLifecycleCallbacks')
                 ->write(' */')
                 ->write('class '.$this->getModelName().(($implements = $this->getClassImplementations()) ? ' implements '.$implements : ''))
@@ -225,6 +235,7 @@ class Table extends BaseTable
                         if ($serializableEntity) {
                             $_this->writeSerialization($writer);
                         }
+                        $_this->writeToString($writer);
                     })
                 ->outdent()
                 ->write('}')
@@ -252,6 +263,9 @@ class Table extends BaseTable
     public function writeConstructor(WriterInterface $writer)
     {
         $writer
+            ->write('/**')
+            ->write(' * only construct object')
+            ->write(' */')
             ->write('public function __construct()')
             ->write('{')
             ->indent()
@@ -269,15 +283,40 @@ class Table extends BaseTable
         return $this;
     }
 
+    public function writeToString(WriterInterface $writer)
+    {
+        $columns = $this->getColumns()->getColumns();
+        $writer
+            ->write('/**')
+            ->write(' * get data for serialize object')
+            ->write(' * @return string')
+            ->write(' */')
+            ->write('public function __toString()')
+            ->write('{')
+            ->indent()
+            ->write('throw new \Symfony\Component\Locale\Exception\MethodNotImplementedException(__METHOD__);')
+            ->write("return '';")
+            ->outdent()
+            ->write('}')
+        ;
+
+
+        return $this;
+    }
+
     public function writeSerialization(WriterInterface $writer)
     {
         $columns = $this->getColumns()->getColumns();
         $writer
+            ->write('/**')
+            ->write(' * get data for serialize object')
+            ->write(' * @return array')
+            ->write(' */')
             ->write('public function __sleep()')
             ->write('{')
             ->indent()
-                ->write('return array(%s);', implode(', ', array_map(function($column) {
-                    return sprintf('\'%s\'', $column->getColumnName());
+                ->write('return [%s];', implode(', ', array_map(function($column) {
+                    return sprintf('\'%s\'', $column->getPhpColumnName());
                 }, $columns)))
             ->outdent()
             ->write('}')
@@ -288,6 +327,7 @@ class Table extends BaseTable
 
     public function writeManyToMany(WriterInterface $writer)
     {
+        $mappedRelation = null;
         $formatter = $this->getDocument()->getFormatter();
         foreach ($this->manyToManyRelations as $relation) {
             $isOwningSide = $formatter->isOwningSide($relation, $mappedRelation);
@@ -306,9 +346,13 @@ class Table extends BaseTable
                 if ($mappedRelation->parseComment('unidirectional') === 'true') {
                     unset($annotationOptions['inversedBy']);
                 }
+                $nativeType = $this->getCollectionClass(false);
+                $targetEntity = $annotationOptions['targetEntity'];
 
                 $writer
                     ->write('/**')
+                    ->write(' * collection of '.$targetEntity)
+                    ->write(' * @var '.$nativeType)
                     ->write(' * '.$this->getAnnotation('ManyToMany', $annotationOptions))
                     ->write(' * '.$this->getAnnotation('JoinTable',
                         array(
@@ -335,10 +379,16 @@ class Table extends BaseTable
                     continue;
                 }
 
+
+                $nativeType = $this->getCollectionClass(false);
+                $targetEntity = $annotationOptions['targetEntity'];
+
                 $annotationOptions['mappedBy'] = $annotationOptions['inversedBy'];
                 $annotationOptions['inversedBy'] = null;
                 $writer
                     ->write('/**')
+                    ->write(' * collection of '.$targetEntity)
+                    ->write(' * @var '.$nativeType)
                     ->write(' * '.$this->getAnnotation('ManyToMany', $annotationOptions))
                     ->write(' */')
                 ;
@@ -354,6 +404,7 @@ class Table extends BaseTable
 
     public function writeManyToManyGetterAndSetter(WriterInterface $writer)
     {
+        $mappedRelation = null;
         $formatter = $this->getDocument()->getFormatter();
         foreach ($this->manyToManyRelations as $relation) {
             $isOwningSide = $formatter->isOwningSide($relation, $mappedRelation);
