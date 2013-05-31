@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=5.3.3",
         "doctrine/inflector": "1.0.*@dev"
     },
     "bin": ["cli/export.php"],
