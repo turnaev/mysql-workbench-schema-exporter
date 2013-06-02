@@ -298,6 +298,7 @@ class Table extends BaseTable
             ->write("return '';")
             ->outdent()
             ->write('}')
+            ->write('')
         ;
 
 
@@ -320,6 +321,7 @@ class Table extends BaseTable
                 }, $columns)))
             ->outdent()
             ->write('}')
+            ->write('')
         ;
 
         return $this;
