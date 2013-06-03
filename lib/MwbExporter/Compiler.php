@@ -156,6 +156,7 @@ class Compiler
         $fromFileContent = file_get_contents($fromXmlFile);
         $toFileContent = preg_replace('/Model\\\/', '', $fromFileContent);
         $toFileContent = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);
+        $toFileContent = preg_replace('/nullable="1"/', 'nullable="true"', $toFileContent);
 
         if(preg_match('/.*Model\.(.*)/', pathinfo($fromXmlFile)['filename'], $m)) {
             $toXmlFile = $configToDirXml . '/' . $m[1].'.xml';
