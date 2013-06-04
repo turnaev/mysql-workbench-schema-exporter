@@ -38,7 +38,9 @@ class Column extends BaseColumn
         $attributes = array(
             'name' => $this->getTable()->quoteIdentifier($this->getColumnName()),
             'type' => $this->getDocument()->getFormatter()->getDatatypeConverter()->getMappedType($this),
+
         );
+
         if (($length = $this->parameters->get('length')) && ($length != -1)) {
             $attributes['length'] = (int) $length;
         }
@@ -101,6 +103,9 @@ class Column extends BaseColumn
         $formatter = $this->getDocument()->getFormatter();
         // one to many references
         foreach ($this->foreigns as $foreign) {
+            /**
+             * @var \MwbExporter\Model\ForeignKey $foreign
+             */
             if ($foreign->getForeign()->getTable()->isManyToMany()) {
                 // do not create entities for many2many tables
                 continue;
@@ -121,6 +126,7 @@ class Column extends BaseColumn
                 'fetch' => $formatter->getFetchOption($foreign->parseComment('fetch')),
                 'orphanRemoval' => $formatter->getBooleanOption($foreign->parseComment('orphanRemoval')),
             );
+
 
             $joinColumnAnnotationOptions = array(
                 'name' => $foreign->getForeign()->getColumnName(),
@@ -168,6 +174,7 @@ class Column extends BaseColumn
                 'targetEntity' => $targetEntityFQCN,
                 'mappedBy' => null,
                 'inversedBy' => $inversedBy,
+                // 'cascade' => $formatter->getCascadeOption($this->local->parseComment('cascade')),
                 // 'cascade' => $formatter->getCascadeOption($this->local->parseComment('cascade')),
                 // 'fetch' => $formatter->getFetchOption($this->local->parseComment('fetch')),
                 // 'orphanRemoval' => $formatter->getBooleanOption($this->local->parseComment('orphanRemoval')),
@@ -281,7 +288,7 @@ class Column extends BaseColumn
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Add '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity to collection (one to many).')
+                        ->write(' * Add '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity to collection (one to many).')
                     ->write(' *')
                     ->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
@@ -295,8 +302,29 @@ class Column extends BaseColumn
                     ->outdent()
                     ->write('}')
                     ->write('')
-                    // getter
+                ;
+
+                $writer
+                    // remove
                     ->write('/**')
+                    ->write(' * remove '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity from collection (one to many).')
+                    ->write(' *')
+                    ->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
+                    ->write(' * @return '.$table->getNamespace())
+                    ->write(' */')
+                    ->write('public function remove'.$this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related.'('.$foreign->getOwningTable()->getModelName().' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
+                    ->write('{')
+                    ->indent()
+                    ->write('$this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'->removeElement($'.lcfirst($foreign->getOwningTable()->getModelName()).');')
+                    ->write('')
+                    ->write('return $this;')
+                    ->outdent()
+                    ->write('}')
+                    ->write('')
+                ;
+
+                    // getter
+                $writer->write('/**')
                     ->write(' * Get '.trim($foreign->getOwningTable()->getModelName().' '.$related_text).' entity collection (one to many).')
                     ->write(' *')
                     ->write(' * @return '.$table->getCollectionInterface())
@@ -304,10 +332,11 @@ class Column extends BaseColumn
                     ->write('public function get'.$this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.';')
+                    ->write('return $this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.';')
                     ->outdent()
                     ->write('}')
                 ;
+
             } else { // OneToOne
                 $writer
                     // setter

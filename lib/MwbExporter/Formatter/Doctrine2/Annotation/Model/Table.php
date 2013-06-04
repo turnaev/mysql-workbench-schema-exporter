@@ -418,6 +418,8 @@ class Table extends BaseTable
         $formatter = $this->getDocument()->getFormatter();
         foreach ($this->manyToManyRelations as $relation) {
             $isOwningSide = $formatter->isOwningSide($relation, $mappedRelation);
+
+            // add
             $writer
                 ->write('/**')
                 ->write(' * Add '.$relation['refTable']->getModelName().' entity to collection.')
@@ -439,7 +441,34 @@ class Table extends BaseTable
                 ->outdent()
                 ->write('}')
                 ->write('')
+            ;
+
+            // remove
+            $writer
                 ->write('/**')
+                ->write(' * Remove '.$relation['refTable']->getModelName().' entity to collection.')
+                ->write(' *')
+                ->write(' * @param '. $relation['refTable']->getNamespace().' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' * @return '.$this->getNamespace($this->getModelName()))
+                ->write(' */')
+                ->write('public function remove'.$relation['refTable']->getModelName().'('.$relation['refTable']->getModelName().' $'.lcfirst($relation['refTable']->getModelName()).')')
+                ->write('{')
+                ->indent()
+                ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
+                        if ($isOwningSide) {
+                            $writer->write('$%s->remove%s($this);', lcfirst($relation['refTable']->getModelName()), $_this->getModelName());
+                        }
+                    })
+                ->write('$this->'.lcfirst(Inflector::pluralize($relation['refTable']->getModelName())).'->removeElement($'.lcfirst($relation['refTable']->getModelName()).');')
+                ->write('')
+                ->write('return $this;')
+                ->outdent()
+                ->write('}')
+                ->write('')
+            ;
+
+            // get
+            $writer->write('/**')
                 ->write(' * Get '.$relation['refTable']->getModelName().' entity collection.')
                 ->write(' *')
                 ->write(' * @return '.$this->getCollectionInterface())
