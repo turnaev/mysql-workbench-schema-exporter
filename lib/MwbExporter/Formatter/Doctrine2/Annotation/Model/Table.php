@@ -285,19 +285,27 @@ class Table extends BaseTable
 
     public function writeToString(WriterInterface $writer)
     {
-        $columns = $this->getColumns()->getColumns();
         $writer
             ->write('/**')
             ->write(' * get data for serialize object')
             ->write(' * @return string')
             ->write(' */')
             ->write('public function __toString()')
-            ->write('{')
-            ->indent()
-            ->write('throw new \Symfony\Component\Locale\Exception\MethodNotImplementedException(__METHOD__);')
-            ->write("return '';")
-            ->outdent()
-            ->write('}')
+            ->write('{');
+        if($this->getColumns()->columnExits('name')) {
+            $column = $this->getColumns()->getColumnByName('name');
+            $name = $column->getPhpColumnName();
+            $writer->indent()
+                ->write("return (string)\$this->{$name};")
+            ->outdent();
+        } else {
+            $writer->indent()
+                ->write('throw new \Symfony\Component\Locale\Exception\MethodNotImplementedException(__METHOD__);')
+                ->write("return '';")
+            ->outdent();
+        }
+
+        $writer->write('}')
             ->write('')
         ;
 
