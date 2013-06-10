@@ -140,8 +140,11 @@ class Column extends BaseColumn
                 $related = $this->getRelatedName($foreign);
                 $nativeType = $this->getTable()->getCollectionClass(false);
 
+                $comment = $foreign->getOwningTable()->getComment();
+
                 $writer
                     ->write('/**')
+                    ->writeIf($comment, $comment)
                     ->write(' * collection of '.$targetEntity)
                     ->write(' * @var '.$nativeType)
                     ->write(' * ')
@@ -153,8 +156,12 @@ class Column extends BaseColumn
                 ;
             } else { // is OneToOne
                 $nativeType = $targetEntity;
+
+                $comment = $foreign->getOwningTable()->getComment();
+
                 $writer
                     ->write('/**')
+                    ->writeIf($comment, $comment)
                     ->write(' * @var '.$nativeType)
                     ->write(' * '.$this->getTable()->getAnnotation('OneToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
@@ -195,8 +202,12 @@ class Column extends BaseColumn
                 } else {
                     $annotationOptions['inversedBy'] = lcfirst(Inflector::pluralize($annotationOptions['inversedBy'])) . $refRelated;
                 }
+
+                $comment = $this->local->getForeign()->getComment();
+
                 $writer
                     ->write('/**')
+                    ->writeIf($comment, $comment)
                     ->write(' * @var '.$targetEntity)
                     ->write(' * '.$this->getTable()->getAnnotation('ManyToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
@@ -212,9 +223,12 @@ class Column extends BaseColumn
                 }
                 $annotationOptions['cascade'] = $formatter->getCascadeOption($this->local->parseComment('cascade'));
 
+                $comment = $this->local->getForeign()->getComment();
+
                 $nativeType = $targetEntity;
                 $writer
                     ->write('/**')
+                    ->writeIf($comment, $comment)
                     ->write(' * @var '.$nativeType)
                     ->write(' * '.$this->getTable()->getAnnotation('OneToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
