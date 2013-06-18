@@ -236,6 +236,8 @@ class Table extends BaseTable
                             $_this->writeSerialization($writer);
                         }
                         $_this->writeToString($writer);
+                        $_this->writeIsNew($writer);
+
                     })
                 ->outdent()
                 ->write('}')
@@ -246,6 +248,29 @@ class Table extends BaseTable
         }
 
         return self::WRITE_EXTERNAL;
+    }
+
+    public function writeIsNew(WriterInterface $writer)
+    {
+        if($this->getColumns()->columnExits('id')) {
+            $column = $this->getColumns()->getColumnByName('id');
+            $name = $column->getPhpColumnName();
+            $writer
+                ->write('/**')
+                ->write(' * check is new object')
+                ->write(' * @return boolean')
+                ->write(' */')
+                ->write('public function isNew()')
+                ->write('{')
+                    ->indent()
+                    ->write("return !(boolean)\$this->{$name};")
+                    ->outdent()
+                ->write('}')
+                ->write('')
+            ;
+        }
+
+        return $this;
     }
 
     public function writeUsedClasses(WriterInterface $writer)
