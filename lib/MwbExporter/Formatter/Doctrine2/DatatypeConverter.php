@@ -70,6 +70,7 @@ class DatatypeConverter extends BaseDatatypeConverter
             static::DATATYPE_BIT                => 'bigint',
             static::DATATYPE_ENUM               => 'string',
             static::DATATYPE_SET                => 'string',
+            static::USERDATATYPE_DATETIME       => 'datetime',
             static::USERDATATYPE_BOOLEAN        => 'boolean',
             static::USERDATATYPE_BOOL           => 'boolean',
             static::USERDATATYPE_FIXED          => 'decimal',
