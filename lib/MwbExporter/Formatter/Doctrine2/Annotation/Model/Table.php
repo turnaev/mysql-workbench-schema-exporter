@@ -325,7 +325,7 @@ class Table extends BaseTable
             ->outdent();
         } else {
             $writer->indent()
-                ->write('throw new \Symfony\Component\Locale\Exception\MethodNotImplementedException(__METHOD__);')
+                ->write('throw new \Symfony\Component\Intl\Exception\MethodNotImplementedException(__METHOD__);')
                 ->write("return '';")
             ->outdent();
         }
