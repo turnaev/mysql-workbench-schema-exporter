@@ -266,8 +266,8 @@ XML;
                         $constraintE = $dom->createElement('constraint');
                         $constraintE->setAttribute('name', 'Type');
 
-                        $optionE = $dom->createElement('option');
-                        $optionE->setAttribute('name', $typeMap[$type]);
+                        $optionE = $dom->createElement('option', $typeMap[$type]);
+                        $optionE->setAttribute('name', 'type');
                         $constraintE->appendChild($optionE);
 
                         $propertyE->appendChild($constraintE);
