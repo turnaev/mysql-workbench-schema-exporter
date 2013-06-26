@@ -310,6 +310,7 @@ class Column extends BaseColumn
                     ->write('public function add'.$this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related.'('.$foreign->getOwningTable()->getModelName().' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
                     ->write('{')
                     ->indent()
+                        ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$table->getModelName().'($this);')
                         ->write('$this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'[] = $'.lcfirst($foreign->getOwningTable()->getModelName()).';')
                         ->write('')
                         ->write('return $this;')
@@ -317,6 +318,7 @@ class Column extends BaseColumn
                     ->write('}')
                     ->write('')
                 ;
+
 
                 $writer
                     // remove
@@ -330,6 +332,7 @@ class Column extends BaseColumn
                     ->write('{')
                     ->indent()
                     ->write('$this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'->removeElement($'.lcfirst($foreign->getOwningTable()->getModelName()).');')
+                    ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$table->getModelName().'(null);')
                     ->write('')
                     ->write('return $this;')
                     ->outdent()
