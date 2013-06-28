@@ -54,12 +54,18 @@ class Column extends BaseColumn
             $attributes['nullable'] = false;
         }
 
+        if ($this->parameters->get('comment')) {
+            $attributes['options']["comment"]=$this->parameters->get('comment');
+
+        }
+
         return $attributes;
     }
 
     public function write(WriterInterface $writer)
     {
         $comment = $this->getComment();
+
 
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));

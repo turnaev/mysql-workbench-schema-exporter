@@ -57,15 +57,42 @@ class Annotation extends Base
      */
     public function asCode($value)
     {
+
         if ($value instanceof Annotation) {
             $value = (string) $value;
         } elseif (is_bool($value)) {
             $value = $value ? 'true' : 'false';
         } elseif (is_string($value)) {
+
+            $value = str_replace('"', "'", $value);
+
             $value = '"'.$value.'"';
+
+
+        } elseif (is_array($value) && array_key_exists('comment', $value)) {
+
+
+            $tmp = array();
+
+            foreach ($value as $k => $v) {
+                // skip null value
+                if (null === $v) {
+                    continue;
+                }
+                $v = $this->asCode($v);
+                $tmp[] = sprintf('"%s"=%s', $k, $v);
+            }
+
+            $value = implode(', ', $tmp);
+            $value = sprintf('{%s}', $value);
+
+            return $value;
+
         } elseif (is_array($value)) {
+
             $tmp = array();
             $useKey = !$this->isKeysNumeric($value);
+
             foreach ($value as $k => $v) {
                 // skip null value
                 if (null === $v) {
@@ -74,17 +101,15 @@ class Annotation extends Base
                 $v = $this->asCode($v);
                 $tmp[] = $useKey ? sprintf('%s=%s', $k, $v) : $v;
             }
-            //$multiline = $this->getOption('multiline') && count($value) > 1;
-            $multiline = false;
-            $value = implode($multiline ? ",\n" : ', ', $tmp).($multiline ? "\n" : '');
+
+            $value = implode(', ', $tmp);
+
             if ($useKey) {
                 $value = sprintf('(%s)', $value);
             } else {
                 $value = sprintf('{%s}', $value);
             }
-            if ($multiline) {
-                $value = $this->wrapLines($value, 4);
-            }
+
         }
 
         return $value;
