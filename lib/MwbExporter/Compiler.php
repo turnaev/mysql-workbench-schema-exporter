@@ -157,7 +157,7 @@ class Compiler
         $toFileContent = preg_replace('/Model\\\/', '', $fromFileContent);
         $toFileContent = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);
         $toFileContent = preg_replace('/nullable="1"/', 'nullable="true"', $toFileContent);
-	$toFileContent = preg_replace('/ precision="0" scale="0"/', '', $toFileContent);
+	    $toFileContent = preg_replace('/ precision="0" scale="0"/', '', $toFileContent);
 
         if(preg_match('/.*Model\.(.*)/', pathinfo($fromXmlFile)['filename'], $m)) {
             $toXmlFile = $configToDirXml . '/' . $m[1].'.xml';
@@ -359,9 +359,9 @@ XML;
 
 namespace ${namespace}\Repository;
 
-use ${baseNamespace}\CoreBundle\Entity\Repository\BaseRepository;
+use ${baseNamespace}\CoreBundle\Doctrine\ORM\EntityRepository;
 
-class ${className} extends BaseRepository
+class ${className} extends EntityRepository
 {
 }
 PHP;
