@@ -146,13 +146,15 @@ class Compiler
     {
         $fromFileContent = file_get_contents($modelFile);
         $toFileContent = preg_replace('/(class) ([^\s]+)/', 'abstract \1 \2', $fromFileContent);
+        $toFileContent = preg_replace('/Model\\\/', '', $toFileContent);
+
         file_put_contents($modelFile, $toFileContent);
 
         $this->removeORMAnatation($modelFile);
     }
 
-    private function changeMetaModel($fromXmlFile, $configToDirXml) {
-
+    private function changeMetaModel($fromXmlFile, $configToDirXml)
+    {
         $fromFileContent = file_get_contents($fromXmlFile);
         $toFileContent = preg_replace('/Model\\\/', '', $fromFileContent);
         $toFileContent = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);

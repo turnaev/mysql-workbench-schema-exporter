@@ -66,7 +66,6 @@ class Column extends BaseColumn
     {
         $comment = $this->getComment();
 
-
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
@@ -147,12 +146,13 @@ class Column extends BaseColumn
                 $nativeType = $this->getTable()->getCollectionClass(false);
 
                 $comment = $foreign->getOwningTable()->getComment();
+                //->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
 
                 $writer
                     ->write('/**')
                     ->writeIf($comment, $comment)
                     ->write(' * collection of '.$targetEntity)
-                    ->write(' * @var '.$nativeType)
+                    ->write(' * @var '.$nativeType.'|'.$foreign->getOwningTable()->getNamespace().'[]')
                     ->write(' * ')
                     ->write(' * '.$this->getTable()->getAnnotation('OneToMany', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
@@ -214,7 +214,7 @@ class Column extends BaseColumn
                 $writer
                     ->write('/**')
                     ->writeIf($comment, $comment)
-                    ->write(' * @var '.$targetEntity)
+                    ->write(' * @var \\'.$this->local->getReferencedTable()->getModelNameAsFQCN())
                     ->write(' * '.$this->getTable()->getAnnotation('ManyToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
                     ->write(' */')
@@ -308,7 +308,7 @@ class Column extends BaseColumn
                 $writer
                     // setter
                     ->write('/**')
-                        ->write(' * Add '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity to collection (one to many).')
+                    ->write(' * Add '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity to collection (one to many).')
                     ->write(' *')
                     ->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
@@ -350,7 +350,7 @@ class Column extends BaseColumn
                 $writer->write('/**')
                     ->write(' * Get '.trim($foreign->getOwningTable()->getModelName().' '.$related_text).' entity collection (one to many).')
                     ->write(' *')
-                    ->write(' * @return '.$table->getCollectionInterface())
+                    ->write(' * @return '.$table->getCollectionInterface().'|'.$foreign->getOwningTable()->getNamespace().'[]')
                     ->write(' */')
                     ->write('public function get'.$this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'()')
                     ->write('{')

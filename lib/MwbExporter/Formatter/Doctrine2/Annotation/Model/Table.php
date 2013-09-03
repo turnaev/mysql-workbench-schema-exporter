@@ -189,9 +189,6 @@ class Table extends BaseTable
             $writer
                 ->open($this->getTableFileName())
                 ->write('<?php')
-                ->write('/**')
-                ->write(' * !!!WARNING. This code was automatically generated, it can be overwritten at any time.')
-                ->write(' */')
                 ->write('')
                 ->write('namespace %s;', $namespace)
                 ->write('')
@@ -381,13 +378,14 @@ class Table extends BaseTable
                 if ($mappedRelation->parseComment('unidirectional') === 'true') {
                     unset($annotationOptions['inversedBy']);
                 }
+
                 $nativeType = $this->getCollectionClass(false);
                 $targetEntity = $annotationOptions['targetEntity'];
 
                 $writer
                     ->write('/**')
                     ->write(' * collection of '.$targetEntity)
-                    ->write(' * @var '.$nativeType)
+                    ->write(' * @var '.$nativeType.'|\\'.$relation['refTable']->getModelNameAsFQCN().'[]')
                     ->write(' * '.$this->getAnnotation('ManyToMany', $annotationOptions))
                     ->write(' * '.$this->getAnnotation('JoinTable',
                         array(
@@ -414,16 +412,16 @@ class Table extends BaseTable
                     continue;
                 }
 
-
                 $nativeType = $this->getCollectionClass(false);
                 $targetEntity = $annotationOptions['targetEntity'];
 
                 $annotationOptions['mappedBy'] = $annotationOptions['inversedBy'];
                 $annotationOptions['inversedBy'] = null;
+
                 $writer
                     ->write('/**')
                     ->write(' * collection of '.$targetEntity)
-                    ->write(' * @var '.$nativeType)
+                    ->write(' * @var '.$nativeType.'|\\'.$relation['refTable']->getModelNameAsFQCN().'[]')
                     ->write(' * '.$this->getAnnotation('ManyToMany', $annotationOptions))
                     ->write(' */')
                 ;
@@ -447,7 +445,7 @@ class Table extends BaseTable
             // add
             $writer
                 ->write('/**')
-                ->write(' * Add '.$relation['refTable']->getModelName().' entity to collection.')
+                ->write(' * Add '.$relation['refTable']->getModelName().' entity to collection (many to many).')
                 ->write(' *')
                 ->write(' * @param '. $relation['refTable']->getNamespace().' $'.lcfirst($relation['refTable']->getModelName()))
                 ->write(' * @return '.$this->getNamespace($this->getModelName()))
@@ -471,7 +469,7 @@ class Table extends BaseTable
             // remove
             $writer
                 ->write('/**')
-                ->write(' * Remove '.$relation['refTable']->getModelName().' entity to collection.')
+                ->write(' * Remove '.$relation['refTable']->getModelName().' entity to collection (many to many).')
                 ->write(' *')
                 ->write(' * @param '. $relation['refTable']->getNamespace().' $'.lcfirst($relation['refTable']->getModelName()))
                 ->write(' * @return '.$this->getNamespace($this->getModelName()))
@@ -494,9 +492,9 @@ class Table extends BaseTable
 
             // get
             $writer->write('/**')
-                ->write(' * Get '.$relation['refTable']->getModelName().' entity collection.')
+                ->write(' * Get '.$relation['refTable']->getModelName().' entity collection (many to many).')
                 ->write(' *')
-                ->write(' * @return '.$this->getCollectionInterface())
+                ->write(' * @return '.$this->getCollectionInterface().'|'.$relation['refTable']->getNamespace().'[]')
                 ->write(' */')
                 ->write('public function get'.Inflector::pluralize($relation['refTable']->getModelName()).'()')
                 ->write('{')
