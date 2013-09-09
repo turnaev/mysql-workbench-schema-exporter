@@ -253,25 +253,28 @@ class Column extends BaseColumn
         $table = $this->getTable();
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
-        $writer
-            // setter
-            ->write('/**')
-            ->write(' * Set the value of '.$this->getPhpColumnName().'.')
-            ->write(' *')
-            ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
-            ->write(' * @return '.$table->getNamespace())
-            ->write(' */')
-            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'($'.$this->getPhpColumnName().')')
-            ->write('{')
-            ->indent()
-                ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
-                ->write('')
-                ->write('return $this;')
-            ->outdent()
-            ->write('}')
-            ->write('')
+
+        if(!$this->isPrimary()) {
+            $writer
+                // setter
+                ->write('/**')
+                ->write(' * Set the value of '.$this->getPhpColumnName().'.')
+                ->write(' *')
+                ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
+                ->write(' * @return '.$table->getNamespace())
+                ->write(' */')
+                ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'($'.$this->getPhpColumnName().')')
+                ->write('{')
+                ->indent()
+                    ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
+                    ->write('')
+                    ->write('return $this;')
+                ->outdent()
+                ->write('}')
+                ->write('');
+        }
             // getter
-            ->write('/**')
+        $writer->write('/**')
             ->write(' * Get the value of '.$this->getPhpColumnName().'.')
             ->write(' *')
             ->write(' * @return '.$nativeType)
