@@ -50,10 +50,11 @@ class Columns extends BaseColumns
         return $this;
     }
 
-    public function writeArrayCollections(WriterInterface $writer)
+    public function writeArrayCollections(WriterInterface $writer, &$maxLen)
     {
+
         foreach ($this->columns as $column) {
-            $column->writeArrayCollection($writer);
+            $column->writeArrayCollection($writer, $maxLen);
         }
 
         return $this;

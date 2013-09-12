@@ -292,9 +292,21 @@ class Table extends BaseTable
             ->write('{')
             ->indent()
                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
-                    $_this->getColumns()->writeArrayCollections($writer);
+
+                    $maxLen=0;
+
+                    $fields = [];
                     foreach ($_this->getManyToManyRelations() as $relation) {
-                        $writer->write('$this->%s = new %s();', lcfirst(Inflector::pluralize($relation['refTable']->getModelName())), $_this->getCollectionClass(false));
+                        $field = lcfirst(Inflector::pluralize($relation['refTable']->getModelName()));
+                        $maxLen = max($maxLen, strlen($field));
+                        $fields[]  = $field;
+                    }
+
+                    $_this->getColumns()->writeArrayCollections($writer, $maxLen);
+
+                    foreach ($fields as $field) {
+                       $format = "\$this->%-{$maxLen}s = new %s();";
+                       $writer->write($format, $field, $_this->getCollectionClass(false));
                     }
                 })
             ->outdent()
@@ -307,24 +319,39 @@ class Table extends BaseTable
 
     public function writeToString(WriterInterface $writer)
     {
+        $throwException = false;
+        if(!$this->getColumns()->columnExits('name')) {
+            $throwException = true;
+        }
+
+        //* @throws MethodNotImplementedException
         $writer
             ->write('/**')
             ->write(' * get data for serialize object')
-            ->write(' * @return string')
-            ->write(' */')
+            ->write(' * @return string');
+
+        if($throwException) {
+            $writer->write(' * @throws \Symfony\Component\Intl\Exception\MethodNotImplementedException');
+        }
+
+        $writer->write(' */')
             ->write('public function __toString()')
             ->write('{');
-        if($this->getColumns()->columnExits('name')) {
+
+        if($throwException) {
+
+
+            $writer->indent()
+                ->write('throw new \Symfony\Component\Intl\Exception\MethodNotImplementedException(__METHOD__);')
+                ->write("return '';")
+                ->outdent();
+
+        } else {
             $column = $this->getColumns()->getColumnByName('name');
             $name = $column->getPhpColumnName();
             $writer->indent()
                 ->write("return (string)\$this->{$name};")
-            ->outdent();
-        } else {
-            $writer->indent()
-                ->write('throw new \Symfony\Component\Intl\Exception\MethodNotImplementedException(__METHOD__);')
-                ->write("return '';")
-            ->outdent();
+                ->outdent();
         }
 
         $writer->write('}')

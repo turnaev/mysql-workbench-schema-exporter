@@ -206,6 +206,9 @@ class Compiler
         $fromFileContent = file_get_contents($modelFile);
         $toFileContent   = preg_replace('/(class) ([^\s]+)/', 'abstract \1 \2', $fromFileContent);
         $toFileContent   = preg_replace('/Model\\\/', '', $toFileContent);
+        $toFileContent   = preg_replace('/\* @var datetime/', '* @var \DateTime', $toFileContent);
+        $toFileContent   = preg_replace('/\* @param datetime/', '* @param \DateTime', $toFileContent);
+        $toFileContent   = preg_replace('/\* @return datetime/', '* @return \DateTime', $toFileContent);
 
         file_put_contents($modelFile, $toFileContent);
 
@@ -244,7 +247,7 @@ class Compiler
 
                     '/(xmlns=|xmlns:xsi=|xsi:schemaLocation=)/'  => "\n" . '        \1',
                     '/(repository-class=".*?") (name=".*?") (table=".*?")/' =>
-                    "\n" . '          \1' . "\n" . '          \2' . "\n" . '          \3',
+                    "\n" . '          \2' . "\n" . '          \1' . "\n" . '          \3',
                 ]
             );
 
@@ -342,7 +345,7 @@ XML;
                     if ($fieldAttrs['type'] == 'datetime') {
 
                         $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'DateTime');
+                        $constraintE->setAttribute('name', '\DateTime');
                         $propertyE->appendChild($constraintE);
 
                         $classE->appendChild($propertyE);
@@ -483,6 +486,7 @@ use ${baseNamespace}\CoreBundle\Doctrine\ORM\EntityRepository;
 
 class ${className} extends EntityRepository
 {
+
 }
 PHP;
 

@@ -86,8 +86,9 @@ class Column extends BaseColumn
         return $this;
     }
 
-    public function writeArrayCollection(WriterInterface $writer)
+    public function writeArrayCollection(WriterInterface $writer, &$maxLen)
     {
+        $fields = [];
         foreach ($this->foreigns as $foreign) {
             if ($foreign->getForeign()->getTable()->isManyToMany()) {
                 // do not create entities for many2many tables
@@ -95,9 +96,19 @@ class Column extends BaseColumn
             }
 
             if ($foreign->isManyToOne() && $foreign->parseComment('unidirectional') !== 'true') { // is ManyToOne
+
                 $related = $this->getRelatedName($foreign);
-                $writer->write('$this->%s = new %s();', lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related, $this->getTable()->getCollectionClass(false));
+                $fields[] = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
             }
+        }
+
+        foreach($fields as $field) {
+            $maxLen = max($maxLen, strlen($field));
+        }
+
+        foreach($fields as $field) {
+            $format = "\$this->%-{$maxLen}s = new %s();";
+            $writer->write($format, $field, $this->getTable()->getCollectionClass(false));
         }
 
         return $this;
@@ -254,25 +265,24 @@ class Column extends BaseColumn
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
-        if(!$this->isPrimary()) {
-            $writer
-                // setter
-                ->write('/**')
-                ->write(' * Set the value of '.$this->getPhpColumnName().'.')
-                ->write(' *')
-                ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
-                ->write(' * @return '.$table->getNamespace())
-                ->write(' */')
-                ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'($'.$this->getPhpColumnName().')')
-                ->write('{')
-                ->indent()
-                    ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
-                    ->write('')
-                    ->write('return $this;')
-                ->outdent()
-                ->write('}')
-                ->write('');
-        }
+        $writer
+            // setter
+            ->write('/**')
+            ->write(' * Set the value of '.$this->getPhpColumnName().'.')
+            ->write(' *')
+            ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
+            ->write(' * @return '.$table->getNamespace())
+            ->write(' */')
+            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'($'.$this->getPhpColumnName().')')
+            ->write('{')
+            ->indent()
+                ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
+                ->write('')
+                ->write('return $this;')
+            ->outdent()
+            ->write('}')
+            ->write('');
+
             // getter
         $writer->write('/**')
             ->write(' * Get the value of '.$this->getPhpColumnName().'.')
