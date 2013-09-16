@@ -97,8 +97,13 @@ class Column extends BaseColumn
 
             if ($foreign->isManyToOne() && $foreign->parseComment('unidirectional') !== 'true') { // is ManyToOne
 
-                $related = $this->getRelatedName($foreign);
-                $fields[] = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
+                    $field = $filedNameInversed;
+                } else {
+                    $related = $this->getRelatedName($foreign);
+                    $field = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                }
+                $fields[] = $field;
             }
         }
 
@@ -119,6 +124,7 @@ class Column extends BaseColumn
         $formatter = $this->getDocument()->getFormatter();
         // one to many references
         foreach ($this->foreigns as $foreign) {
+
             /**
              * @var \MwbExporter\Model\ForeignKey $foreign
              */
@@ -131,9 +137,14 @@ class Column extends BaseColumn
                 continue;
             }
 
+            //w($foreign->parseComment('field'));
             $targetEntity = $foreign->getOwningTable()->getModelName();
             $targetEntityFQCN = $foreign->getOwningTable()->getModelNameAsFQCN($foreign->getReferencedTable()->getEntityNamespace());
             $mappedBy = $foreign->getReferencedTable()->getModelName();
+
+            if($filedNameMapped = $foreign->getForeign()->parseComment('field-mapped')) {
+                $mappedBy = $filedNameMapped;
+            }
 
             $annotationOptions = array(
                 'targetEntity' => $targetEntityFQCN,
@@ -151,13 +162,15 @@ class Column extends BaseColumn
                 'nullable' => !$foreign->getForeign()->isNotNull() ? true : false,
             );
 
+
+
             //check for OneToOne or OneToMany relationship
             if ($foreign->isManyToOne()) { // is OneToMany
                 $related = $this->getRelatedName($foreign);
                 $nativeType = $this->getTable()->getCollectionClass(false);
 
                 $comment = $foreign->getOwningTable()->getComment();
-                //->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
+                $filedNameInversed = ($d = $foreign->getForeign()->parseComment('field-inversed')) ? $d : lcfirst(Inflector::pluralize($targetEntity)).$related;
 
                 $writer
                     ->write('/**')
@@ -168,7 +181,7 @@ class Column extends BaseColumn
                     ->write(' * '.$this->getTable()->getAnnotation('OneToMany', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
                     ->write(' */')
-                    ->write('protected $'.lcfirst(Inflector::pluralize($targetEntity)).$related.';')
+                    ->write('protected $'.$filedNameInversed.';')
                     ->write('')
                 ;
             } else { // is OneToOne
@@ -194,6 +207,10 @@ class Column extends BaseColumn
             $targetEntityFQCN = $this->local->getReferencedTable()->getModelNameAsFQCN($this->local->getOwningTable()->getEntityNamespace());
             $inversedBy = $this->local->getOwningTable()->getModelName();
 
+            if($filedNameInversed = $this->local->getForeign()->parseComment('field-inversed')) {
+               $inversedBy = $filedNameInversed;
+            }
+
             $annotationOptions = array(
                 'targetEntity' => $targetEntityFQCN,
                 'mappedBy' => null,
@@ -216,11 +233,15 @@ class Column extends BaseColumn
                 $refRelated = $this->local->getLocal()->getRelatedName($this->local);
                 if ($this->local->parseComment('unidirectional') === 'true') {
                     $annotationOptions['inversedBy'] = null;
+                } else if($filedNameInversed) {
+                    null;
                 } else {
                     $annotationOptions['inversedBy'] = lcfirst(Inflector::pluralize($annotationOptions['inversedBy'])) . $refRelated;
                 }
 
                 $comment = $this->local->getForeign()->getComment();
+
+                $filedNameMapped = ($d = $this->local->getForeign()->parseComment('field-mapped')) ? $d : lcfirst($targetEntity).$related;
 
                 $writer
                     ->write('/**')
@@ -229,7 +250,7 @@ class Column extends BaseColumn
                     ->write(' * '.$this->getTable()->getAnnotation('ManyToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
                     ->write(' */')
-                    ->write('protected $'.lcfirst($targetEntity).$related.';')
+                    ->write('protected $'.$filedNameMapped.';')
                     ->write('')
                 ;
             } else { // is OneToOne
@@ -316,8 +337,35 @@ class Column extends BaseColumn
             }
 
             if ($foreign->isManyToOne()) { // is ManyToOne
+
                 $related = $this->getRelatedName($foreign);
                 $related_text = $this->getRelatedName($foreign, false);
+
+                if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
+
+                    $funactionNamePart    = ucfirst(Inflector::singularize($filedNameInversed));
+                    $funactionGetNamePart = ucfirst($filedNameInversed);
+
+                    $codeAddPart       = $filedNameInversed;
+                    $codeRemovePart    = $filedNameInversed;
+                    $codeGetPart       = $filedNameInversed;
+
+                } else {
+
+                    $funactionNamePart    = $this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related;
+                    $funactionGetNamePart = $this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+
+                    $codeAddPart       = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                    $codeRemovePart    = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                    $codeGetPart       = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                }
+
+                if($filedNameMapped = $foreign->getForeign()->parseComment('field-mapped')) {
+                    $codeSetMappedPart = ucfirst($filedNameMapped);
+                } else {
+                    $codeSetMappedPart = ucfirst($table->getModelName());
+                }
+
                 $writer
                     // setter
                     ->write('/**')
@@ -326,52 +374,48 @@ class Column extends BaseColumn
                     ->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function add'.$this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related.'('.$foreign->getOwningTable()->getModelName().' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
+                ->write('public function add'.$funactionNamePart.'('.$foreign->getOwningTable()->getModelName().' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
                     ->write('{')
                     ->indent()
-                        ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$table->getModelName().'($this);')
-                        ->write('$this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'[] = $'.lcfirst($foreign->getOwningTable()->getModelName()).';')
+                        ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$codeSetMappedPart.'($this);')
+                        ->write('$this->'.$codeAddPart.'[] = $'.lcfirst($foreign->getOwningTable()->getModelName()).';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
                     ->write('}')
                     ->write('')
-                ;
 
-
-                $writer
                     // remove
-                    ->write('/**')
+                 ->write('/**')
                     ->write(' * remove '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity from collection (one to many).')
                     ->write(' *')
                     ->write(' * @param '.$foreign->getOwningTable()->getNamespace().' $'.lcfirst($foreign->getOwningTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function remove'.$this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related.'('.$foreign->getOwningTable()->getModelName().' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
-                    ->write('{')
-                    ->indent()
-                    ->write('$this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'->removeElement($'.lcfirst($foreign->getOwningTable()->getModelName()).');')
-                    ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$table->getModelName().'(null);')
-                    ->write('')
-                    ->write('return $this;')
-                    ->outdent()
-                    ->write('}')
-                    ->write('')
-                ;
+                    ->write('public function remove'.$funactionNamePart.'('.$foreign->getOwningTable()->getModelName().' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
+                        ->write('{')
+                        ->indent()
+                            ->write('$this->'.$codeRemovePart.'->removeElement($'.lcfirst($foreign->getOwningTable()->getModelName()).');')
+                            ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$codeSetMappedPart.'(null);')
+                            ->write('')
+                            ->write('return $this;')
+                        ->outdent()
+                        ->write('}')
+                        ->write('')
 
                     // getter
-                $writer->write('/**')
+                ->write('/**')
                     ->write(' * Get '.trim($foreign->getOwningTable()->getModelName().' '.$related_text).' entity collection (one to many).')
                     ->write(' *')
                     ->write(' * @return '.$table->getCollectionInterface().'|'.$foreign->getOwningTable()->getNamespace().'[]')
                     ->write(' */')
-                    ->write('public function get'.$this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.'()')
-                    ->write('{')
-                    ->indent()
-                    ->write('return $this->'.lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related.';')
-                    ->outdent()
-                    ->write('}')
-                ;
+                    ->write('public function get'.$funactionGetNamePart.'()')
+                        ->write('{')
+                        ->indent()
+                            ->write('return $this->'.$codeGetPart.';')
+                        ->outdent()
+                        ->write('}')
+                    ;
 
             } else { // OneToOne
                 $writer
@@ -414,8 +458,21 @@ class Column extends BaseColumn
             $unidirectional = ($this->local->parseComment('unidirectional') === 'true');
 
             if ($this->local->isManyToOne()) { // is ManyToOne
+
                 $related = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName());
                 $related_text = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName(), false);
+
+                if($filedNameMapped = $this->local->getForeign()->parseComment('field-mapped')) {
+                    $funactionNamePart = ucfirst(Inflector::singularize($filedNameMapped));
+                    $codeSetPart       = $filedNameMapped;
+                    $codeGetPart       = $filedNameMapped;
+
+                } else {
+                    $funactionNamePart = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).$related;
+                    $codeSetPart       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
+                    $codeGetPart       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
+                }
+
                 $writer
                     // setter
                     ->write('/**')
@@ -424,10 +481,10 @@ class Column extends BaseColumn
                     ->write(' * @param '.$this->local->getReferencedTable()->getNamespace().' $'.lcfirst($this->local->getReferencedTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function set'.$this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).$related.'('.$this->local->getReferencedTable()->getModelName().' $'.lcfirst($this->local->getReferencedTable()->getModelName()).' = null)')
+                    ->write('public function set'.$funactionNamePart.'('.$this->local->getReferencedTable()->getModelName().' $'.lcfirst($this->local->getReferencedTable()->getModelName()).' = null)')
                     ->write('{')
                     ->indent()
-                        ->write('$this->'.lcfirst($this->local->getReferencedTable()->getModelName()).$related.' = $'.lcfirst($this->local->getReferencedTable()->getModelName()).';')
+                        ->write('$this->'.$codeSetPart.' = $'.lcfirst($this->local->getReferencedTable()->getModelName()).';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -439,10 +496,10 @@ class Column extends BaseColumn
                     ->write(' *')
                     ->write(' * @return '.$this->local->getReferencedTable()->getNamespace())
                     ->write(' */')
-                    ->write('public function get'.$this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).$related.'()')
+                    ->write('public function get'.$funactionNamePart.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.lcfirst($this->local->getReferencedTable()->getModelName()).$related.';')
+                        ->write('return $this->'.$codeGetPart.';')
                     ->outdent()
                     ->write('}')
                     ->write('')

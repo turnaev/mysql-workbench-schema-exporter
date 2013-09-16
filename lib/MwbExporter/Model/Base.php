@@ -61,6 +61,7 @@ abstract class Base
     public function __construct(Base $parent = null, $node)
     {
         $this->parameters = new RegistryHolder();
+
         $this->parent = $parent;
         $this->node = $node;
         $this->attributes = $node->attributes();
@@ -175,6 +176,7 @@ abstract class Base
     protected function getComment($asPhpComment = true)
     {
         $comment = $this->parameters->get('comment');
+
         // strip hints for mysql-exporter in comments (starting with {d:keyword}
         // or {doctrine:keyword} and ending with {/d:keyword}
         if ($comment = trim(preg_replace(sprintf('/\{(%s):([^\}]+)\}(.+?)\{\/\1:\2\}/si', $this->getDocument()->getFormatter()->getCommentParserIdentifierPrefix()), '', $comment))) {
@@ -188,6 +190,7 @@ abstract class Base
 
             return $comment;
         }
+
     }
 
     /**

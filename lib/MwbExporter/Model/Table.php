@@ -326,6 +326,10 @@ class Table extends Base
             $tableName = $singular;
         }
 
+        if($this->parseComment('className')) {
+            $tableName = $this->parseComment('className');
+        }
+
         // camleCase under scores for model names
         return ucfirst(preg_replace('@\_(\w)@e', 'ucfirst("$1")', $tableName));
     }

@@ -85,7 +85,8 @@ class Compiler
                 ->getWriter()
                 ->getStorage()
                 ->getResult();
-            $dir      = new \DirectoryIterator($this->document
+
+            $dir = new \DirectoryIterator($this->document
                 ->getWriter()
                 ->getStorage()
                 ->getResult());

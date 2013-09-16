@@ -129,14 +129,19 @@ class Bootstrap
     public function export(FormatterInterface $formatter, $filename, $outDir, $storage = 'file')
     {
         if ($formatter && $storage = $this->getStorage($storage)) {
+
             if ($formatter->getRegistry()->config->get(FormatterInterface::CFG_USE_LOGGED_STORAGE)) {
                 $storage = new LoggedStorage($storage); 
             }
+
             $storage->setOutdir(realpath($outDir) ? realpath($outDir) : $outDir);
             $storage->setBackup($formatter->getRegistry()->config->get(FormatterInterface::CFG_BACKUP_FILE));
+
             $writer = $this->getWriter($formatter->getPreferredWriter());
             $writer->setStorage($storage);
+
             $document = new Document($formatter, $filename);
+
             if (strlen($logFile = $formatter->getRegistry()->config->get(FormatterInterface::CFG_LOG_FILE))) {
                 $logger = new LoggerFile(array('filename' => $logFile));
             } elseif ($formatter->getRegistry()->config->get(FormatterInterface::CFG_LOG_TO_CONSOLE)) {
@@ -144,8 +149,10 @@ class Bootstrap
             } else {
                 $logger = new Logger();
             }
+
             $document->setLogger($logger);
             $document->write($writer);
+
             if ($e = $document->getError()) {
                 throw $e;
             }
