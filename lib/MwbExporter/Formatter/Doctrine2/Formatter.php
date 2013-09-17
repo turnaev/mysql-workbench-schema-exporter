@@ -123,10 +123,10 @@ abstract class Formatter extends BaseFormatter
     public function getBooleanOption($booleanValue)
     {
         if ($booleanValue) {
+
             switch (strtolower($booleanValue)) {
                 case 'true':
                     return true;
-
                 case 'false':
                     return false;
             }

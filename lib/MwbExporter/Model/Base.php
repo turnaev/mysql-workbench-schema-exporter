@@ -61,7 +61,6 @@ abstract class Base
     public function __construct(Base $parent = null, $node)
     {
         $this->parameters = new RegistryHolder();
-
         $this->parent = $parent;
         $this->node = $node;
         $this->attributes = $node->attributes();
@@ -70,6 +69,7 @@ abstract class Base
         if ($this->id && ($document = $this->getDocument())) {
             $document->getReference()->set($this->id, $this);
         }
+
     }
 
     protected function init()

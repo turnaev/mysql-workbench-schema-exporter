@@ -57,20 +57,21 @@ class Annotation extends Base
      */
     public function asCode($value)
     {
-
         if ($value instanceof Annotation) {
+
             $value = (string) $value;
+
         } elseif (is_bool($value)) {
+
             $value = $value ? 'true' : 'false';
+
         } elseif (is_string($value)) {
 
             $value = str_replace('"', "'", $value);
-
             $value = '"'.$value.'"';
-
+            $value = str_replace('=', '"="', $value);
 
         } elseif (is_array($value) && array_key_exists('comment', $value)) {
-
 
             $tmp = array();
 
@@ -99,7 +100,12 @@ class Annotation extends Base
                     continue;
                 }
                 $v = $this->asCode($v);
-                $tmp[] = $useKey ? sprintf('%s=%s', $k, $v) : $v;
+                if($k == '') {
+                    $tmp[] = $useKey ? sprintf('%s', $v) : $v;
+                } else {
+                    $tmp[] = $useKey ? sprintf('%s=%s', $k, $v) : $v;
+                }
+
             }
 
             $value = implode(', ', $tmp);

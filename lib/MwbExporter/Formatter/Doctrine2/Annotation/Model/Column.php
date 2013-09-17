@@ -35,11 +35,10 @@ class Column extends BaseColumn
 {
     public function asAnnotation()
     {
-        $attributes = array(
+        $attributes = [
             'name' => $this->getTable()->quoteIdentifier($this->getColumnName()),
             'type' => $this->getDocument()->getFormatter()->getDatatypeConverter()->getMappedType($this),
-
-        );
+        ];
 
         if (($length = $this->parameters->get('length')) && ($length != -1)) {
             $attributes['length'] = (int) $length;
@@ -77,7 +76,7 @@ class Column extends BaseColumn
                     ' * '.$this->getTable()->getAnnotation('Id'))
             ->write(' * '.$this->getTable()->getAnnotation('Column', $this->asAnnotation()))
             ->writeIf($this->isAutoIncrement(),
-                    ' * '.$this->getTable()->getAnnotation('GeneratedValue', array('strategy' => 'AUTO')))
+                    ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => 'AUTO']))
             ->write(' */')
             ->write('protected $'.$this->getPhpColumnName().';')
             ->write('')
@@ -146,26 +145,36 @@ class Column extends BaseColumn
                 $mappedBy = $filedNameMapped;
             }
 
-            $annotationOptions = array(
-                'targetEntity' => $targetEntityFQCN,
-                'mappedBy' => lcfirst($mappedBy),
-                'cascade' => $formatter->getCascadeOption($foreign->parseComment('cascade')),
-                'fetch' => $formatter->getFetchOption($foreign->parseComment('fetch')),
-                'orphanRemoval' => $formatter->getBooleanOption($foreign->parseComment('orphanRemoval')),
-            );
+            $cascade = ($d = $foreign->getForeign()->parseComment('cascade')) ? $d:$foreign->parseComment('cascade');
+            $orphanRemoval = ($d = $foreign->getForeign()->parseComment('orphanRemoval')) ? $d:$foreign->parseComment('orphanRemoval');
 
+            $annotationOptions = [
+                'targetEntity'  => $targetEntityFQCN,
+                'mappedBy'      => lcfirst($mappedBy),
+                'cascade'       => $formatter->getCascadeOption($cascade),
+                'fetch'         => $formatter->getFetchOption($foreign->parseComment('fetch')),
+                'orphanRemoval' => $formatter->getBooleanOption($orphanRemoval),
+            ];
 
-            $joinColumnAnnotationOptions = array(
-                'name' => $foreign->getForeign()->getColumnName(),
+            $joinColumnAnnotationOptions = [
+                'name'                 => $foreign->getForeign()->getColumnName(),
                 'referencedColumnName' => $foreign->getLocal()->getColumnName(),
-                'onDelete' => $formatter->getDeleteRule($foreign->getLocal()->getParameters()->get('deleteRule')),
-                'nullable' => !$foreign->getForeign()->isNotNull() ? true : false,
-            );
+                'onDelete'             => $formatter->getDeleteRule($foreign->getLocal()->getParameters()->get('deleteRule')),
+                'nullable'             => !$foreign->getForeign()->isNotNull() ? true : false,
+            ];
 
+            $orderByAnnotationOptions = [];
+            $orderBy = $foreign->getForeign()->parseComment('orderBy');
 
+            if(!is_null($orderBy)) {
+
+                $orderBy = $foreign->getForeign()->parseComment('orderBy');
+                $orderByAnnotationOptions=[null=>[$orderBy]];
+            }
 
             //check for OneToOne or OneToMany relationship
             if ($foreign->isManyToOne()) { // is OneToMany
+
                 $related = $this->getRelatedName($foreign);
                 $nativeType = $this->getTable()->getCollectionClass(false);
 
@@ -179,7 +188,13 @@ class Column extends BaseColumn
                     ->write(' * @var '.$nativeType.'|'.$foreign->getOwningTable()->getNamespace().'[]')
                     ->write(' * ')
                     ->write(' * '.$this->getTable()->getAnnotation('OneToMany', $annotationOptions))
-                    ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
+                    ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions));
+
+                if($orderByAnnotationOptions) {
+                    $writer->write(' * '.$this->getTable()->getAnnotation('OrderBy', $orderByAnnotationOptions));
+                }
+
+                $writer
                     ->write(' */')
                     ->write('protected $'.$filedNameInversed.';')
                     ->write('')
@@ -211,21 +226,22 @@ class Column extends BaseColumn
                $inversedBy = $filedNameInversed;
             }
 
-            $annotationOptions = array(
+            $annotationOptions = [
                 'targetEntity' => $targetEntityFQCN,
-                'mappedBy' => null,
-                'inversedBy' => $inversedBy,
+                'mappedBy'     => null,
+                'inversedBy'   => $inversedBy,
                 // 'cascade' => $formatter->getCascadeOption($this->local->parseComment('cascade')),
                 // 'cascade' => $formatter->getCascadeOption($this->local->parseComment('cascade')),
                 // 'fetch' => $formatter->getFetchOption($this->local->parseComment('fetch')),
                 // 'orphanRemoval' => $formatter->getBooleanOption($this->local->parseComment('orphanRemoval')),
-            );
-            $joinColumnAnnotationOptions = array(
-                'name' => $this->local->getForeign()->getColumnName(),
+            ];
+
+            $joinColumnAnnotationOptions = [
+                'name'                 => $this->local->getForeign()->getColumnName(),
                 'referencedColumnName' => $this->local->getLocal()->getColumnName(),
-                'onDelete' => $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule')),
-                'nullable' => !$this->local->getForeign()->isNotNull() ? true : false,
-            );
+                'onDelete'             => $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule')),
+                'nullable'             => !$this->local->getForeign()->isNotNull() ? true : false,
+            ];
 
             //check for OneToOne or ManyToOne relationship
             if ($this->local->isManyToOne()) { // is ManyToOne

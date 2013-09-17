@@ -122,12 +122,40 @@ class ForeignKey extends Base
     }
 
     /**
+     * get the a boolean option for a relation
+     *
+     * @param $booleanValue string boolean option (true or false)
+     * @return boolean or null, if booleanValue was invalid
+     */
+    private function getBooleanOption($booleanValue)
+    {
+        if (!is_null($booleanValue)) {
+            switch (strtolower($booleanValue)) {
+                case 'true':
+                    return true;
+                case 'false':
+                    return false;
+                default:
+                    return (bool) $booleanValue;
+            }
+        }
+    }
+
+    /**
      * Check relation if it is a many to one relation.
      *
      * @return boolean
      */
     public function isManyToOne()
     {
-        return (bool) $this->parameters->get('many');
+        //$formatter->getBooleanOption
+        $o2o = $this->foreign->parseComment('o2o');
+        if(!is_null($o2o)) {
+            $isMany = !(bool) $this->getBooleanOption($o2o);
+        } else {
+            $isMany = (bool) $this->parameters->get('many');
+        }
+
+        return $isMany;
     }
 }
