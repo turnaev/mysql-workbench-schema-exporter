@@ -148,7 +148,6 @@ class ForeignKey extends Base
      */
     public function isManyToOne()
     {
-        //$formatter->getBooleanOption
         $o2o = $this->foreign->parseComment('o2o');
         if(!is_null($o2o)) {
             $isMany = !(bool) $this->getBooleanOption($o2o);

@@ -234,7 +234,7 @@ class Compiler
             $toFileContent = $this->prettyXml(
                 $toFileContent, [
 
-                    '/(\s+<entity)/'             => "\n" . '\1',
+                    '/(\s+<entity)/'            => "\n" . '\1',
                     '/(\s+<\/entity>)/'          => "\n" . '\1' . "\n",
                     '/(\s+<field)/'              => "\n" . '\1',
                     '/(\s+<one-to-one)/'         => "\n" . '\1',
@@ -246,9 +246,10 @@ class Compiler
                     '/(\s+<unique-constraints)/' => "\n" . '\1',
                     '/(\s+<unique-constraints)/' => "\n" . '\1',
 
-                    '/(xmlns=|xmlns:xsi=|xsi:schemaLocation=)/'  => "\n" . '        \1',
-                    '/(repository-class=".*?") (name=".*?") (table=".*?")/' =>
-                    "\n" . '          \2' . "\n" . '          \1' . "\n" . '          \3',
+                    '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n" . '       \1',
+
+                    '/( repository-class=".*?")( name=".*?")( table=".*?")/' =>
+                    "\n" . '         \2' . "\n" . '         \1' . "\n" . '         \3',
                 ]
             );
 
