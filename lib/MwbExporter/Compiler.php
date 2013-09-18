@@ -446,12 +446,16 @@ XML;
         $toFileContent = file($file);
         foreach ($toFileContent as $k => $line) {
 
-            if (preg_match('/\s+\*\s+@ORM/', $line, $m) || preg_match('/\s+as\s+ORM/', $line, $m)) {
+            if (preg_match('/\s+\*\s+@ORM/', $line, $m) ||
+                preg_match('/\s+as\s+ORM/', $line, $m)) {
 
                 unset($toFileContent[$k]);
             }
         }
+
         $toFileContent = join('', $toFileContent);
+        $toFileContent = preg_replace("/\s+?\*\s*?\n/", "\n", $toFileContent);
+
         file_put_contents($file, $toFileContent);
     }
 
