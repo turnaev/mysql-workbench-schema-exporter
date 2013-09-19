@@ -73,6 +73,10 @@ class Column extends BaseColumn
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
         $asAnnotation = $this->asAnnotation();
+        if($asAnnotation['type'] == 'array') {
+            $nativeType = $converter->getNativeType('array');
+        }
+
         $filedName = $this->getPhpColumnName();
 
         $writer
@@ -318,6 +322,13 @@ class Column extends BaseColumn
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
+        $hint = '';
+        $asAnnotation = $this->asAnnotation();
+        if($asAnnotation['type'] == 'array') {
+            $nativeType = $converter->getNativeType('array');
+            $hint = 'array ';
+        }
+
         $writer
             // setter
             ->write('/**')
@@ -326,7 +337,7 @@ class Column extends BaseColumn
             ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
             ->write(' * @return '.$table->getNamespace())
             ->write(' */')
-            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'($'.$this->getPhpColumnName().')')
+            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'('.$hint.'$'.$this->getPhpColumnName().')')
             ->write('{')
             ->indent()
                 ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
