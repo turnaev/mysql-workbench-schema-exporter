@@ -265,16 +265,25 @@ General options applied to all formatter.
 
     Another option you can set in the comments of foreign key. ([Reference](http://doctrine-orm.readthedocs.org/en/latest/reference/working-with-associations.html#orphan-removal))
 
+  * `{d:o2o}true{/d:o2o}` (applied to Field)
 
-  * `{d:o2o}true{/d:o2o}` (applied to field)
+    To make one to one relation.
 
-  * `{d:orphanRemoval}true{/d:orphanRemoval}` (applied to field)
+  * `{d:orphanRemoval}true{/d:orphanRemoval}` (applied to Field)
 
-  * `{d:orderBy}priority=ASC{/d:orderBy}` (applied to field)
+    Add orphanRemoval attr.
 
-  * `{d:field-mapped}parentCategory{/d:field-mapped}` (applied to field)
+  * `{d:orderBy}priority=ASC{/d:orderBy}` (applied to Field)
 
-  * `{d:field-inversed}childCategories{/d:field-inversed}` (applied to field)
+     User order.
+
+  * `{d:field-mapped}parentCategory{/d:field-mapped}` (applied to Field)
+
+    Override name mapped filed.
+
+  * `{d:field-inversed}childCategories{/d:field-inversed}` (applied to Field)
+
+    Override name inversed filed.
 
 
 #### Additional option list for Doctrine 2.0 Annotation ZF2 Inputfilter
