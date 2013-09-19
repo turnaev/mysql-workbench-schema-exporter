@@ -253,7 +253,7 @@ General options applied to all formatter.
 
     In a bi-directional many-to-many mapping table the owning side of the relation is randomly selected. If you add this hint to one foreign key of the m2m-table, you can define the owning side for Doctrine.
 
-  * `{d:cascade}persist, merge, remove, detach, all{/d:cascade}` (applied to ForeignKey)
+  * `{d:cascade}persist, merge, remove, detach, all{/d:cascade}` (applied to ForeignKey or Field)
 
     You can specify Doctrine cascade options as a comment on a foreign key. The will be generated into the Annotation. ([Reference](http://doctrine-orm.readthedocs.org/en/latest/reference/working-with-associations.html#transitive-persistence-cascade-operations))
 
@@ -264,6 +264,18 @@ General options applied to all formatter.
   * `{d:orphanRemoval}true{/d:orphanRemoval}` (applied to ForeignKey)
 
     Another option you can set in the comments of foreign key. ([Reference](http://doctrine-orm.readthedocs.org/en/latest/reference/working-with-associations.html#orphan-removal))
+
+
+  * `{d:o2o}true{/d:o2o}` (applied to field)
+
+  * `{d:orphanRemoval}true{/d:orphanRemoval}` (applied to field)
+
+  * `{d:orderBy}priority=ASC{/d:orderBy}` (applied to field)
+
+  * `{d:field-mapped}parentCategory{/d:field-mapped}` (applied to field)
+
+  * `{d:field-inversed}childCategories{/d:field-inversed}` (applied to field)
+
 
 #### Additional option list for Doctrine 2.0 Annotation ZF2 Inputfilter
 
