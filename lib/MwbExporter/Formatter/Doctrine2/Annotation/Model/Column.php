@@ -475,7 +475,7 @@ class Column extends BaseColumn
 
                 } else {
 
-                    $funactionNamePart    = lcfirst($this->columnNameBeautifier($foreign->getOwningTable()->getModelName()));
+                    $funactionNamePart    = ucfirst($this->columnNameBeautifier($foreign->getOwningTable()->getModelName()));
 
                     $codeSetPart       = lcfirst($foreign->getOwningTable()->getModelName());
                     $codeGetPart       = lcfirst($foreign->getOwningTable()->getModelName());

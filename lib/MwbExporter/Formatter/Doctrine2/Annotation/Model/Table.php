@@ -528,15 +528,17 @@ class Table extends BaseTable
         foreach ($this->manyToManyRelations as $relation) {
             $isOwningSide = $formatter->isOwningSide($relation, $mappedRelation);
 
+            $typeEntity = $relation['refTable']->getNamespace();
+
             // add
             $writer
                 ->write('/**')
                 ->write(' * Add '.$relation['refTable']->getModelName().' entity to collection (many to many).')
                 ->write(' *')
-                ->write(' * @param '. $relation['refTable']->getNamespace().' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' * @param '. $typeEntity.' $'.lcfirst($relation['refTable']->getModelName()))
                 ->write(' * @return '.$this->getNamespace($this->getModelName()))
                 ->write(' */')
-                ->write('public function add'.$relation['refTable']->getModelName().'('.$relation['refTable']->getModelName().' $'.lcfirst($relation['refTable']->getModelName()).')')
+                ->write('public function add'.$relation['refTable']->getModelName().'('.$typeEntity.' $'.lcfirst($relation['refTable']->getModelName()).')')
                 ->write('{')
                 ->indent()
                     ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
@@ -557,10 +559,10 @@ class Table extends BaseTable
                 ->write('/**')
                 ->write(' * Remove '.$relation['refTable']->getModelName().' entity to collection (many to many).')
                 ->write(' *')
-                ->write(' * @param '. $relation['refTable']->getNamespace().' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' * @param '. $typeEntity.' $'.lcfirst($relation['refTable']->getModelName()))
                 ->write(' * @return '.$this->getNamespace($this->getModelName()))
                 ->write(' */')
-                ->write('public function remove'.$relation['refTable']->getModelName().'('.$relation['refTable']->getModelName().' $'.lcfirst($relation['refTable']->getModelName()).')')
+                ->write('public function remove'.$relation['refTable']->getModelName().'('.$typeEntity.' $'.lcfirst($relation['refTable']->getModelName()).')')
                 ->write('{')
                 ->indent()
                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
