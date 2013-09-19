@@ -201,7 +201,7 @@ class Table extends BaseTable
                 ->writeIf($comment, $comment)
                 ->write(' * '.$this->getAnnotation('Table', array('name' => $this->quoteIdentifier($this->getRawTableName()), 'indexes' => $this->getIndexesAnnotation(), 'uniqueConstraints' => $this->getUniqueConstraintsAnnotation())))
                 ->write(' * '.$this->getAnnotation('Entity', array('repositoryClass' => $this->getDocument()->getConfig()->get(Formatter::CFG_AUTOMATIC_REPOSITORY) ? $repositoryNamespace.$this->getModelName().'Repository' : null)))
-                ->writeIf($lifecycleCallbacks, ' * @HasLifecycleCallbacks')
+                ->writeIf($lifecycleCallbacks, ' * @ORM\HasLifecycleCallbacks')
                 ->write(' */')
                 ->write('class '.$this->getModelName().(($implements = $this->getClassImplementations()) ? ' implements '.$implements : ''))
                 ->write('{')
@@ -220,14 +220,19 @@ class Table extends BaseTable
                             foreach ($handlers as $handler) {
                                 $writer
                                     ->write('/**')
-                                    ->write(' * @%s', ucfirst($callback))
+                                    ->write(' * @ORM\%s', ucfirst($callback))
+                                    ->write(' * @throws \Symfony\Component\Intl\Exception\MethodNotImplementedException')
                                     ->write(' */')
                                     ->write('public function %s()', $handler)
                                     ->write('{')
+                                    ->indent()
+                                    ->write('throw new \Symfony\Component\Intl\Exception\MethodNotImplementedException(__METHOD__);')
+                                    ->outdent()
                                     ->write('}')
                                     ->write('')
                                 ;
                             }
+
                         }
                         if ($serializableEntity) {
                             $_this->writeSerialization($writer);

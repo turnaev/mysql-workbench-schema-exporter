@@ -245,6 +245,7 @@ class Compiler
                     '/(\s+<indexes)/'            => "\n" . '\1',
                     '/(\s+<unique-constraints)/' => "\n" . '\1',
                     '/(\s+<unique-constraints)/' => "\n" . '\1',
+                    '/(\s+<lifecycle-callbacks)/' => "\n" . '\1',
 
                     '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n" . '       \1',
 

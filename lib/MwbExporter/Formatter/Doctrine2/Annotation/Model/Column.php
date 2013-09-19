@@ -40,6 +40,10 @@ class Column extends BaseColumn
             'type' => $this->getDocument()->getFormatter()->getDatatypeConverter()->getMappedType($this),
         ];
 
+        if($type = $this->parseComment('type')) {
+            $attributes['type'] = $type;
+        }
+
         if (($length = $this->parameters->get('length')) && ($length != -1)) {
             $attributes['length'] = (int) $length;
         }
@@ -54,6 +58,7 @@ class Column extends BaseColumn
         }
 
         if ($this->parameters->get('comment')) {
+
             $attributes['options']["comment"] = $this->getComment(false);
         }
 
@@ -67,17 +72,20 @@ class Column extends BaseColumn
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
+        $asAnnotation = $this->asAnnotation();
+        $filedName = $this->getPhpColumnName();
+
         $writer
             ->write('/**')
             ->writeIf($comment, $comment)
             ->write(' * @var '.$nativeType)
             ->writeIf($this->isPrimary,
                     ' * '.$this->getTable()->getAnnotation('Id'))
-            ->write(' * '.$this->getTable()->getAnnotation('Column', $this->asAnnotation()))
+            ->write(' * '.$this->getTable()->getAnnotation('Column', $asAnnotation))
             ->writeIf($this->isAutoIncrement(),
                     ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => 'AUTO']))
             ->write(' */')
-            ->write('protected $'.$this->getPhpColumnName().';')
+            ->write('protected $'.$filedName.';')
             ->write('')
         ;
 
@@ -198,10 +206,11 @@ class Column extends BaseColumn
                     ->write('')
                 ;
             } else { // is OneToOne
-                $nativeType = $targetEntity;
 
                 $comment = $foreign->getOwningTable()->getComment();
                 $entityType = $foreign->getOwningTable()->getNamespace();
+
+                $filedNameInversed = ($d = $foreign->getForeign()->parseComment('field-inversed')) ? $d : lcfirst($targetEntity);
 
                 $writer
                     ->write('/**')
@@ -210,7 +219,7 @@ class Column extends BaseColumn
                     ->write(' * '.$this->getTable()->getAnnotation('OneToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
                     ->write(' */')
-                    ->write('protected $'.lcfirst($targetEntity).';')
+                    ->write('protected $'.$filedNameInversed.';')
                     ->write('')
                 ;
             }
@@ -244,6 +253,7 @@ class Column extends BaseColumn
 
             //check for OneToOne or ManyToOne relationship
             if ($this->local->isManyToOne()) { // is ManyToOne
+
                 $related = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName());
                 $refRelated = $this->local->getLocal()->getRelatedName($this->local);
                 if ($this->local->parseComment('unidirectional') === 'true') {
@@ -269,14 +279,22 @@ class Column extends BaseColumn
                     ->write('')
                 ;
             } else { // is OneToOne
+
                 if ($this->local->parseComment('unidirectional') === 'true') {
                     $annotationOptions['inversedBy'] = null;
                 } else {
                     $annotationOptions['inversedBy'] = lcfirst($annotationOptions['inversedBy']);
                 }
+
+                if($filedNameInversed = $this->local->getForeign()->parseComment('field-inversed')) {
+                    $annotationOptions['inversedBy'] = $filedNameInversed;
+                }
+
                 $annotationOptions['cascade'] = $formatter->getCascadeOption($this->local->parseComment('cascade'));
 
                 $comment = $this->local->getForeign()->getComment();
+
+                $filedNameMapped = ($d = $this->local->getForeign()->parseComment('field-mapped')) ? $d : lcfirst($targetEntity);
 
                 $writer
                     ->write('/**')
@@ -285,7 +303,7 @@ class Column extends BaseColumn
                     ->write(' * '.$this->getTable()->getAnnotation('OneToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
                     ->write(' */')
-                    ->write('protected $'.lcfirst($targetEntity).';')
+                    ->write('protected $'.$filedNameMapped.';')
                     ->write('')
                 ;
             }
@@ -434,20 +452,36 @@ class Column extends BaseColumn
 
             } else { // OneToOne
 
+
+                if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
+
+                    $funactionNamePart    = ucfirst(Inflector::singularize($filedNameInversed));
+
+                    $codeSetPart       = $filedNameInversed;
+                    $codeGetPart       = $filedNameInversed;
+
+                } else {
+
+                    $funactionNamePart    = lcfirst($this->columnNameBeautifier($foreign->getOwningTable()->getModelName()));
+
+                    $codeSetPart       = lcfirst($foreign->getOwningTable()->getModelName());
+                    $codeGetPart       = lcfirst($foreign->getOwningTable()->getModelName());
+                }
+
                 $typeEntity = $foreign->getOwningTable()->getNamespace();
 
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Set '.$foreign->getOwningTable()->getModelName().' entity (one to one).')
+                    ->write(' * Set '.$funactionNamePart.' entity (one to one).')
                     ->write(' *')
                     ->write(' * @param '.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function set'.$this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).'('.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
+                    ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.$codeSetPart.')')
                     ->write('{')
                     ->indent()
-                        ->write('$this->'.lcfirst($foreign->getOwningTable()->getModelName()).' = $'.lcfirst($foreign->getOwningTable()->getModelName()).';')
+                        ->write('$this->'.$codeSetPart.' = $'.$codeSetPart.';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -455,14 +489,14 @@ class Column extends BaseColumn
                     ->write('')
                     // getter
                     ->write('/**')
-                    ->write(' * Get '.$foreign->getOwningTable()->getModelName().' entity (one to one).')
+                    ->write(' * Get '.$funactionNamePart.' entity (one to one).')
                     ->write(' *')
                     ->write(' * @return '.$foreign->getOwningTable()->getNamespace())
                     ->write(' */')
-                    ->write('public function get'.$this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).'()')
+                    ->write('public function get'.$funactionNamePart.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.lcfirst($foreign->getOwningTable()->getModelName()).';')
+                        ->write('return $this->'.$codeGetPart.';')
                     ->outdent()
                     ->write('}')
                 ;
