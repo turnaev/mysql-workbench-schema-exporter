@@ -73,8 +73,10 @@ class Column extends BaseColumn
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
         $asAnnotation = $this->asAnnotation();
+        $value = '';
         if($asAnnotation['type'] == 'array') {
             $nativeType = $converter->getNativeType('array');
+            $value = ' = []';
         }
 
         $filedName = $this->getPhpColumnName();
@@ -89,7 +91,7 @@ class Column extends BaseColumn
             ->writeIf($this->isAutoIncrement(),
                     ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => 'AUTO']))
             ->write(' */')
-            ->write('protected $'.$filedName.';')
+            ->write('protected $'.$filedName.$value.';')
             ->write('')
         ;
 

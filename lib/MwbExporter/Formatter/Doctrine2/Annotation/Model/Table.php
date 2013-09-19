@@ -183,6 +183,8 @@ class Table extends BaseTable
             }
             $skipGetterAndSetter = $this->getDocument()->getConfig()->get(Formatter::CFG_SKIP_GETTER_SETTER);
             $serializableEntity  = $this->getDocument()->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_SERIALIZATION);
+            $toArrrabeEntity  = $this->getDocument()->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_TO_ARRAY);
+
             $lifecycleCallbacks  = $this->getLifecycleCallbacks();
 
             $comment = $this->getComment();
@@ -206,7 +208,7 @@ class Table extends BaseTable
                 ->write('class '.$this->getModelName().(($implements = $this->getClassImplementations()) ? ' implements '.$implements : ''))
                 ->write('{')
                 ->indent()
-                    ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($skipGetterAndSetter, $serializableEntity, $lifecycleCallbacks) {
+                    ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($skipGetterAndSetter, $serializableEntity, $toArrrabeEntity, $lifecycleCallbacks) {
                         $_this->writePreClassHandler($writer);
                         $_this->getColumns()->write($writer);
                         $_this->writeManyToMany($writer);
@@ -237,6 +239,11 @@ class Table extends BaseTable
                         if ($serializableEntity) {
                             $_this->writeSerialization($writer);
                         }
+
+                        if ($toArrrabeEntity) {
+                            $_this->writeToArray($writer);
+                        }
+
                         $_this->writeToString($writer);
                         $_this->writeIsNew($writer);
 
@@ -332,7 +339,7 @@ class Table extends BaseTable
         //* @throws MethodNotImplementedException
         $writer
             ->write('/**')
-            ->write(' * get data for serialize object')
+            ->write(' * to strig entity')
             ->write(' * @return string');
 
         if($throwException) {
@@ -388,6 +395,53 @@ class Table extends BaseTable
 
         return $this;
     }
+
+    public function writeToArray(WriterInterface $writer)
+    {
+        $columns = $this->getColumns()->getColumns();
+
+        $columns = array_filter($columns, function($column) {
+                return !preg_match('/_id$/', $column->getColumnName());
+            });
+
+        $columns = array_map(function($column) {
+                /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
+                return $column->getPhpColumnName();
+
+            }, $columns);
+
+        $maxLen = 0;
+        foreach($columns as $column) {
+            $maxLen = max($maxLen, strlen($column));
+        }
+
+        $maxLen+=2;
+        $columnsArr = [];
+
+        foreach ($columns as $column) {
+            $format = "    %-{$maxLen}s => \$this->%s";
+            $columnsArr[] = sprintf($format, "'".$column."'", $column);
+        }
+
+        $writer
+            ->write('/**')
+            ->write(' * get data as array')
+            ->write(' * @return array')
+            ->write(' */')
+            ->write('public function toArray()')
+            ->write('{')
+            ->indent()
+                ->write("return [")
+                ->write(join(",\n", $columnsArr))
+                ->write("];")
+            ->outdent()
+            ->write('}')
+            ->write('')
+        ;
+
+        return $this;
+    }
+
 
     public function writeManyToMany(WriterInterface $writer)
     {

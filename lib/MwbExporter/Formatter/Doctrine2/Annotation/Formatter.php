@@ -32,14 +32,16 @@ use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
 {
-    const CFG_ANNOTATION_PREFIX              = 'useAnnotationPrefix';
-    const CFG_SKIP_GETTER_SETTER             = 'skipGetterAndSetter';
-    const CFG_GENERATE_ENTITY_SERIALIZATION  = 'generateEntitySerialization';
-    const CFG_QUOTE_IDENTIFIER               = 'quoteIdentifier';
 
-    const CFG_BASE_NAMESPASE                 = 'baseNamespace';
-    const CFG_BUNDELE_NAMESPACE              = 'bundleNamespace';
-    const CFG_BUNDELE_NAMESPACE_TO           = 'bundleNamespaceTo';
+    const CFG_ANNOTATION_PREFIX             = 'useAnnotationPrefix';
+    const CFG_SKIP_GETTER_SETTER            = 'skipGetterAndSetter';
+    const CFG_GENERATE_ENTITY_SERIALIZATION = 'generateEntitySerialization';
+    const CFG_GENERATE_ENTITY_TO_ARRAY      = 'generateEntityToArray';
+    const CFG_QUOTE_IDENTIFIER              = 'quoteIdentifier';
+
+    const CFG_BASE_NAMESPASE       = 'baseNamespace';
+    const CFG_BUNDELE_NAMESPACE    = 'bundleNamespace';
+    const CFG_BUNDELE_NAMESPACE_TO = 'bundleNamespaceTo';
 
 
     protected function init()
@@ -51,6 +53,8 @@ class Formatter extends BaseFormatter
             static::CFG_ANNOTATION_PREFIX             => 'ORM\\',
             static::CFG_SKIP_GETTER_SETTER            => false,
             static::CFG_GENERATE_ENTITY_SERIALIZATION => true,
+            static::CFG_GENERATE_ENTITY_TO_ARRAY      => true,
+
             static::CFG_QUOTE_IDENTIFIER              => false,
 
             static::CFG_BASE_NAMESPASE                => 'VN',
