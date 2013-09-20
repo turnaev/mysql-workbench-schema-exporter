@@ -113,7 +113,9 @@ Sample export paramaters (JSON) for doctrine2-annotation:
             "useAutomaticRepository": true,
             "indentation": 4,
             "filename": "%entity%.%extension%",
-            "quoteIdentifier": false
+            "quoteIdentifier": false,
+            "generateEntitySerialization": false,
+            "generateEntityToArray": true
         }
     }
 
@@ -285,6 +287,9 @@ General options applied to all formatter.
 
     Override name inversed filed.
 
+  * `{d:lifecycleCallbacks}postLoad:fnc,prePersist:fnc,postPersist:fnc,preRemove:fnc,postRemove:fnc,preUpdate:fnc,postUpdate:fnc{/d:lifecycleCallbacks}` (applied to Table)
+
+    You can specify Doctrine lifecycleCallbacks options as a comment on a table. The will be generated into the Annotation.
 
 #### Additional option list for Doctrine 2.0 Annotation ZF2 Inputfilter
 

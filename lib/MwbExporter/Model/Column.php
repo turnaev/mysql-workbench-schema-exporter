@@ -354,8 +354,13 @@ class Column extends Base
      */
     public function getDefaultValue()
     {
+
         if (1 != $this->parameters->get('defaultValueIsNull')) {
-            if (($defaultValue = trim($this->parameters->get('defaultValue'), '\'"')) && ('NULL' != $defaultValue)) {
+
+            $defaultValue = trim($this->parameters->get('defaultValue'), '\'"');
+
+            if (!(is_null($defaultValue) || ('NULL' == $defaultValue) || $defaultValue == '')) {
+
                 return $defaultValue;
             }
         }

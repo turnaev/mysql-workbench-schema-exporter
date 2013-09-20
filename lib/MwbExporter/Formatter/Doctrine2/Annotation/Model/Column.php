@@ -35,6 +35,7 @@ class Column extends BaseColumn
 {
     public function asAnnotation()
     {
+
         $attributes = [
             'name' => $this->getTable()->quoteIdentifier($this->getColumnName()),
             'type' => $this->getDocument()->getFormatter()->getDatatypeConverter()->getMappedType($this),
@@ -71,15 +72,30 @@ class Column extends BaseColumn
 
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
+        $filedName = $this->getPhpColumnName();
 
         $asAnnotation = $this->asAnnotation();
+
         $value = '';
+
+        if(!is_null($this->getDefaultValue())) {
+
+            if($nativeType == 'boolean') {
+
+                $map = [true=>'true', false=>'false'];
+                $value = " = ".$map[(boolean)$this->getDefaultValue()];
+
+            } else if ($nativeType == 'integer') {
+                $value = " = {$this->getDefaultValue()}";
+            } else {
+                $value = " = '{$this->getDefaultValue()}'";
+            }
+        }
+
         if($asAnnotation['type'] == 'array') {
             $nativeType = $converter->getNativeType('array');
             $value = ' = []';
         }
-
-        $filedName = $this->getPhpColumnName();
 
         $writer
             ->write('/**')
@@ -575,19 +591,31 @@ class Column extends BaseColumn
 
                 $typeEntity = $this->local->getReferencedTable()->getNamespace();
 
+                if($filedNameMapped = $this->local->getForeign()->parseComment('field-mapped')) {
+
+                    $funactionNamePart = ucfirst(Inflector::singularize($filedNameMapped));
+                    $codeSetPart       = $filedNameMapped;
+                    $codeGetPart       = $filedNameMapped;
+
+                } else {
+                    $funactionNamePart = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName());
+                    $codeSetPart       = lcfirst($this->local->getReferencedTable()->getModelName());
+                    $codeGetPart       = lcfirst($this->local->getReferencedTable()->getModelName());
+                }
+
                 $writer
                     // setter
                     ->write('/**')
                     ->write(' * Set '.$this->local->getReferencedTable()->getModelName().' entity (one to one).')
                     ->write(' *')
-                    ->write(' * @param '.$this->local->getReferencedTable()->getNamespace().' $'.lcfirst($this->local->getReferencedTable()->getModelName()))
+                    ->write(' * @param '.$this->local->getReferencedTable()->getNamespace().' $'.$codeSetPart)
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function set'.$this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).'('.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()).' = null)')
+                    ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.$codeSetPart.' = null)')
                     ->write('{')
                     ->indent()
-                        ->writeIf(!$unidirectional, '$'.lcfirst($this->local->getReferencedTable()->getModelName()).'->set'.$this->columnNameBeautifier($this->local->getOwningTable()->getModelName()).'($this);')
-                        ->write('$this->'.lcfirst($this->local->getReferencedTable()->getModelName()).' = $'.lcfirst($this->local->getReferencedTable()->getModelName()).';')
+                        ->writeIf(!$unidirectional, '$'.$codeSetPart.'->set'.$this->columnNameBeautifier($this->local->getOwningTable()->getModelName()).'($this);')
+                        ->write('$this->'.$codeSetPart.' = $'.$codeSetPart.';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -599,10 +627,10 @@ class Column extends BaseColumn
                     ->write(' *')
                     ->write(' * @return '.$this->local->getReferencedTable()->getNamespace())
                     ->write(' */')
-                    ->write('public function get'.$this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).'()')
+                    ->write('public function get'.$funactionNamePart.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.lcfirst($this->local->getReferencedTable()->getModelName()).';')
+                        ->write('return $this->'.$codeGetPart.';')
                     ->outdent()
                     ->write('}')
                     ->write('')
