@@ -77,19 +77,23 @@ class Column extends BaseColumn
         $asAnnotation = $this->asAnnotation();
 
         $value = '';
-
         if(!is_null($this->getDefaultValue())) {
 
-            if($nativeType == 'boolean') {
-
-                $map = [true=>'true', false=>'false'];
-                $value = " = ".$map[(boolean)$this->getDefaultValue()];
-
-            } else if ($nativeType == 'integer') {
-                $value = " = {$this->getDefaultValue()}";
-            } else {
-                $value = " = '{$this->getDefaultValue()}'";
+            switch($nativeType) {
+                case 'boolean':
+                    $map = [true=>'true', false=>'false'];
+                    $value = " = ".$map[(boolean)$this->getDefaultValue()];
+                    break;
+                case 'integer':
+                    $value = " = ".intval($this->getDefaultValue());
+                    break;
+                case 'float':
+                    $value = " = ".floatval($this->getDefaultValue());
+                    break;
+                default:
+                    $value = " = '{$this->getDefaultValue()}'";
             }
+
         }
 
         if($asAnnotation['type'] == 'array') {
