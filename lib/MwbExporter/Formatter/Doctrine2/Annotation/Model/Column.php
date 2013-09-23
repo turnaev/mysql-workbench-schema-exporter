@@ -344,12 +344,33 @@ class Column extends BaseColumn
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
-        $hint = '';
+        $hint = null;
+        $defaultValue = null;
+
         $asAnnotation = $this->asAnnotation();
         if($asAnnotation['type'] == 'array') {
+
             $nativeType = $converter->getNativeType('array');
             $hint = 'array ';
+
+            if($this->isNotNull()) {
+                $defaultValue = ' = []';
+            } else {
+                $defaultValue = ' = null';
+            }
         }
+
+        if($asAnnotation['type'] == 'datetime') {
+            $nativeType = $converter->getDataType('datetime');
+
+            $nativeType = '\DateTime';
+            $hint = $nativeType.' ';
+
+            if(!$this->isNotNull()) {
+                $defaultValue = ' = null';
+            }
+        }
+
 
         $writer
             // setter
@@ -359,7 +380,7 @@ class Column extends BaseColumn
             ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
             ->write(' * @return '.$table->getNamespace())
             ->write(' */')
-            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'('.$hint.'$'.$this->getPhpColumnName().')')
+            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'('.$hint.'$'.$this->getPhpColumnName().$defaultValue.')')
             ->write('{')
             ->indent()
                 ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
