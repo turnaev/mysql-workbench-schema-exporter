@@ -483,7 +483,6 @@ class Column extends BaseColumn
                         ->write('{')
                         ->indent()
                             ->write('$this->'.$codeRemovePart.'->removeElement($'.lcfirst($foreign->getOwningTable()->getModelName()).');')
-                            ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$codeSetMappedPart.'(null);')
                             ->write('')
                             ->write('return $this;')
                         ->outdent()
@@ -579,6 +578,12 @@ class Column extends BaseColumn
                     $codeGetPart       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
                 }
 
+                $defaultValue = '';
+
+                if(!$this->isNotNull()) {
+                    $defaultValue = ' = null';
+                }
+
                 $typeEntity = $this->local->getReferencedTable()->getNamespace();
 
                 $writer
@@ -589,7 +594,7 @@ class Column extends BaseColumn
                     ->write(' * @param '.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()).' = null)')
+                    ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()).$defaultValue.')')
                     ->write('{')
                     ->indent()
                         ->write('$this->'.$codeSetPart.' = $'.lcfirst($this->local->getReferencedTable()->getModelName()).';')
