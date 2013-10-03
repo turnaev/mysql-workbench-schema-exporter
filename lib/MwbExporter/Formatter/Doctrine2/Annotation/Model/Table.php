@@ -245,8 +245,10 @@ class Table extends BaseTable
                         }
 
                         $_this->writeToString($writer);
-                        $_this->writeIsNew($writer);
-
+                        if($this->getColumns()->columnExits('id')) {
+                            $writer->write('');
+                            $_this->writeIsNew($writer);
+                        }
                     })
                 ->outdent()
                 ->write('}')
@@ -261,23 +263,20 @@ class Table extends BaseTable
 
     public function writeIsNew(WriterInterface $writer)
     {
-        if($this->getColumns()->columnExits('id')) {
-            $column = $this->getColumns()->getColumnByName('id');
-            $name = $column->getPhpColumnName();
-            $writer
-                ->write('/**')
-                ->write(' * check is new object')
-                ->write(' * @return boolean')
-                ->write(' */')
-                ->write('public function isNew()')
-                ->write('{')
-                    ->indent()
-                    ->write("return !(boolean)\$this->{$name};")
-                    ->outdent()
-                ->write('}')
-                ->write('')
-            ;
-        }
+        $column = $this->getColumns()->getColumnByName('id');
+        $name = $column->getPhpColumnName();
+        $writer
+            ->write('/**')
+            ->write(' * check is new object')
+            ->write(' * @return boolean')
+            ->write(' */')
+            ->write('public function isNew()')
+            ->write('{')
+                ->indent()
+                ->write("return !(boolean)\$this->{$name};")
+                ->outdent()
+            ->write('}')
+        ;
 
         return $this;
     }
@@ -367,7 +366,6 @@ class Table extends BaseTable
         }
 
         $writer->write('}')
-            ->write('')
         ;
 
 
