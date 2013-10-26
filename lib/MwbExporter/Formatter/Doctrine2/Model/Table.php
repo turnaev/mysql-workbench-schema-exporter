@@ -86,6 +86,7 @@ class Table extends BaseTable
     {
         $result = array();
         if ($lifecycleCallbacks = trim($this->parseComment('lifecycleCallbacks'))) {
+            $lifecycleCallbacks = str_replace(';', "\n", $lifecycleCallbacks);
             foreach (explode("\n", $lifecycleCallbacks) as $callback) {
                 list($method, $handler) = explode(':', $callback, 2);
                 $method = lcfirst(trim($method));
