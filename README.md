@@ -1,5 +1,5 @@
-forked from johmue/mysql-workbench-schema-exporter
-
+forked from johmue/mysql-workbench-schema-exporter.
+Supported only Doctrine 2.0
 README  
 ======
 
@@ -28,14 +28,7 @@ What is MySQL Workbench schema exporter?
 
 The application is intended to create:
 
-  * Doctrine 1.0 [YAML Schema](http://docs.doctrine-project.org/projects/doctrine1/en/latest/en/manual/yaml-schema-files.html)
-  * Doctrine 2.0 [YAML Schema](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/yaml-mapping.html), [Annotation Classes](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/annotations-reference.html) or Annotation Classes with [Zend Framework 2](http://framework.zend.com/) [Input Filter support](http://framework.zend.com/manual/2.1/en/modules/zend.input-filter.intro.html)
-  * [Zend DbTable](http://framework.zend.com/manual/en/zend.db.table.html)
-  * Zend Rest Controller
-  * Sencha ExtJS3 Model
-  * Sencha [ExtJS4 Model](http://www.sencha.com/products/extjs/)
-  * Propel [XML Schema](http://www.propelorm.org/reference/schema)
-  * CakePHP (not implemented)
+  * Doctrine 2.0 [YAML Schema](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/yaml-mapping.html), [Annotation Classes](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/annotations-reference.html)
 
 schema files from MySQL Workbench models (*.mwb).
 It is inspired by [mysql-workbench-doctrine-plugin](http://code.google.com/p/mysql-workbench-doctrine-plugin/).
@@ -73,15 +66,7 @@ Where:
 
   * `options`:
     * `--export=type`, choose the result of the export, currently available types:
-      * `doctrine1-yaml`, Doctrine 1.0 YAML schema (default)
-      * `doctrine2-yaml`, Doctrine 2.0 YAML schema
       * `doctrine2-annotation`, Doctrine 2.0 Annotation classes
-      * `doctrine2-zf2inputfilterannotation`, Doctrine 2.0 Annotation classes with Zend Framework 2 Inputfilter configuration, Populate and getArrayCopy methods.
-      * `propel1-xml`, Propel XML schema
-      * `zend-dbtable`, Zend DbTable
-      * `zend-restcontroller`, Zend Rest Controller
-      * `sencha-extjs3`, Sencha ExtJS3 Model
-      * `sencha-extjs4`, Sencha ExtJS4 Model
     * `--config=file`, read export parameters from file (in JSON format)
     * `--saveconfig`, save export parameters to file `export.json`, later can be used as value for `--config=file`
     * `--list-exporter`, show all available exporter
@@ -93,7 +78,7 @@ Where:
 
 Sample usage:
 
-    php cli/export.php --export=doctrine1-yaml example/data/test.mwb ./generated
+    php cli/export.php --export=doctrine2-annotation example/data/test.mwb ./generated
     php cli/export.php --zip example/data/test.mwb
 
 Sample export paramaters (JSON) for doctrine2-annotation:
@@ -164,18 +149,6 @@ General options applied to all formatter.
   * `{MwbExporter:external}true{/MwbExporter:external}` (applied to Table, View)
 
     Mark table/view as external to skip table/view code generation. For Doctrine use `{d:external}true{/d:external}` instead.
-
-### Option list for Doctrine 1.0
-
-  * `extendTableNameWithSchemaName`
-
-    Include schema name beside the table name. Default is `false`.
-
-### Comment behavior for Doctrine 1.0
-
-  * `{d:externalRelations}relation{/d:externalRelations}`
-
-  * `{d:actAs}behavior{/d:actAs}`
 
 ### Option list for Doctrine 2.0 YAML
 
@@ -291,39 +264,14 @@ General options applied to all formatter.
 
     You can specify Doctrine lifecycleCallbacks options as a comment on a table. The will be generated into the Annotation.
 
+  * `{d:type}dateinterval{/d:type}` (applied to Field)
+    Force cast datetype
+
 #### Additional option list for Doctrine 2.0 Annotation ZF2 Inputfilter
 
   * `generateEntityPopulate`
   * `generateEntityGetArrayCopy`
 
-### Option list for Propel Xml
-
-  * `namespace`
-  * `addVendor`
-
-### Option list for Zend DbTable
-
-  * `tablePrefix`
-  * `parentTable`
-  * `generateDRI`
-  * `generateGetterSetter`
-
-### Option list for Zend Rest Controller
-
-  * `tablePrefix`
-  * `parentTable`
-
-### Option list for Sencha ExtJS3 Model
-
-  * `classPrefix`
-  * `parentClass`
-
-### Option list for Sencha ExtJS4.2 Model
-
-  * `classPrefix`
-  * `parentClass`
-  * `generateValidation`
-  * `generateProxy`
 
 Requirements
 ------------
@@ -335,7 +283,6 @@ Links
   * [MySQL Workbench](http://wb.mysql.com/)
   * [Doctrine Project](http://www.doctrine-project.org/)
   * [Symfony Project](http://www.symfony.com/)
-  * [Sencha - Open source FAQ](http://www.sencha.com/legal/open-source-faq/)
 
 Test-Database
 -------------

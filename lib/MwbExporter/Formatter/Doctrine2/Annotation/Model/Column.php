@@ -93,12 +93,15 @@ class Column extends BaseColumn
                 default:
                     $value = " = '{$this->getDefaultValue()}'";
             }
-
         }
 
         if($asAnnotation['type'] == 'array') {
             $nativeType = $converter->getNativeType('array');
             $value = ' = []';
+        }
+
+        if(in_array($asAnnotation['type'], ['datetime', 'dateinterval'])) {
+            $nativeType = $converter->getDataType($asAnnotation['type']);
         }
 
         $writer
@@ -342,6 +345,49 @@ class Column extends BaseColumn
         return $this;
     }
 
+    private function getColumnTypeDate()
+    {
+        $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
+
+        $asAnnotation = $this->asAnnotation();
+        switch($asAnnotation['type']) {
+            case 'array':
+                    $nativeType = $converter->getNativeType('array');
+                    $hint = 'array ';
+
+                    if($this->isNotNull()) {
+                        $defaultValue = ' = []';
+                    } else {
+                        $defaultValue = ' = null';
+                    }
+                ;
+
+            case 'datetime':
+                    $nativeType = $converter->getDataType('datetime');
+                    $hint = $nativeType.' ';
+
+                    if(!$this->isNotNull()) {
+                        $defaultValue = ' = null';
+                    } else {
+                        $defaultValue = '';
+                    }
+                ;
+            case 'dateinterval':
+                    $nativeType = $converter->getDataType('dateinterval');
+                    $hint = $nativeType.' ';
+
+                    if(!$this->isNotNull()) {
+                        $defaultValue = ' = null';
+                    } else {
+                        $defaultValue = '';
+                    }
+                ;
+            default;
+        }
+
+        return isset($nativeType)?[$nativeType, $hint, $defaultValue]:null;
+    }
+
     public function writeGetterAndSetter(WriterInterface $writer)
     {
         $table = $this->getTable();
@@ -351,30 +397,9 @@ class Column extends BaseColumn
         $hint = null;
         $defaultValue = null;
 
-        $asAnnotation = $this->asAnnotation();
-        if($asAnnotation['type'] == 'array') {
-
-            $nativeType = $converter->getNativeType('array');
-            $hint = 'array ';
-
-            if($this->isNotNull()) {
-                $defaultValue = ' = []';
-            } else {
-                $defaultValue = ' = null';
-            }
+        if($res = $this->getColumnTypeDate()) {
+            list($nativeType, $hint, $defaultValue) = $res;
         }
-
-        if($asAnnotation['type'] == 'datetime') {
-            $nativeType = $converter->getDataType('datetime');
-
-            $nativeType = '\DateTime';
-            $hint = $nativeType.' ';
-
-            if(!$this->isNotNull()) {
-                $defaultValue = ' = null';
-            }
-        }
-
 
         $writer
             // setter

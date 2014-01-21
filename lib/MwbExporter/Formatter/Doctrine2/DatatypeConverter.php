@@ -89,6 +89,9 @@ class DatatypeConverter extends BaseDatatypeConverter
             static::USERDATATYPE_NUMERIC        => 'decimal',
             static::USERDATATYPE_DEC            => 'decimal',
             static::USERDATATYPE_CHARACTER      => 'string',
+
+            static::USERDATATYPE_DATETIME_NATIVE      => '\DateTime',
+            static::USERDATATYPE_DATEINTERVAL_NATIVE  => '\DateInterval',
         ));
     }
 

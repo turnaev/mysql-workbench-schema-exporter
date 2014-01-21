@@ -66,7 +66,7 @@ interface DatatypeConverterInterface
     const DATATYPE_BIT                 = 'com.mysql.rdbms.mysql.datatype.bit';
     const DATATYPE_ENUM                = 'com.mysql.rdbms.mysql.datatype.enum';
     const DATATYPE_SET                 = 'com.mysql.rdbms.mysql.datatype.set';
-    const USERDATATYPE_DATETIME            = 'com.mysql.rdbms.mysql.datatype.datetime_f';
+    const USERDATATYPE_DATETIME        = 'com.mysql.rdbms.mysql.datatype.datetime_f';
     const USERDATATYPE_BOOLEAN         = 'com.mysql.rdbms.mysql.userdatatype.boolean';
     const USERDATATYPE_BOOL            = 'com.mysql.rdbms.mysql.userdatatype.bool';
     const USERDATATYPE_FIXED           = 'com.mysql.rdbms.mysql.userdatatype.fixed';
@@ -85,6 +85,9 @@ interface DatatypeConverterInterface
     const USERDATATYPE_NUMERIC         = 'com.mysql.rdbms.mysql.userdatatype.numeric';
     const USERDATATYPE_DEC             = 'com.mysql.rdbms.mysql.userdatatype.dec';
     const USERDATATYPE_CHARACTER       = 'com.mysql.rdbms.mysql.userdatatype.character';
+
+    const USERDATATYPE_DATETIME_NATIVE      = 'datetime';
+    const USERDATATYPE_DATEINTERVAL_NATIVE  = 'dateinterval';
 
     public function setup();
     public function getDataType($key);
