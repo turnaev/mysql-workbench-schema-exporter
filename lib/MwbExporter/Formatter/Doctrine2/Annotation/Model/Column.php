@@ -273,9 +273,13 @@ class Column extends BaseColumn
             $joinColumnAnnotationOptions = [
                 'name'                 => $this->local->getForeign()->getColumnName(),
                 'referencedColumnName' => $this->local->getLocal()->getColumnName(),
-                'onDelete'             => $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule')),
                 'nullable'             => !$this->local->getForeign()->isNotNull() ? true : false,
             ];
+            $onDelete = $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule'));
+            if($onDelete) {
+                $joinColumnAnnotationOptions['onDelete'] = $onDelete;
+            }
+
 
             //check for OneToOne or ManyToOne relationship
             if ($this->local->isManyToOne()) { // is ManyToOne
