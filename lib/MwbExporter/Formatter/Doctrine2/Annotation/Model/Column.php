@@ -97,11 +97,19 @@ class Column extends BaseColumn
 
         if($asAnnotation['type'] == 'array') {
             $nativeType = $converter->getNativeType('array');
-            $value = ' = []';
+
+            if(!$this->isNotNull()) {
+                $nativeType = 'null|'.$nativeType;
+            } else {
+                $value = ' = []';
+            }
         }
 
         if(in_array($asAnnotation['type'], ['datetime', 'dateinterval'])) {
             $nativeType = $converter->getDataType($asAnnotation['type']);
+            if(!$this->isNotNull()) {
+                $nativeType = 'null|'.$nativeType;
+            }
         }
 
         $writer
@@ -207,6 +215,7 @@ class Column extends BaseColumn
                 $orderByAnnotationOptions=[null=>[$orderBy]];
             }
 
+
             //check for OneToOne or OneToMany relationship
             if ($foreign->isManyToOne()) { // is OneToMany
 
@@ -288,6 +297,7 @@ class Column extends BaseColumn
             if ($this->local->isManyToOne()) { // is ManyToOne
 
                 $related = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName());
+
                 $refRelated = $this->local->getLocal()->getRelatedName($this->local);
                 if ($this->local->parseComment('unidirectional') === 'true') {
                     $annotationOptions['inversedBy'] = null;
@@ -300,11 +310,14 @@ class Column extends BaseColumn
                 $comment = $this->local->getForeign()->getComment();
 
                 $filedNameMapped = ($d = $this->local->getForeign()->parseComment('field-mapped')) ? $d : lcfirst($targetEntity).$related;
-
+                $nullType = '';
+                if(!$this->isNotNull()) {
+                    $nullType = 'null|';
+                }
                 $writer
                     ->write('/**')
                     ->writeIf($comment, $comment)
-                    ->write(' * @var \\'.$this->local->getReferencedTable()->getModelNameAsFQCN())
+                    ->write(' * @var '.$nullType.'\\'.$this->local->getReferencedTable()->getModelNameAsFQCN())
                     ->write(' * '.$this->getTable()->getAnnotation('ManyToOne', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions))
                     ->write(' */')
@@ -360,7 +373,7 @@ class Column extends BaseColumn
                     } else {
                         $defaultValue = ' = null';
                     }
-                ;
+                break;
 
             case 'datetime':
                     $nativeType = $converter->getDataType('datetime');
@@ -371,7 +384,8 @@ class Column extends BaseColumn
                     } else {
                         $defaultValue = '';
                     }
-                ;
+                break;
+
             case 'dateinterval':
                     $nativeType = $converter->getDataType('dateinterval');
                     $hint = $nativeType.' ';
@@ -381,7 +395,8 @@ class Column extends BaseColumn
                     } else {
                         $defaultValue = '';
                     }
-                ;
+                break;
+
             default;
         }
 
@@ -392,13 +407,18 @@ class Column extends BaseColumn
     {
         $table = $this->getTable();
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
-        $nativeType = $converter->getNativeType($converter->getMappedType($this));
+        $nativeType1=        $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
         $hint = null;
         $defaultValue = null;
+        $nullType = '';
 
         if($res = $this->getColumnTypeDate()) {
+
             list($nativeType, $hint, $defaultValue) = $res;
+            if(!$this->isNotNull()) {
+                $nullType = 'null|';
+            }
         }
 
         $writer
@@ -406,7 +426,7 @@ class Column extends BaseColumn
             ->write('/**')
             ->write(' * Set the value of '.$this->getPhpColumnName().'.')
             ->write(' *')
-            ->write(' * @param '.$nativeType.' $'.$this->getPhpColumnName())
+            ->write(' * @param '.$nullType.$nativeType.' $'.$this->getPhpColumnName())
             ->write(' * @return '.$table->getNamespace())
             ->write(' */')
             ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'('.$hint.'$'.$this->getPhpColumnName().$defaultValue.')')
@@ -423,7 +443,7 @@ class Column extends BaseColumn
         $writer->write('/**')
             ->write(' * Get the value of '.$this->getPhpColumnName().'.')
             ->write(' *')
-            ->write(' * @return '.$nativeType)
+            ->write(' * @return '.$nullType.$nativeType)
             ->write(' */')
             ->write('public function get'.$this->columnNameBeautifier($this->getColumnName()).'()')
             ->write('{')
@@ -591,6 +611,11 @@ class Column extends BaseColumn
         if (null !== $this->local) {
             $unidirectional = ($this->local->parseComment('unidirectional') === 'true');
 
+            $nullType = '';
+            if(!$this->isNotNull()) {
+                $nullType = 'null|';
+            }
+
             if ($this->local->isManyToOne()) { // is ManyToOne
 
                 $related = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName());
@@ -609,8 +634,12 @@ class Column extends BaseColumn
 
                 $defaultValue = '';
 
+
                 if(!$this->isNotNull()) {
                     $defaultValue = ' = null';
+                    if(!$this->isNotNull()) {
+                        $nullType = 'null|';
+                    }
                 }
 
                 $typeEntity = $this->local->getReferencedTable()->getNamespace();
@@ -620,7 +649,7 @@ class Column extends BaseColumn
                     ->write('/**')
                     ->write(' * Set '.trim($this->local->getReferencedTable()->getModelName().' '.$related_text).' entity (many to one).')
                     ->write(' *')
-                    ->write(' * @param '.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()))
+                    ->write(' * @param '.$nullType.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()))
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                     ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.lcfirst($this->local->getReferencedTable()->getModelName()).$defaultValue.')')
@@ -636,7 +665,7 @@ class Column extends BaseColumn
                     ->write('/**')
                     ->write(' * Get '.trim($this->local->getReferencedTable()->getModelName().' '.$related_text).' entity (many to one).')
                     ->write(' *')
-                    ->write(' * @return '.$this->local->getReferencedTable()->getNamespace())
+                    ->write(' * @return '.$nullType.$this->local->getReferencedTable()->getNamespace())
                     ->write(' */')
                     ->write('public function get'.$funactionNamePart.'()')
                     ->write('{')
@@ -667,7 +696,7 @@ class Column extends BaseColumn
                     ->write('/**')
                     ->write(' * Set '.$this->local->getReferencedTable()->getModelName().' entity (one to one).')
                     ->write(' *')
-                    ->write(' * @param '.$this->local->getReferencedTable()->getNamespace().' $'.$codeSetPart)
+                    ->write(' * @param '.$nullType.$this->local->getReferencedTable()->getNamespace().' $'.$codeSetPart)
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                     ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.$codeSetPart.' = null)')
@@ -684,7 +713,7 @@ class Column extends BaseColumn
                     ->write('/**')
                     ->write(' * Get '.$this->local->getReferencedTable()->getModelName().' entity (one to one).')
                     ->write(' *')
-                    ->write(' * @return '.$this->local->getReferencedTable()->getNamespace())
+                    ->write(' * @return '.$nullType.$this->local->getReferencedTable()->getNamespace())
                     ->write(' */')
                     ->write('public function get'.$funactionNamePart.'()')
                     ->write('{')
