@@ -33,18 +33,6 @@ The application is intended to create:
 schema files from MySQL Workbench models (*.mwb).
 It is inspired by [mysql-workbench-doctrine-plugin](http://code.google.com/p/mysql-workbench-doctrine-plugin/).
 
-Doctrine behaviours
--------------------
-
-Support for behaviours is implemented for Doctrine1. Use the comment fields in
-tables.
-
-    {d:actAs}
-      actAs:
-        timestampable:
-          [..]
-    {/d:actAs}
-
 Foreign key name
 ----------------
 
@@ -150,29 +138,6 @@ General options applied to all formatter.
 
     Mark table/view as external to skip table/view code generation. For Doctrine use `{d:external}true{/d:external}` instead.
 
-### Option list for Doctrine 2.0 YAML
-
-  * `useAutomaticRepository`
-
-    Automatically generate entity repository class name.
-
-  * `bundleNamespace`
-
-    The global namespace prefix for entity class name.
-
-  * `entityNamespace`
-
-    The entity namespace. Default is `Entity`.
-
-  * `repositoryNamespace`
-
-    The namespace prefix for entity repository class name. For this configuration to apply, `useAutomaticRepository` must be set to `true`.
-
-  * `extendTableNameWithSchemaName`
-
-    Include schema name beside the table name. Default is `false`. 
-
-
 ### Option list for Doctrine 2.0 Annotation
 
   * `useAnnotationPrefix`
@@ -271,7 +236,6 @@ General options applied to all formatter.
 
   * `generateEntityPopulate`
   * `generateEntityGetArrayCopy`
-
 
 Requirements
 ------------
