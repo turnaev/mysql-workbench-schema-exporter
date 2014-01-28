@@ -184,7 +184,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createCatalog()
      */
-    public function createCatalog(Base $parent, $node)
+    public function createCatalog(Base $parent = null, $node)
     {
         return new Catalog($parent, $node);
     }
@@ -193,7 +193,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createSchemas()
      */
-    public function createSchemas(Base $parent, $node)
+    public function createSchemas(Base $parent = null, $node)
     {
         return new Schemas($parent, $node);
     }
@@ -202,7 +202,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createSchema()
      */
-    public function createSchema(Base $parent, $node)
+    public function createSchema(Base $parent = null, $node)
     {
         return new Schema($parent, $node);
     }
@@ -211,7 +211,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createTables()
      */
-    public function createTables(Base $parent, $node)
+    public function createTables(Base $parent = null, $node)
     {
         return new Tables($parent, $node);
     }
@@ -220,7 +220,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createTable()
      */
-    public function createTable(Base $parent, $node)
+    public function createTable(Base $parent = null, $node)
     {
         return new Table($parent, $node);
     }
@@ -229,7 +229,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createForeignKeys()
      */
-    public function createForeignKeys(Base $parent, $node)
+    public function createForeignKeys(Base $parent = null, $node)
     {
         return new ForeignKeys($parent, $node);
     }
@@ -238,7 +238,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createForeignKey()
      */
-    public function createForeignKey(Base $parent, $node)
+    public function createForeignKey(Base $parent = null, $node)
     {
         return new ForeignKey($parent, $node);
     }
@@ -247,7 +247,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createIndices()
      */
-    public function createIndices(Base $parent, $node)
+    public function createIndices(Base $parent = null, $node)
     {
         return new Indices($parent, $node);
     }
@@ -256,7 +256,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createIndex()
      */
-    public function createIndex(Base $parent, $node)
+    public function createIndex(Base $parent = null, $node)
     {
         return new Index($parent, $node);
     }
@@ -265,7 +265,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createColumns()
      */
-    public function createColumns(Base $parent, $node)
+    public function createColumns(Base $parent = null, $node)
     {
         return new Columns($parent, $node);
     }
@@ -274,7 +274,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createColumn()
      */
-    public function createColumn(Base $parent, $node)
+    public function createColumn(Base $parent = null, $node)
     {
         return new Column($parent, $node);
     }
@@ -283,7 +283,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createViews()
      */
-    public function createViews(Base $parent, $node)
+    public function createViews(Base $parent = null, $node)
     {
         return new Views($parent, $node);
     }
@@ -292,7 +292,7 @@ abstract class Formatter implements FormatterInterface
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\FormatterInterface::createView()
      */
-    public function createView(Base $parent, $node)
+    public function createView(Base $parent = null, $node)
     {
         return new View($parent, $node);
     }

@@ -143,7 +143,6 @@ class Compiler
      */
     private function changeNamenamespaceModel(\RecursiveDirectoryIterator $dir, $namenamespaceFrom, $namenamespaceTo)
     {
-
         $namenamespaceFromRgx = preg_quote($namenamespaceFrom, "%");
 
         foreach ($dir as $fileinfo) {
@@ -234,17 +233,17 @@ class Compiler
             $toFileContent = $this->prettyXml(
                 $toFileContent, [
 
-                    '/(\s+<entity)/'            => "\n" . '\1',
-                    '/(\s+<\/entity>)/'          => "\n" . '\1' . "\n",
-                    '/(\s+<field)/'              => "\n" . '\1',
-                    '/(\s+<one-to-one)/'         => "\n" . '\1',
-                    '/(\s+<many-to-one)/'        => "\n" . '\1',
-                    '/(\s+<one-to-many)/'        => "\n" . '\1',
-                    '/(\s+<many-to-many)/'       => "\n" . '\1',
-                    '/(\s+<id)/'                 => "\n" . '\1',
-                    '/(\s+<indexes)/'            => "\n" . '\1',
-                    '/(\s+<unique-constraints)/' => "\n" . '\1',
-                    '/(\s+<unique-constraints)/' => "\n" . '\1',
+                    '/(\s+<entity)/'              => "\n" . '\1',
+                    '/(\s+<\/entity>)/'           => "\n" . '\1' . "\n",
+                    '/(\s+<field)/'               => "\n" . '\1',
+                    '/(\s+<one-to-one)/'          => "\n" . '\1',
+                    '/(\s+<many-to-one)/'         => "\n" . '\1',
+                    '/(\s+<one-to-many)/'         => "\n" . '\1',
+                    '/(\s+<many-to-many)/'        => "\n" . '\1',
+                    '/(\s+<id)/'                  => "\n" . '\1',
+                    '/(\s+<indexes)/'             => "\n" . '\1',
+                    '/(\s+<unique-constraints)/'  => "\n" . '\1',
+                    '/(\s+<unique-constraints)/'  => "\n" . '\1',
                     '/(\s+<lifecycle-callbacks)/' => "\n" . '\1',
 
                     '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n" . '       \1',
@@ -323,10 +322,10 @@ XML;
                 $className = $model->entity->attributes()['name'] . '';
                 $classE->setAttribute('name', $className);
 
-                $constrains = array();
+                $constrains = [];
                 foreach ($model->entity->field as $field) {
 
-                    $constrainsFields = array();
+                    $constrainsFields = [];
 
                     $fieldAttrs = $field->attributes();
 
@@ -345,10 +344,17 @@ XML;
                         $constrainsFields[] = $constrains[] = $constraintE;
                     }
 
-                    if ($fieldAttrs['type'] == 'datetime') {
+                    if (in_array($fieldAttrs['type'], ['dateinterval', 'datetime'])) {
 
                         $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', '\DateTime');
+
+                        if($fieldAttrs['type'] == 'dateinterval') {
+                            $constraintE->setAttribute('name', 'DateInterval');
+
+                        } else if ($fieldAttrs['type'] == 'datetime') {
+                            $constraintE->setAttribute('name', 'DateTime');
+                        }
+
                         $propertyE->appendChild($constraintE);
 
                         $classE->appendChild($propertyE);
@@ -381,6 +387,10 @@ XML;
                     }
 
                     if (is_numeric($fieldAttrs['length'] . '')) {
+
+                        if($fieldAttrs['type'] == 'dateinterval') {
+                            continue;
+                        }
 
                         $constraintE = $dom->createElement('constraint');
                         $constraintE->setAttribute('name', 'Length');
@@ -455,7 +465,12 @@ XML;
         }
 
         $toFileContent = join('', $toFileContent);
+
         $toFileContent = preg_replace("/\s+?\*\s*?\n/", "\n", $toFileContent);
+
+        $toFileContent = preg_replace("/\\/\*\*\n \*\\//s", '', $toFileContent);
+        $toFileContent = preg_replace("/(\n+)(\nabstract class)/", "\n".'\2', $toFileContent);
+        $toFileContent = preg_replace("/(\n+)(\nclass)/", "\n".'\2', $toFileContent);
 
         file_put_contents($file, $toFileContent);
     }
@@ -493,7 +508,6 @@ use ${baseNamespace}\DoctrineBundle\ORM\EntityRepository;
 
 class ${className} extends EntityRepository
 {
-
 }
 PHP;
 
@@ -507,14 +521,14 @@ PHP;
      */
     private function removeClassBody($file)
     {
-        $toFileContent    = array();
+        $toFileContent    = [];
         $toFileContentTmp = file($file);
 
         foreach ($toFileContentTmp as $k => $line) {
 
             $toFileContent[] = $line;
             if (preg_match('/^class\s/', $line, $m)) {
-                $toFileContent[] = "{\n\n";
+                $toFileContent[] = "{\n";
                 $toFileContent[] = "}";
                 break;
             }

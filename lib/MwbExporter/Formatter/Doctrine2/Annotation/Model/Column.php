@@ -378,23 +378,14 @@ class Column extends BaseColumn
             case 'datetime':
                     $nativeType = $converter->getDataType('datetime');
                     $hint = $nativeType.' ';
+                    $defaultValue = ' = null'; //allow null for form working
 
-                    if(!$this->isNotNull()) {
-                        $defaultValue = ' = null';
-                    } else {
-                        $defaultValue = '';
-                    }
                 break;
 
             case 'dateinterval':
                     $nativeType = $converter->getDataType('dateinterval');
                     $hint = $nativeType.' ';
-
-                    if(!$this->isNotNull()) {
-                        $defaultValue = ' = null';
-                    } else {
-                        $defaultValue = '';
-                    }
+                    $defaultValue = ' = null'; //allow null for form working
                 break;
 
             default;

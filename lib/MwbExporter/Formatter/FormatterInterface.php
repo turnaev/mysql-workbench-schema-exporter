@@ -76,8 +76,7 @@ interface FormatterInterface {
 
     /**
      * Create catalog model.
-     *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Catalog
      */
@@ -86,7 +85,7 @@ interface FormatterInterface {
     /**
      * Create schemas model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Schemas
      */
@@ -95,7 +94,7 @@ interface FormatterInterface {
     /**
      * Create schema model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Schema
      */
@@ -104,7 +103,7 @@ interface FormatterInterface {
     /**
      * Create tables model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Tables
      */
@@ -113,7 +112,7 @@ interface FormatterInterface {
     /**
      * Create catalog model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Table
      */
@@ -122,7 +121,7 @@ interface FormatterInterface {
     /**
      * Create foreign keys model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\ForeignKeys
      */
@@ -131,7 +130,7 @@ interface FormatterInterface {
     /**
      * Create foreign key model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\ForeignKey
      */
@@ -140,7 +139,7 @@ interface FormatterInterface {
     /**
      * Create indices model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Indices
      */
@@ -149,7 +148,7 @@ interface FormatterInterface {
     /**
      * Create index model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Index
      */
@@ -158,7 +157,7 @@ interface FormatterInterface {
     /**
      * Create columns model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Columns
      */
@@ -167,7 +166,7 @@ interface FormatterInterface {
     /**
      * Create column model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Column
      */
@@ -176,7 +175,7 @@ interface FormatterInterface {
     /**
      * Create views model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\Views
      */
@@ -185,7 +184,7 @@ interface FormatterInterface {
     /**
      * Create view model.
      *
-     * @param \MbwExporter\Model\Base $parent  The object parent
+     * @param \MwbExporter\Model\Base $parent  The object parent
      * @param \SimpleXMLElement $node  The model data
      * @return \MwbExporter\Model\View
      */

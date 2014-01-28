@@ -193,7 +193,6 @@ class Table extends BaseTable
                 ->write('<?php')
                 ->write('')
                 ->write('namespace %s;', $namespace)
-                ->write('')
                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
                     $_this->writeUsedClasses($writer);
                 })
@@ -283,7 +282,10 @@ class Table extends BaseTable
 
     public function writeUsedClasses(WriterInterface $writer)
     {
-        if (count($uses = $this->getUsedClasses())) {
+        $uses = $this->getUsedClasses();
+        if (count($uses)) {
+
+            $writer->write('');
             foreach ($uses as $use) {
                 $writer->write('use %s;', $use);
             }
@@ -338,7 +340,7 @@ class Table extends BaseTable
         //* @throws MethodNotImplementedException
         $writer
             ->write('/**')
-            ->write(' * to strig entity')
+            ->write(' * to string entity')
             ->write(' * @return string');
 
         if($throwException) {
@@ -609,7 +611,7 @@ class Table extends BaseTable
      *
      * @return array
      */
-    protected function getUsedClasses()
+    public  function getUsedClasses()
     {
         $uses = array();
         if ('@ORM\\' === $this->addPrefix()) {
