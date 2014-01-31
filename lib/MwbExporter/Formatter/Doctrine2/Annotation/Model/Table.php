@@ -404,23 +404,23 @@ class Table extends BaseTable
                 return !preg_match('/_id$/', $column->getColumnName());
             });
 
-        $columns = array_map(function($column) {
-                /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
-                return $column->getPhpColumnName();
-
-            }, $columns);
-
         $maxLen = 0;
         foreach($columns as $column) {
-            $maxLen = max($maxLen, strlen($column));
+            $maxLen = max($maxLen, strlen($column->getPhpColumnName()));
         }
 
         $maxLen+=2;
         $columnsArr = [];
 
         foreach ($columns as $column) {
+            $columnKey = $column->getPhpColumnName();
+            $columnName = $columnKey;
+            if(in_array($column->asAnnotation()['type'], ['dateinterval', 'datetime', 'date'])) {
+                $columnName .= " . ''";
+            }
+
             $format = "    %-{$maxLen}s => \$this->%s";
-            $columnsArr[] = sprintf($format, "'".$column."'", $column);
+            $columnsArr[] = sprintf($format, "'".$columnKey."'", $columnName);
         }
 
         $writer
@@ -436,7 +436,33 @@ class Table extends BaseTable
                 ->write("];")
             ->outdent()
             ->write('}')
-            ->write('')
+
+            //->write('')
+            //->write('/**')
+            //->write(' * @param array $data')
+            //->write(' * @return $this')
+            //->write(' * @throws \InvalidArgumentException')
+            //->write(' */')
+            //->write('public function fromArray(array $data = [])')
+            //->write('{')
+            //->indent()
+            //    ->write('$map = $this->toArray();')
+            //    ->write('foreach($data as $key => $value) {')
+            //    ->indent()
+            //        ->write('if(array_key_exists($key, $map)) {')
+            //        ->indent()
+            //            ->write('$this->$key = $value;')
+            //        ->outdent()
+            //        ->write('} else {')
+            //        ->indent()
+            //            ->write('throw new \InvalidArgumentException(sprintf(\'The class "%s" has not property "%s".\', __CLASS__, $key));')
+            //        ->outdent()
+            //        ->write('}')
+            //    ->outdent()
+            //    ->write('}')
+            //->outdent()
+            //->write('}')
+            //->write('')
         ;
 
         return $this;
