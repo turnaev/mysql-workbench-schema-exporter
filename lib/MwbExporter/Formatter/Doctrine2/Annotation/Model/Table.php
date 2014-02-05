@@ -416,11 +416,15 @@ class Table extends BaseTable
             $columnKey = $column->getPhpColumnName();
             $columnName = $columnKey;
             if(in_array($column->asAnnotation()['type'], ['dateinterval', 'datetime', 'date'])) {
-                $columnName .= " . ''";
-            }
 
-            $format = "    %-{$maxLen}s => \$this->%s";
-            $columnsArr[] = sprintf($format, "'".$columnKey."'", $columnName);
+                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s.'' : \$this->%s";
+                $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
+
+            } else {
+
+                $format = "    %-{$maxLen}s => \$this->%s";
+                $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey);
+            }
         }
 
         $writer
