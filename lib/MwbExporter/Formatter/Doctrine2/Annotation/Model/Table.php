@@ -414,7 +414,7 @@ class Table extends BaseTable
 
         foreach ($columns as $column) {
             $columnKey = $column->getPhpColumnName();
-            $columnName = $columnKey;
+
             if(in_array($column->asAnnotation()['type'], ['dateinterval', 'datetime', 'date'])) {
 
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s.'' : \$this->%s";
@@ -440,7 +440,8 @@ class Table extends BaseTable
                 ->write("];")
             ->outdent()
             ->write('}')
-
+            ->write('')
+        
             //->write('')
             //->write('/**')
             //->write(' * @param array $data')

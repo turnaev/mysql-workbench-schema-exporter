@@ -398,7 +398,7 @@ class Column extends BaseColumn
     {
         $table = $this->getTable();
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
-        $nativeType1=        $nativeType = $converter->getNativeType($converter->getMappedType($this));
+        $nativeType = $converter->getNativeType($converter->getMappedType($this));
 
         $hint = null;
         $defaultValue = null;
@@ -623,16 +623,14 @@ class Column extends BaseColumn
                     $codeGetPart       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
                 }
 
-                $defaultValue = '';
-
-
                 if(!$this->isNotNull()) {
-                    $defaultValue = ' = null';
+
                     if(!$this->isNotNull()) {
                         $nullType = 'null|';
                     }
                 }
 
+                $defaultValue = ' = null';
                 $typeEntity = $this->local->getReferencedTable()->getNamespace();
 
                 $writer
