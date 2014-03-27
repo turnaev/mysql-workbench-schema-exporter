@@ -333,7 +333,21 @@ class Table extends BaseTable
     public function writeToString(WriterInterface $writer)
     {
         $throwException = false;
+
+        if($this->getColumns()->columnExits('name')) {
+
+            $column = $this->getColumns()->getColumnByName('name');
+
+        } else if($this->getColumns()->columnExits('id')) {
+
+            $column = $this->getColumns()->getColumnByName('id');
+        } else {
+            $throwException = true;
+        }
+
         if(!$this->getColumns()->columnExits('name')) {
+
+            !$this->getColumns()->columnExits('id');
             $throwException = true;
         }
 
@@ -351,8 +365,7 @@ class Table extends BaseTable
             ->write('public function __toString()')
             ->write('{');
 
-        if($throwException) {
-
+        if(!isset($column) && $throwException) {
 
             $writer->indent()
                 ->write('throw new \Symfony\Component\Intl\Exception\MethodNotImplementedException(__METHOD__);')
@@ -360,7 +373,7 @@ class Table extends BaseTable
                 ->outdent();
 
         } else {
-            $column = $this->getColumns()->getColumnByName('name');
+
             $name = $column->getPhpColumnName();
             $writer->indent()
                 ->write("return (string)\$this->{$name};")
