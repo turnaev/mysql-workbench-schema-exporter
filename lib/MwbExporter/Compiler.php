@@ -420,9 +420,11 @@ XML;
             $dom->saveXML(), [
                 '/(xmlns=|xmlns:xsi=|xsi:schemaLocation=)/' => "\n" . '        \1',
                 '/(\s+<class)/'                             => "\n" . '\1',
-                '/(\s+<\/class)/'                           => "\n" . '\1',
-                '/(\s+<property)/'                          => "\n" . '\1',
-                '/(\s+<property)/'                          => "\n" . '\1',
+                //'/(\s+<\/class)/'                           => "\n" . '\1',
+                //'/(\s+<property name)/'                          => "\n" . '\1',
+               // '/(\s+<property)/'                          => "\n" . '\1',
+                //'/(\s+<property)/'                          => "\n" . '\1',
+                "/(    <\/property>)\n    (<property)/is"                          => '\1'."\n\n".'    \2',
             ]
         );
 
