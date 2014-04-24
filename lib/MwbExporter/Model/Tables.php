@@ -119,6 +119,11 @@ class Tables extends Base implements \ArrayAccess, \IteratorAggregate, \Countabl
     public function write(WriterInterface $writer)
     {
         foreach ($this->tables as $table) {
+
+            if ($table->parseComment('skip') == 'true') {
+                continue;
+            }
+
             $table->write($writer);
         }
 

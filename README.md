@@ -217,9 +217,9 @@ General options applied to all formatter.
 
      User order.
 
-  * `{d:skip}true{/d:skip}` (applied to Field)
+  * `{d:skip}true{/d:skip}` (applied to Field or Table)
 
-    Skip field
+    Skip field or table
 
   * `{d:generator-strategy}NONE{/d:generator-strategy}` (applied to id Field) [AUTO, SEQUENCE, TABLE, IDENTITY, NONE, UUID, CUSTOM]
 
