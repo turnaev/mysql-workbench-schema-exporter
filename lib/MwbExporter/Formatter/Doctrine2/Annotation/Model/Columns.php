@@ -40,10 +40,16 @@ class Columns extends BaseColumns
                 // do not output fields of relations.
                 continue;
             }
+            /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
+            if ($column->parseComment('skip') == 'true') {
+                continue;
+            }
+
             $column->write($writer);
         }
         // display column relations
         foreach ($this->columns as $column) {
+
             $column->writeRelations($writer);
         }
 
@@ -52,7 +58,6 @@ class Columns extends BaseColumns
 
     public function writeArrayCollections(WriterInterface $writer, &$maxLen)
     {
-
         foreach ($this->columns as $column) {
             $column->writeArrayCollection($writer, $maxLen);
         }

@@ -52,7 +52,7 @@ class Column extends Base
     protected $local    = null;
 
     /**
-     * @var array \MwbExporter\Model\ForeignKey
+     * @var \MwbExporter\Model\ForeignKey[]
      */
     protected $foreigns = array();
 
@@ -354,7 +354,6 @@ class Column extends Base
      */
     public function getDefaultValue()
     {
-
         if (1 != $this->parameters->get('defaultValueIsNull')) {
 
             $defaultValue = trim($this->parameters->get('defaultValue'), '\'"');

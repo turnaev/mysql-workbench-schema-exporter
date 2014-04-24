@@ -387,7 +387,7 @@ class Table extends Base
      * Return relation betweens the current table and the $rawTableName table
      *
      * @param string $rawTableName
-     * @return MwbExporter\Model\ForeignKey|null
+     * @return \MwbExporter\Model\ForeignKey|null
      */
     public function getRelationToTable($rawTableName)
     {

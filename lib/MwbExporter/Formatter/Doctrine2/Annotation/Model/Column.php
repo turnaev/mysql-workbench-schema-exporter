@@ -35,7 +35,6 @@ class Column extends BaseColumn
 {
     public function asAnnotation()
     {
-
         $attributes = [
             'name' => $this->getTable()->quoteIdentifier($this->getColumnName()),
             'type' => $this->getDocument()->getFormatter()->getDatatypeConverter()->getMappedType($this),
@@ -120,7 +119,7 @@ class Column extends BaseColumn
                     ' * '.$this->getTable()->getAnnotation('Id'))
             ->write(' * '.$this->getTable()->getAnnotation('Column', $asAnnotation))
             ->writeIf($this->isAutoIncrement(),
-                    ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => 'AUTO']))
+                    ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => ($val = $this->parseComment('generator-strategy'))?$val:'AUTO']))
             ->write(' */')
             ->write('protected $'.$filedName.$value.';')
             ->write('')

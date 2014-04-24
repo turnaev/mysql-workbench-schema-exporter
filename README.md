@@ -217,6 +217,14 @@ General options applied to all formatter.
 
      User order.
 
+  * `{d:skip}true{/d:skip}` (applied to Field)
+
+    Skip field
+
+  * `{d:generator-strategy}NONE{/d:generator-strategy}` (applied to id Field) [AUTO, SEQUENCE, TABLE, IDENTITY, NONE, UUID, CUSTOM]
+
+    Generator strategy for id
+
   * `{d:field-mapped}parentCategory{/d:field-mapped}` (applied to Field)
 
     Override name mapped filed.
@@ -230,7 +238,10 @@ General options applied to all formatter.
     You can specify Doctrine lifecycleCallbacks options as a comment on a table. The will be generated into the Annotation.
 
   * `{d:type}dateinterval{/d:type}` (applied to Field)
+
     Force cast datetype
+
+
 
 #### Additional option list for Doctrine 2.0 Annotation ZF2 Inputfilter
 

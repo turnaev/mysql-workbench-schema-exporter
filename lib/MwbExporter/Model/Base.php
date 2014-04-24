@@ -190,7 +190,6 @@ abstract class Base
 
             return $comment;
         }
-
     }
 
     /**
