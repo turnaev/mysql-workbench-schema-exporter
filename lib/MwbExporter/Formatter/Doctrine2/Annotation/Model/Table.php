@@ -179,7 +179,8 @@ class Table extends BaseTable
 
             $namespace = $this->getEntityNamespace();
             if ($repositoryNamespace = $this->getDocument()->getConfig()->get(Formatter::CFG_REPOSITORY_NAMESPACE)) {
-                $repositoryNamespace .= '\\';
+                $base = $this->getDocument()->getConfig()->get(Formatter::CFG_BUNDELE_NAMESPACE_TO);
+                $repositoryNamespace = $base. '\\'.  $repositoryNamespace. '\\';
             }
             $skipGetterAndSetter = $this->getDocument()->getConfig()->get(Formatter::CFG_SKIP_GETTER_SETTER);
             $serializableEntity  = $this->getDocument()->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_SERIALIZATION);

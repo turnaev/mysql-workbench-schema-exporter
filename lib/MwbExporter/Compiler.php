@@ -12,7 +12,6 @@ use MwbExporter\Model\Document;
  */
 class Compiler
 {
-
     /**
      * @var FormatterInterface
      */
