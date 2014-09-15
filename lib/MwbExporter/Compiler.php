@@ -23,6 +23,13 @@ class Compiler
     private $document;
 
     /**
+     * @var array
+     */
+    private $quoteWords = [
+        'order'
+    ];
+
+    /**
      * @param FormatterInterface $formatter
      * @param Document           $document
      */
@@ -223,13 +230,23 @@ class Compiler
     private function changeMetaModel($fromXmlFile, $configToDirXml)
     {
         $fromFileContent = file_get_contents($fromXmlFile);
-        $toFileContent   = preg_replace('/Model\\\/', '', $fromFileContent);
-        $toFileContent   = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);
-        $toFileContent   = preg_replace('/nullable="1"/', 'nullable="true"', $toFileContent);
-        $toFileContent   = preg_replace('/ precision="0" scale="0"/', '', $toFileContent);
 
         if (preg_match('/.*Model\.(.*)/', pathinfo($fromXmlFile)['filename'], $m)) {
             $toXmlFile = $configToDirXml . '/' . $m[1] . '.xml';
+
+            $toFileContent   = preg_replace('/Model\\\/', '', $fromFileContent);
+            $toFileContent   = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);
+            $toFileContent   = preg_replace('/nullable="1"/', 'nullable="true"', $toFileContent);
+            $toFileContent   = preg_replace('/ precision="0" scale="0"/', '', $toFileContent);
+
+            $toFileContent = preg_replace_callback('/(column=|table=)("|\')([^\2]*?)(\2)/', function($m){
+
+                if(in_array($m[3], $this->quoteWords)) {
+                    $m[3] = '`'.$m[3].'`';
+                }
+                return $m[1].$m[2].$m[3].$m[4];
+
+            }, $toFileContent);
 
             $toFileContent = $this->prettyXml(
                 $toFileContent, [
