@@ -181,7 +181,8 @@ class Column extends Base
      */
     protected function columnNameBeautifier($columnName)
     {
-        return ucfirst(preg_replace('@\_(\w)@e', 'ucfirst("$1")', $columnName));
+        // camleCase under scores for model names
+        return $this->underscoreToCamelCase($columnName, true);
     }
 
     /**

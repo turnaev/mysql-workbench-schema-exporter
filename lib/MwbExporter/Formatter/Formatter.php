@@ -71,6 +71,9 @@ abstract class Formatter implements FormatterInterface
             static::CFG_ENHANCE_M2M_DETECTION  => true,
             static::CFG_LOG_TO_CONSOLE         => false,
             static::CFG_LOG_FILE               => '',
+
+            static::CFG_RELATED_VAR_NAME_FORMAT      => '%related%',
+            static::CFG_RELATED_PREFIX               => '',
         ));
         $this->setDatatypeConverter($this->createDatatypeConverter());
         $this->init();

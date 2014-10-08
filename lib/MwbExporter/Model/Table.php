@@ -331,7 +331,7 @@ class Table extends Base
         }
 
         // camleCase under scores for model names
-        return ucfirst(preg_replace('@\_(\w)@e', 'ucfirst("$1")', $tableName));
+        return $this->underscoreToCamelCase($tableName, true);
     }
 
     /**

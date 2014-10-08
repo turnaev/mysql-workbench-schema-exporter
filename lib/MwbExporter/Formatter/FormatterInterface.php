@@ -45,6 +45,10 @@ interface FormatterInterface {
     const CFG_BUNDELE_NAMESPACE      = 'bundleNamespace';
     const CFG_BUNDELE_NAMESPACE_TO   = 'bundleNamespaceTo';
 
+    const CFG_RELATED_VAR_NAME_FORMAT   = 'relatedVarNameFormat';
+    const CFG_RELATED_PREFIX            = 'relatedPrefix';
+
+
 
     /**
      * Get the registry object.

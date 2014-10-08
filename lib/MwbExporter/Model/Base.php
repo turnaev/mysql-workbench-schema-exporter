@@ -69,7 +69,16 @@ abstract class Base
         if ($this->id && ($document = $this->getDocument())) {
             $document->getReference()->set($this->id, $this);
         }
+    }
 
+    protected function underscoreToCamelCase($string, $firstCharCaps = false)
+    {
+        if( $firstCharCaps == true )
+        {
+            $string[0] = strtoupper($string[0]);
+        }
+        $func = create_function('$c', 'return strtoupper($c[1]);');
+        return preg_replace_callback('/_([a-z])/', $func, $string);
     }
 
     protected function init()
