@@ -94,6 +94,7 @@ class Column extends BaseColumn
             }
         }
 
+
         if($asAnnotation['type'] == 'array') {
             $nativeType = $converter->getNativeType('array');
 
@@ -103,6 +104,27 @@ class Column extends BaseColumn
                 $value = ' = []';
             }
         }
+
+        if($asAnnotation['type'] == 'string_array') {
+            $nativeType = $converter->getNativeType('string[]');
+
+            if(!$this->isNotNull()) {
+                $nativeType = 'null|'.$nativeType;
+            } else {
+                $value = ' = []';
+            }
+        }
+
+        if($asAnnotation['type'] == 'integer_array') {
+            $nativeType = $converter->getNativeType('integer[]');
+
+            if(!$this->isNotNull()) {
+                $nativeType = 'null|'.$nativeType;
+            } else {
+                $value = ' = []';
+            }
+        }
+
 
         if(in_array($asAnnotation['type'], ['datetime', 'dateinterval'])) {
             $nativeType = $converter->getDataType($asAnnotation['type']);
@@ -357,37 +379,45 @@ class Column extends BaseColumn
         return $this;
     }
 
-    private function getColumnTypeDate()
+    private function getColumnTypeData()
     {
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
 
         $asAnnotation = $this->asAnnotation();
+
         switch($asAnnotation['type']) {
             case 'array':
                     $nativeType = $converter->getNativeType('array');
                     $hint = 'array ';
-
-                    if($this->isNotNull()) {
-                        $defaultValue = ' = []';
-                    } else {
-                        $defaultValue = ' = null';
-                    }
                 break;
 
             case 'datetime':
                     $nativeType = $converter->getDataType('datetime');
                     $hint = $nativeType.' ';
-                    $defaultValue = ' = null'; //allow null for form working
-
                 break;
 
             case 'dateinterval':
                     $nativeType = $converter->getDataType('dateinterval');
                     $hint = $nativeType.' ';
-                    $defaultValue = ' = null'; //allow null for form working
+                break;
+
+            case 'string_array':
+                    $nativeType = $converter->getNativeType('string[]');
+                    $hint = 'array ';
+                break;
+
+            case 'integer_array':
+                    $nativeType = $converter->getNativeType('integer[]');
+                    $hint = 'array ';
                 break;
 
             default;
+        }
+
+        if($this->isNotNull()) {
+            $defaultValue = '';
+        } else {
+            $defaultValue = ' = null'; //allow null for form working
         }
 
         return isset($nativeType)?[$nativeType, $hint, $defaultValue]:null;
@@ -403,7 +433,7 @@ class Column extends BaseColumn
         $defaultValue = null;
         $nullType = '';
 
-        if($res = $this->getColumnTypeDate()) {
+        if($res = $this->getColumnTypeData()) {
 
             list($nativeType, $hint, $defaultValue) = $res;
             if(!$this->isNotNull()) {
