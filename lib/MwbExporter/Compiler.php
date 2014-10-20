@@ -134,7 +134,7 @@ class Compiler
                     if (!$fileinfo->isDot()) {
 
                         $fromXmlFile = $configFromDirXml . '/' . $fileinfo->getFilename();
-                        $this->changeMetaModel($fromXmlFile, $configToDirXml);
+                        $this->changeXmlMetaModel($fromXmlFile, $configToDirXml);
                     }
                 }
             }
@@ -227,7 +227,7 @@ class Compiler
      * @param $fromXmlFile
      * @param $configToDirXml
      */
-    private function changeMetaModel($fromXmlFile, $configToDirXml)
+    private function changeXmlMetaModel($fromXmlFile, $configToDirXml)
     {
         $fromFileContent = file_get_contents($fromXmlFile);
 
@@ -265,14 +265,60 @@ class Compiler
                     '/(\s+<lifecycle-callbacks)/' => "\n" . '\1',
 
                     '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n" . '       \1',
+                    '/( repository-class=".*?")( name=".*?")( table=".*?")/' => "\n" . '         \2' . "\n" . '         \1' . "\n" . '         \3',
 
-                    '/( repository-class=".*?")( name=".*?")( table=".*?")/' =>
-                    "\n" . '         \2' . "\n" . '         \1' . "\n" . '         \3',
+                    "/<options\W.*?\/>/i" => function($m) {
+
+                        $out = $m[0];
+                        if(preg_match_all('/(\w+)=(\'|\")(.*?)(\2)/', $m[0], $r)) {
+
+                            $options = [];
+                            foreach($r[1] as $k=>$name) {
+                                $value = $r[3][$k];
+                                $options[] = "<option name=\"{$name}\">{$value}</option>";
+                            }
+                            $options = join("\n          ", $options);
+
+                            $out = <<<XML
+<options>
+          {$options}
+      </options>
+XML;
+                        }
+                        return $out;
+                    },
                 ]
             );
 
             file_put_contents($toXmlFile, $toFileContent);
         }
+    }
+
+    /**
+     * @param       $xmlStringIn
+     * @param array $regulations
+     *
+     * @return mixed
+     */
+    private function prettyXml($xmlStringIn, array $regulations = [])
+    {
+
+        $dom                     = new \DOMDocument();
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput       = true;
+        $dom->loadXML($xmlStringIn);
+
+        $xmlStringOut = $dom->saveXML();
+
+        foreach ($regulations as $from => $to) {
+            if(is_callable($to)) {
+                $xmlStringOut = preg_replace_callback($from, $to, $xmlStringOut);
+            } else {
+                $xmlStringOut = preg_replace($from, $to, $xmlStringOut);
+            }
+        }
+
+        return $xmlStringOut;
     }
 
     /**
@@ -556,32 +602,11 @@ XML;
                 "/(    <\/property>)\n    (<property)/is"                          => '\1'."\n\n".'    \2',
                 "/(    <\/constraint>)\n    (<property)/is"                          => '\1'."\n\n".'    \2',
                 "/(    <\/constraint>)\n    (<constraint)/is"                          => '\1'."\n\n".'    \2',
+
             ]
         );
 
         file_put_contents($validationFile, $xmlString);
-    }
-
-    /**
-     * @param       $xmlStringIn
-     * @param array $regulations
-     *
-     * @return mixed
-     */
-    private function prettyXml($xmlStringIn, array $regulations = [])
-    {
-        $dom                     = new \DOMDocument();
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput       = true;
-        $dom->loadXML($xmlStringIn);
-
-        $xmlStringOut = $dom->saveXML();
-
-        foreach ($regulations as $from => $to) {
-            $xmlStringOut = preg_replace($from, $to, $xmlStringOut);
-        }
-
-        return $xmlStringOut;
     }
 
     /**

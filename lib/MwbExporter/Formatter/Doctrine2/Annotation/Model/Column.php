@@ -57,11 +57,20 @@ class Column extends BaseColumn
             $attributes['nullable'] = false;
         }
 
-        if ($this->parameters->get('comment')) {
+        $attributes['options']['comment'] = $this->getComment(false);
 
-            $attributes['options']["comment"] = $this->getComment(false);
+        $defaultValue = $this->parameters->get('defaultValue');
+        if($defaultValue !== '' && $defaultValue !== 'NULL') {
+
+            $defaultValue = trim($defaultValue, '"\'');
+            if($attributes['type'] === 'boolean') {
+                $defaultValue = $defaultValue?'true':'false';
+            }
+
+            $attributes['options']['default'] = $defaultValue;
+
+
         }
-
         return $attributes;
     }
 
