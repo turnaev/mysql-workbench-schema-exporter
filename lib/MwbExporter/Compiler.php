@@ -360,6 +360,14 @@ XML;
     {
         $validationFile = dirname($configDir) . '/validation.xml';
         $dir            = new \DirectoryIterator($configDir);
+        $files = [];
+        foreach ($dir as $fileinfo) {
+            if (!$fileinfo->isDot()) {
+                $files[$fileinfo->getFileName()] = $fileinfo->getPathName();
+            }
+        }
+        ksort($files);
+
         $xml
                         = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -374,207 +382,118 @@ XML;
 
         $dom->loadXML($xml);
 
-        foreach ($dir as $fileinfo) {
+        foreach ($files as $filePath) {
 
-            if (!$fileinfo->isDot()) {
+            $model = simplexml_load_file($filePath);
 
-                $model = simplexml_load_file($fileinfo->getPathName());
+            $root   = $dom->documentElement;
+            $classE = $dom->createElement('class');
 
-                $root   = $dom->documentElement;
-                $classE = $dom->createElement('class');
+            $className = $model->entity->attributes()['name'] . '';
+            $classE->setAttribute('name', $className);
 
-                $className = $model->entity->attributes()['name'] . '';
-                $classE->setAttribute('name', $className);
+            $uniqueConstraints = $model->entity->{'unique-constraints'};
+            if(count($uniqueConstraints)) {
 
-                $uniqueConstraints = $model->entity->{'unique-constraints'};
-                if(count($uniqueConstraints)) {
-
-                    foreach($uniqueConstraints->{'unique-constraint'} as $uniqueConstraint) {
-                        $columns = $uniqueConstraint->attributes()['columns'];
-                        $columns = explode(',', $columns);
-                        array_walk($columns, function(&$v) {
-                            $v = trim($v);
-                            $v  = preg_replace('/_id$/', '', $v);
-                            $v  = preg_replace('/_/', ' ', $v);
-                            $v = ucwords($v);
-                            $v = lcfirst($v);
-                            $v  = preg_replace('/\s/', '', $v);
-                        });
-
-                        $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity');
-
-                        $optionE = $dom->createElement('option');
-                        $optionE->setAttribute('name', 'fields');
-                        $constraintE->appendChild($optionE);
-
-                        foreach($columns as $column) {
-                            $valueE = $dom->createElement('value', $column);
-                            $optionE->appendChild($valueE);
-                        }
-
-                        $objName = 'Object';
-                        if(preg_match('/[^\\\]*?$/', $className, $m)) {
-                            $objName = $m[0];
-                        }
-
-                        $columns = implode(', ', $columns);
-                        $optionE = $dom->createElement('option', "$objName (with $columns) already exists.");
-                        $optionE->setAttribute('name', 'message');
-                        $constraintE->appendChild($optionE);
-
-                        $classE->appendChild($constraintE);
-
-                        $constrainsFields[] = $constrains[] = $constraintE;
-                    }
-                }
-
-                $constrains = [];
-                foreach ($model->entity->field as $field) {
-
-                    $constrainsFields = [];
-
-                    $fieldAttrs = $field->attributes();
-
-                    $propertyE = $dom->createElement('property');
-                    $fieldName = $fieldAttrs['name'] . '';
-                    $propertyE->setAttribute('name', $fieldName);
-
-                    if ($fieldAttrs['nullable'] == 'false') {
-
-                        $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'NotBlank');
-                        $propertyE->appendChild($constraintE);
-
-                        $classE->appendChild($propertyE);
-
-                        $constrainsFields[] = $constrains[] = $constraintE;
-                    }
-
-                    if (in_array($fieldAttrs['type'], ['dateinterval', 'date', 'datetime'])) {
-
-                        $constraintE = $dom->createElement('constraint');
-
-                        if($fieldAttrs['type'] == 'dateinterval') {
-                            $constraintE->setAttribute('name', '\LP\CoreBundle\Validator\Constraints\DateInterval');
-
-                        } else if ($fieldAttrs['type'] == 'datetime') {
-                            $constraintE->setAttribute('name', 'DateTime');
-                        } else if ($fieldAttrs['type'] == 'date') {
-                            $constraintE->setAttribute('name', 'Date');
-                        }
-
-                        $propertyE->appendChild($constraintE);
-
-                        $classE->appendChild($propertyE);
-
-                        $constrainsFields[] = $constrains[] = $constraintE;
-                    }
-
-                    if (in_array($fieldAttrs['type'] . '', ['decimal', 'float', 'boolean', 'integer'])) {
-
-                        $type    = $fieldAttrs['type'] . '';
-                        $typeMap = [
-                            'decimal' => 'float',
-                            'float'   => 'float',
-                            'boolean' => 'bool',
-                            'integer' => 'integer',
-                        ];
-
-                        $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'Type');
-
-                        $optionE = $dom->createElement('option', $typeMap[$type]);
-                        $optionE->setAttribute('name', 'type');
-                        $constraintE->appendChild($optionE);
-
-                        $propertyE->appendChild($constraintE);
-
-                        $classE->appendChild($propertyE);
-
-                        $constrainsFields[] = $constrains[] = $constraintE;
-                    }
-
-                    if (is_numeric($fieldAttrs['length'] . '')) {
-
-                        if($fieldAttrs['type'] == 'dateinterval') {
-                            continue;
-                        }
-
-                        $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'Length');
-
-                        $optionE = $dom->createElement('option', $fieldAttrs['length'] . '');
-                        $optionE->setAttribute('name', 'max');
-
-                        $constraintE->appendChild($optionE);
-
-                        $propertyE->appendChild($constraintE);
-
-                        $classE->appendChild($propertyE);
-
-                        $constrainsFields[] = $constrains[] = $constraintE;
-                    }
-                }
-
-                foreach ($model->entity->{'one-to-one'} as $field) {
-
-                    $fieldAttrs = $field->attributes();
-
-                    $propertyE = $dom->createElement('property');
-                    $fieldType = '\\'.$fieldAttrs['target-entity'].'';
-                    $fieldType = preg_replace('/^\\\/', '\\', $fieldType);
-                    $fieldName = $fieldAttrs['field'].'';
-
-                    $propertyE->setAttribute('name', $fieldName);
-
-                    $joinFieldAttrs = $field->{'join-columns'}->{'join-column'}->attributes();
-
-                    if ($joinFieldAttrs['nullable'] == 'false') {
-
-                        $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'NotBlank');
-                        $propertyE->appendChild($constraintE);
-                    }
+                foreach($uniqueConstraints->{'unique-constraint'} as $uniqueConstraint) {
+                    $columns = $uniqueConstraint->attributes()['columns'];
+                    $columns = explode(',', $columns);
+                    array_walk($columns, function(&$v) {
+                        $v = trim($v);
+                        $v  = preg_replace('/_id$/', '', $v);
+                        $v  = preg_replace('/_/', ' ', $v);
+                        $v = ucwords($v);
+                        $v = lcfirst($v);
+                        $v  = preg_replace('/\s/', '', $v);
+                    });
 
                     $constraintE = $dom->createElement('constraint');
-                    $constraintE->setAttribute('name', 'Type');
+                    $constraintE->setAttribute('name', 'Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity');
 
-                    $optionE = $dom->createElement('option', $fieldType);
-                    $optionE->setAttribute('name', 'type');
+                    $optionE = $dom->createElement('option');
+                    $optionE->setAttribute('name', 'fields');
                     $constraintE->appendChild($optionE);
+
+                    foreach($columns as $column) {
+                        $valueE = $dom->createElement('value', $column);
+                        $optionE->appendChild($valueE);
+                    }
+
+                    $objName = 'Object';
+                    if(preg_match('/[^\\\]*?$/', $className, $m)) {
+                        $objName = $m[0];
+                    }
+
+                    $columns = implode(', ', $columns);
+                    $optionE = $dom->createElement('option', "$objName (with $columns) already exists.");
+                    $optionE->setAttribute('name', 'message');
+                    $constraintE->appendChild($optionE);
+
+                    $classE->appendChild($constraintE);
+
+                    $constrainsFields[] = $constrains[] = $constraintE;
+                }
+            }
+
+            $constrains = [];
+
+            $fields = $this->getSortedFields($model->entity->field);
+
+            foreach ($fields as $field) {
+
+                $constrainsFields = [];
+
+                $fieldAttrs = $field->attributes();
+
+                $propertyE = $dom->createElement('property');
+                $fieldName = $fieldAttrs['name'] . '';
+                $propertyE->setAttribute('name', $fieldName);
+
+                if ($fieldAttrs['nullable'] == 'false') {
+
+                    $constraintE = $dom->createElement('constraint');
+                    $constraintE->setAttribute('name', 'NotBlank');
+                    $propertyE->appendChild($constraintE);
+
+                    $classE->appendChild($propertyE);
+
+                    $constrainsFields[] = $constrains[] = $constraintE;
+                }
+
+                if (in_array($fieldAttrs['type'], ['dateinterval', 'date', 'datetime'])) {
+
+                    $constraintE = $dom->createElement('constraint');
+
+                    if($fieldAttrs['type'] == 'dateinterval') {
+                        $constraintE->setAttribute('name', '\LP\CoreBundle\Validator\Constraints\DateInterval');
+
+                    } else if ($fieldAttrs['type'] == 'datetime') {
+                        $constraintE->setAttribute('name', 'DateTime');
+                    } else if ($fieldAttrs['type'] == 'date') {
+                        $constraintE->setAttribute('name', 'Date');
+                    }
 
                     $propertyE->appendChild($constraintE);
 
                     $classE->appendChild($propertyE);
 
-                    $classE->appendChild($propertyE);
+                    $constrainsFields[] = $constrains[] = $constraintE;
                 }
 
-                foreach ($model->entity->{'many-to-one'} as $field) {
+                if (in_array($fieldAttrs['type'] . '', ['decimal', 'float', 'boolean', 'integer'])) {
 
-                    $fieldAttrs = $field->attributes();
-
-                    $propertyE = $dom->createElement('property');
-                    $fieldType = '\\'.$fieldAttrs['target-entity'].'';
-                    $fieldType = preg_replace('/^\\\/', '\\', $fieldType);
-                    $fieldName = $fieldAttrs['field'].'';
-
-                    $propertyE->setAttribute('name', $fieldName);
-
-                    $joinFieldAttrs = $field->{'join-columns'}->{'join-column'}->attributes();
-
-                    if ($joinFieldAttrs['nullable'] == 'false') {
-
-                        $constraintE = $dom->createElement('constraint');
-                        $constraintE->setAttribute('name', 'NotBlank');
-                        $propertyE->appendChild($constraintE);
-                    }
+                    $type    = $fieldAttrs['type'] . '';
+                    $typeMap = [
+                        'decimal' => 'float',
+                        'float'   => 'float',
+                        'boolean' => 'bool',
+                        'integer' => 'integer',
+                    ];
 
                     $constraintE = $dom->createElement('constraint');
                     $constraintE->setAttribute('name', 'Type');
 
-                    $optionE = $dom->createElement('option', $fieldType);
+                    $optionE = $dom->createElement('option', $typeMap[$type]);
                     $optionE->setAttribute('name', 'type');
                     $constraintE->appendChild($optionE);
 
@@ -585,9 +504,103 @@ XML;
                     $constrainsFields[] = $constrains[] = $constraintE;
                 }
 
-                if (count($constrains)) {
-                    $root->appendChild($classE);
+                if (is_numeric($fieldAttrs['length'] . '')) {
+
+                    if($fieldAttrs['type'] == 'dateinterval') {
+                        continue;
+                    }
+
+                    $constraintE = $dom->createElement('constraint');
+                    $constraintE->setAttribute('name', 'Length');
+
+                    $optionE = $dom->createElement('option', $fieldAttrs['length'] . '');
+                    $optionE->setAttribute('name', 'max');
+
+                    $constraintE->appendChild($optionE);
+
+                    $propertyE->appendChild($constraintE);
+
+                    $classE->appendChild($propertyE);
+
+                    $constrainsFields[] = $constrains[] = $constraintE;
                 }
+            }
+
+            $fields = $this->getSortedFields($model->entity->{'one-to-one'});
+
+            foreach ($fields as $field) {
+
+                $fieldAttrs = $field->attributes();
+
+                $propertyE = $dom->createElement('property');
+                $fieldType = '\\'.$fieldAttrs['target-entity'].'';
+                $fieldType = preg_replace('/^\\\/', '\\', $fieldType);
+                $fieldName = $fieldAttrs['field'].'';
+
+                $propertyE->setAttribute('name', $fieldName);
+
+                $joinFieldAttrs = $field->{'join-columns'}->{'join-column'}->attributes();
+
+                if ($joinFieldAttrs['nullable'] == 'false') {
+
+                    $constraintE = $dom->createElement('constraint');
+                    $constraintE->setAttribute('name', 'NotBlank');
+                    $propertyE->appendChild($constraintE);
+                }
+
+                $constraintE = $dom->createElement('constraint');
+                $constraintE->setAttribute('name', 'Type');
+
+                $optionE = $dom->createElement('option', $fieldType);
+                $optionE->setAttribute('name', 'type');
+                $constraintE->appendChild($optionE);
+
+                $propertyE->appendChild($constraintE);
+
+                $classE->appendChild($propertyE);
+
+                $classE->appendChild($propertyE);
+            }
+
+            $fields = $this->getSortedFields($model->entity->{'many-to-one'});
+
+            foreach ($fields as $field) {
+
+                $fieldAttrs = $field->attributes();
+
+                $propertyE = $dom->createElement('property');
+                $fieldType = '\\'.$fieldAttrs['target-entity'].'';
+                $fieldType = preg_replace('/^\\\/', '\\', $fieldType);
+                $fieldName = $fieldAttrs['field'].'';
+
+                $propertyE->setAttribute('name', $fieldName);
+
+                $joinFieldAttrs = $field->{'join-columns'}->{'join-column'}->attributes();
+
+                if ($joinFieldAttrs['nullable'] == 'false') {
+
+                    $constraintE = $dom->createElement('constraint');
+                    $constraintE->setAttribute('name', 'NotBlank');
+                    $propertyE->appendChild($constraintE);
+                }
+
+                $constraintE = $dom->createElement('constraint');
+                $constraintE->setAttribute('name', 'Type');
+
+                $optionE = $dom->createElement('option', $fieldType);
+                $optionE->setAttribute('name', 'type');
+                $constraintE->appendChild($optionE);
+
+                $propertyE->appendChild($constraintE);
+
+                $classE->appendChild($propertyE);
+
+                $constrainsFields[] = $constrains[] = $constraintE;
+            }
+
+            if (count($constrains)) {
+
+                $root->appendChild($classE);
             }
         }
 
@@ -609,6 +622,19 @@ XML;
         file_put_contents($validationFile, $xmlString);
     }
 
+    private function getSortedFields($fieldsIn)
+    {
+        $fields = [];
+        foreach ($fieldsIn as $field) {
+            $fields[] = $field;
+        }
+
+        usort($fields, function($a, $b) {
+            return strcmp($a->attributes()['name'], $b->attributes()['name']);
+        });
+
+        return $fields;
+    }
     /**
      * @param $file
      */
