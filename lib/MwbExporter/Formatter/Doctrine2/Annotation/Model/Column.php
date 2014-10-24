@@ -135,7 +135,7 @@ class Column extends BaseColumn
         }
 
 
-        if(in_array($asAnnotation['type'], ['datetime', 'dateinterval'])) {
+        if(in_array($asAnnotation['type'], ['datetime', 'dateinterval', 'datetime_with_millisecond'])) {
             $nativeType = $converter->getDataType($asAnnotation['type']);
             if(!$this->isNotNull()) {
                 $nativeType = 'null|'.$nativeType;
@@ -400,6 +400,7 @@ class Column extends BaseColumn
                     $hint = 'array ';
                 break;
 
+            case 'datetime_with_millisecond':
             case 'datetime':
                     $nativeType = $converter->getDataType('datetime');
                     $hint = $nativeType.' ';

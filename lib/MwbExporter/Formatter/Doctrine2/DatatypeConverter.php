@@ -90,8 +90,10 @@ class DatatypeConverter extends BaseDatatypeConverter
             static::USERDATATYPE_DEC            => 'decimal',
             static::USERDATATYPE_CHARACTER      => 'string',
 
-            static::USERDATATYPE_DATETIME_NATIVE      => '\DateTime',
-            static::USERDATATYPE_DATEINTERVAL_NATIVE  => '\DateInterval',
+            static::USERDATATYPE_DATETIME_NATIVE                  => '\DateTime',
+            static::USERDATATYPE_DATETIME_WITH_MILLISECOND_NATIVE => '\DateTime',
+            static::USERDATATYPE_DATEINTERVAL_NATIVE              => '\DateInterval',
+
         ));
     }
 

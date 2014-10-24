@@ -429,7 +429,7 @@ class Table extends BaseTable
         foreach ($columns as $column) {
             $columnKey = $column->getPhpColumnName();
 
-            if(in_array($column->asAnnotation()['type'], ['dateinterval', 'datetime', 'date'])) {
+            if(in_array($column->asAnnotation()['type'], ['dateinterval', 'datetime', 'date', 'datetime_with_millisecond'])) {
 
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s.'' : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);

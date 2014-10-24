@@ -237,8 +237,8 @@ General options applied to all formatter.
 
     You can specify Doctrine lifecycleCallbacks options as a comment on a table. The will be generated into the Annotation.
 
-  * `{d:type}dateinterval{/d:type}` (applied to Field)
-
+   
+  * `{d:type}dateinterval|datetime_with_millisecond{/d:type}` (applied to Field)
     Force cast datetype
 
 
