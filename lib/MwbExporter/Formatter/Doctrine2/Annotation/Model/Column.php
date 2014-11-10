@@ -394,6 +394,8 @@ class Column extends BaseColumn
 
         $asAnnotation = $this->asAnnotation();
 
+        $defaultValue = null;
+
         switch($asAnnotation['type']) {
             case 'array':
                     $nativeType = $converter->getNativeType('array');
@@ -404,11 +406,13 @@ class Column extends BaseColumn
             case 'datetime':
                     $nativeType = $converter->getDataType('datetime');
                     $hint = $nativeType.' ';
+                    $defaultValue = ' = null';
                 break;
 
             case 'dateinterval':
                     $nativeType = $converter->getDataType('dateinterval');
                     $hint = $nativeType.' ';
+                    $defaultValue = ' = null';
                 break;
 
             case 'string_array':
@@ -424,10 +428,13 @@ class Column extends BaseColumn
             default;
         }
 
-        if($this->isNotNull()) {
-            $defaultValue = '';
-        } else {
-            $defaultValue = ' = null'; //allow null for form working
+        if(is_null($defaultValue)) {
+
+            if($this->isNotNull()) {
+                $defaultValue = '';
+            } else {
+                $defaultValue = ' = null'; //allow null for form working
+            }
         }
 
         return isset($nativeType)?[$nativeType, $hint, $defaultValue]:null;
