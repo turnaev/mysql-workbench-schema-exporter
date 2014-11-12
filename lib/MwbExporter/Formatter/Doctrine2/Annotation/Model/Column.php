@@ -717,11 +717,13 @@ class Column extends BaseColumn
                 if($filedNameMapped = $this->local->getForeign()->parseComment('field-mapped')) {
 
                     $funactionNamePart = ucfirst(Inflector::singularize($filedNameMapped));
+                    $funactionNamePartPref = $funactionNamePart;
                     $codeSetPart       = $filedNameMapped;
                     $codeGetPart       = $filedNameMapped;
 
                 } else {
                     $funactionNamePart = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName());
+                    $funactionNamePartPref = '';
                     $codeSetPart       = lcfirst($this->local->getReferencedTable()->getModelName());
                     $codeGetPart       = lcfirst($this->local->getReferencedTable()->getModelName());
                 }
@@ -737,7 +739,7 @@ class Column extends BaseColumn
                     ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.$codeSetPart.' = null)')
                     ->write('{')
                     ->indent()
-                        ->writeIf(!$unidirectional, '$'.$codeSetPart.'->set'.$this->columnNameBeautifier($this->local->getOwningTable()->getModelName()).'($this);')
+                        ->writeIf(!$unidirectional, '$'.$codeSetPart.'->set'.$funactionNamePartPref.$this->columnNameBeautifier($this->local->getOwningTable()->getModelName()).'($this);')
                         ->write('$this->'.$codeSetPart.' = $'.$codeSetPart.';')
                         ->write('')
                         ->write('return $this;')
