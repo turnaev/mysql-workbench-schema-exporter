@@ -690,7 +690,7 @@ XML;
 
 namespace ${namespace}\Repository;
 
-use ${baseNamespace}\DoctrineBundle\ORM\EntityRepository;
+use Common\DoctrineBundle\ORM\EntityRepository;
 
 class ${className} extends EntityRepository
 {
