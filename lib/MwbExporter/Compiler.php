@@ -215,8 +215,8 @@ class Compiler
         $toFileContent   = preg_replace('/\* @var datetime/', '* @var \DateTime', $toFileContent);
         $toFileContent   = preg_replace('/\* @param datetime/', '* @param \DateTime', $toFileContent);
         $toFileContent   = preg_replace('/\* @return datetime/', '* @return \DateTime', $toFileContent);
-        $toFileContent   = preg_replace('/\\\DateTime/', '\LP\CoreBundle\Type\DateTime', $toFileContent);
-        $toFileContent   = preg_replace('/\\\DateInterval/', '\LP\CoreBundle\Type\DateInterval', $toFileContent);
+        $toFileContent   = preg_replace('/\\\DateTime/', '\Common\CoreBundle\Type\DateTime', $toFileContent);
+        $toFileContent   = preg_replace('/\\\DateInterval/', '\Common\CoreBundle\Type\DateInterval', $toFileContent);
 
         file_put_contents($modelFile, $toFileContent);
 
