@@ -215,8 +215,6 @@ class Compiler
         $toFileContent   = preg_replace('/\* @var datetime/', '* @var \DateTime', $toFileContent);
         $toFileContent   = preg_replace('/\* @param datetime/', '* @param \DateTime', $toFileContent);
         $toFileContent   = preg_replace('/\* @return datetime/', '* @return \DateTime', $toFileContent);
-        $toFileContent   = preg_replace('/\\\DateTime/', '\Common\CoreBundle\Type\DateTime', $toFileContent);
-        $toFileContent   = preg_replace('/\\\DateInterval/', '\Common\CoreBundle\Type\DateInterval', $toFileContent);
 
         file_put_contents($modelFile, $toFileContent);
 
@@ -449,7 +447,7 @@ XML;
                 $fieldName = $fieldAttrs['name'] . '';
                 $propertyE->setAttribute('name', $fieldName);
 
-                if ($fieldAttrs['nullable'] == 'false') {
+                if ($fieldAttrs['nullable'] == 'false' && !in_array($fieldAttrs['type'], ['boolean', 'bool'])) {
 
                     $constraintE = $dom->createElement('constraint');
                     $constraintE->setAttribute('name', 'NotBlank');
@@ -465,7 +463,7 @@ XML;
                     $constraintE = $dom->createElement('constraint');
 
                     if($fieldAttrs['type'] == 'dateinterval') {
-                        $constraintE->setAttribute('name', '\LP\CoreBundle\Validator\Constraints\DateInterval');
+                        $constraintE->setAttribute('name', 'DateInterval');
 
                     } else if ($fieldAttrs['type'] == 'datetime') {
                         $constraintE->setAttribute('name', 'DateTime');
