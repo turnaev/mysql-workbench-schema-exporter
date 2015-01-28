@@ -134,6 +134,7 @@ class Compiler
                     if (!$fileinfo->isDot()) {
 
                         $fromXmlFile = $configFromDirXml . '/' . $fileinfo->getFilename();
+
                         $this->changeXmlMetaModel($fromXmlFile, $configToDirXml);
                     }
                 }
@@ -229,7 +230,8 @@ class Compiler
     {
         $fromFileContent = file_get_contents($fromXmlFile);
 
-        if (preg_match('/.*Model\.(.*)/', pathinfo($fromXmlFile)['filename'], $m)) {
+        if (preg_match('/.*\.Model\.(.*?)$/', pathinfo($fromXmlFile)['filename'], $m)) {
+
             $toXmlFile = $configToDirXml . '/' . $m[1] . '.xml';
 
             $toFileContent   = preg_replace('/Model\\\/', '', $fromFileContent);

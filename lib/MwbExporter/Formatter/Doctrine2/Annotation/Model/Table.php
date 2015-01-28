@@ -342,15 +342,12 @@ class Table extends BaseTable
         } else if($this->getColumns()->columnExits('id')) {
 
             $column = $this->getColumns()->getColumnByName('id');
+
         } else {
             $throwException = true;
+            $column         = null;
         }
 
-        if(!$this->getColumns()->columnExits('name')) {
-
-            !$this->getColumns()->columnExits('id');
-            $throwException = true;
-        }
 
         //* @throws MethodNotImplementedException
         $writer
