@@ -460,14 +460,14 @@ XML;
                     $constrainsFields[] = $constrains[] = $constraintE;
                 }
 
-                if (in_array($fieldAttrs['type'], ['dateinterval', 'date', 'datetime'])) {
+                if (in_array($fieldAttrs['type'], ['dateinterval', 'date', 'datetime', 'datetime_with_millisecond'])) {
 
                     $constraintE = $dom->createElement('constraint');
 
                     if($fieldAttrs['type'] == 'dateinterval') {
                         $constraintE->setAttribute('name', 'DateInterval');
 
-                    } else if ($fieldAttrs['type'] == 'datetime') {
+                    } else if (in_array($fieldAttrs['type'], ['datetime', 'datetime_with_millisecond'])) {
                         $constraintE->setAttribute('name', 'DateTime');
                     } else if ($fieldAttrs['type'] == 'date') {
                         $constraintE->setAttribute('name', 'Date');
