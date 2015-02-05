@@ -420,15 +420,30 @@ class Table extends BaseTable
             $maxLen = max($maxLen, strlen($column->getPhpColumnName()));
         }
 
-        $maxLen+=2;
+        $maxLen    += 2;
         $columnsArr = [];
 
         foreach ($columns as $column) {
             $columnKey = $column->getPhpColumnName();
 
-            if(in_array($column->asAnnotation()['type'], ['dateinterval', 'datetime', 'date', 'datetime_with_millisecond'])) {
+            if(in_array($column->asAnnotation()['type'], ['datetime'])) {
 
-                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s.'' : \$this->%s";
+                $format       = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d H:i:s') : \$this->%s";
+                $columnsArr[] = sprintf($format, '\'' . $columnKey . '\'', $columnKey, $columnKey, $columnKey);
+
+            } else if(in_array($column->asAnnotation()['type'], ['datetime_with_millisecond'])) {
+
+                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d H:i:s.u') : \$this->%s";
+                $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
+
+            } else if(in_array($column->asAnnotation()['type'], ['date'])) {
+
+                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d') : \$this->%s";
+                $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
+
+            } else if(in_array($column->asAnnotation()['type'], ['dateinterval'])) {
+
+                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('P%y%m%dT%h%i%s') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
 
             } else {
