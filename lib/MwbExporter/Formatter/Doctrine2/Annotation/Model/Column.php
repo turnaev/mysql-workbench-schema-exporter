@@ -458,18 +458,21 @@ class Column extends BaseColumn
             }
         }
 
+        $propName = $varName =$this->getPhpColumnName();
+        $funactionName = $this->columnNameBeautifier($this->getColumnName());
+
         $writer
             // setter
             ->write('/**')
-            ->write(' * Set the value of '.$this->getPhpColumnName().'.')
+            ->write(' * Set the value of '.$varName.'.')
             ->write(' *')
-            ->write(' * @param '.$nullType.$nativeType.' $'.$this->getPhpColumnName())
+            ->write(' * @param '.$nullType.$nativeType.' $'.$varName)
             ->write(' * @return '.$table->getNamespace())
             ->write(' */')
-            ->write('public function set'.$this->columnNameBeautifier($this->getColumnName()).'('.$hint.'$'.$this->getPhpColumnName().$defaultValue.')')
+            ->write('public function set'.$funactionName.'('.$hint.'$'.$varName.$defaultValue.')')
             ->write('{')
             ->indent()
-                ->write('$this->'.$this->getPhpColumnName().' = $'.$this->getPhpColumnName().';')
+                ->write('$this->'.$propName.' = $'.$varName.';')
                 ->write('')
                 ->write('return $this;')
             ->outdent()
@@ -478,14 +481,14 @@ class Column extends BaseColumn
 
             // getter
         $writer->write('/**')
-            ->write(' * Get the value of '.$this->getPhpColumnName().'.')
+            ->write(' * Get the value of '.$varName.'.')
             ->write(' *')
             ->write(' * @return '.$nullType.$nativeType)
             ->write(' */')
-            ->write('public function get'.$this->columnNameBeautifier($this->getColumnName()).'()')
+            ->write('public function get'.$funactionName.'()')
             ->write('{')
             ->indent()
-                ->write('return $this->'.$this->getPhpColumnName().';')
+                ->write('return $this->'.$propName.';')
             ->outdent()
             ->write('}')
             ->write('')
@@ -513,45 +516,60 @@ class Column extends BaseColumn
                 $related = $this->getRelatedName($foreign);
                 $related_text = $this->getRelatedName($foreign, false);
 
-                if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
+                if($v = $foreign->getForeign()->parseComment('field-inversed')) {
+                    //v($v);
+                    $propName =   $v;
+                    $varName = Inflector::singularize($v);
 
-                    $funactionNamePart    = ucfirst(Inflector::singularize($filedNameInversed));
-                    $funactionGetNamePart = ucfirst($filedNameInversed);
-
-                    $codeAddPart       = $filedNameInversed;
-                    $codeRemovePart    = $filedNameInversed;
-                    $codeGetPart       = $filedNameInversed;
+                    $funactionName    = ucfirst(Inflector::singularize($propName));
+                    $funactionGetName = ucfirst($v);
 
                 } else {
 
-                    $funactionNamePart    = $this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related;
-                    $funactionGetNamePart = $this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                    $funactionName    = $this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related;
+                    $funactionGetName = $this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
 
-                    $codeAddPart       = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
-                    $codeRemovePart    = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
-                    $codeGetPart       = lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                    $propName =  lcfirst(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
+                    $varName = lcfirst($foreign->getOwningTable()->getModelName());
                 }
 
-                if($filedNameMapped = $foreign->getForeign()->parseComment('field-mapped')) {
-                    $codeSetMappedPart = ucfirst($filedNameMapped);
+                if($v = $foreign->getForeign()->parseComment('field-mapped')) {
+                    $funactionSetName = ucfirst($v);
                 } else {
-                    $codeSetMappedPart = ucfirst($table->getModelName());
+                    $funactionSetName = ucfirst($table->getModelName());
                 }
-
                 $typeEntity = $foreign->getOwningTable()->getNamespace();
+
+                $nullType = 'null|';
+                $defaultValue = ' = null';
+
+//                ->write('if($'.$varName.') {')
+//                    ->indent()
+//                    ->writeIf(!$unidirectional, '$'.$varName.'->set'.$setterFunactionName.'($this);')
+//                    ->outdent()
+//                    ->write('}')
+//                    ->write('$this->'.$propName.' = $'.$varName.';')
+//                    ->write('')
+//                    ->write('return $this;')
+
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Add '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity to collection (one to many).')
+                    ->write(' * Add '.trim($varName.' '.$related_text). ' entity to collection (one to many).')
                     ->write(' *')
-                    ->write(' * @param '.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()))
+                    ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                ->write('public function add'.$funactionNamePart.'('.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
+                ->write('public function add'.$funactionName.'('.$typeEntity.' $'.$varName.$defaultValue.')')
                     ->write('{')
                     ->indent()
-                        ->write('$'.lcfirst($foreign->getOwningTable()->getModelName()).'->set'.$codeSetMappedPart.'($this);')
-                        ->write('$this->'.$codeAddPart.'[] = $'.lcfirst($foreign->getOwningTable()->getModelName()).';')
+                        ->write('if($'.$varName.') {')
+                            ->indent()
+                                ->write('$'.$varName.'->set'.$funactionSetName.'($this);')
+                                ->write('$this->'.$propName.'[] = $'.$varName.';')
+
+                            ->outdent()
+                        ->write('}')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -560,15 +578,19 @@ class Column extends BaseColumn
 
                     // remove
                  ->write('/**')
-                    ->write(' * remove '.trim($foreign->getOwningTable()->getModelName().' '.$related_text). ' entity from collection (one to many).')
+                    ->write(' * remove '.trim($varName.' '.$related_text). ' entity from collection (one to many).')
                     ->write(' *')
-                    ->write(' * @param '.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()))
+                    ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function remove'.$funactionNamePart.'('.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()).')')
+                    ->write('public function remove'.$funactionName.'('.$typeEntity.' $'.$varName.$defaultValue.')')
                         ->write('{')
                         ->indent()
-                            ->write('$this->'.$codeRemovePart.'->removeElement($'.lcfirst($foreign->getOwningTable()->getModelName()).');')
+                            ->write('if($'.$varName.') {')
+                            ->indent()
+                                ->write('$this->'.$propName.'->removeElement($'.$varName.');')
+                            ->outdent()
+                            ->write('}')
                             ->write('')
                             ->write('return $this;')
                         ->outdent()
@@ -577,34 +599,29 @@ class Column extends BaseColumn
 
                     // getter
                 ->write('/**')
-                    ->write(' * Get '.trim($foreign->getOwningTable()->getModelName().' '.$related_text).' entity collection (one to many).')
+                    ->write(' * Get '.trim($propName.' '.$related_text).' collection (one to many).')
                     ->write(' *')
-                    ->write(' * @return '.$table->getCollectionInterface().'|'.$foreign->getOwningTable()->getNamespace().'[]')
+                    ->write(' * @return '.$table->getCollectionInterface().'|'.$typeEntity.'[]')
                     ->write(' */')
-                    ->write('public function get'.$funactionGetNamePart.'()')
+                    ->write('public function get'.$funactionGetName.'()')
                         ->write('{')
                         ->indent()
-                            ->write('return $this->'.$codeGetPart.';')
+                            ->write('return $this->'.$propName.';')
                         ->outdent()
                         ->write('}')
                     ;
 
             } else { // OneToOne
 
-
                 if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
 
-                    $funactionNamePart    = ucfirst(Inflector::singularize($filedNameInversed));
-
-                    $codeSetPart       = $filedNameInversed;
-                    $codeGetPart       = $filedNameInversed;
+                    $funactionName = ucfirst(Inflector::singularize($filedNameInversed));
+                    $propName = $varName = $filedNameInversed;
 
                 } else {
 
-                    $funactionNamePart    = ucfirst($this->columnNameBeautifier($foreign->getOwningTable()->getModelName()));
-
-                    $codeSetPart       = lcfirst($foreign->getOwningTable()->getModelName());
-                    $codeGetPart       = lcfirst($foreign->getOwningTable()->getModelName());
+                    $funactionName = ucfirst($this->columnNameBeautifier($foreign->getOwningTable()->getModelName()));
+                    $propName = $varName  = lcfirst($foreign->getOwningTable()->getModelName());
                 }
 
                 $typeEntity = $foreign->getOwningTable()->getNamespace();
@@ -612,15 +629,15 @@ class Column extends BaseColumn
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Set '.$funactionNamePart.' entity (one to one).')
+                    ->write(' * Set '.$varName.' entity (one to one).')
                     ->write(' *')
-                    ->write(' * @param '.$typeEntity.' $'.lcfirst($foreign->getOwningTable()->getModelName()))
+                    ->write(' * @param '.$typeEntity.' $'.$propName)
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
-                    ->write('public function set'.$funactionNamePart.'('.$typeEntity.' $'.$codeSetPart.')')
+                    ->write('public function set'.$funactionName.'('.$typeEntity.' $'.$varName.')')
                     ->write('{')
                     ->indent()
-                        ->write('$this->'.$codeSetPart.' = $'.$codeSetPart.';')
+                        ->write('$this->'.$propName.' = $'.$varName.';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -628,14 +645,14 @@ class Column extends BaseColumn
                     ->write('')
                     // getter
                     ->write('/**')
-                    ->write(' * Get '.$funactionNamePart.' entity (one to one).')
+                    ->write(' * Get '.$varName.' entity (one to one).')
                     ->write(' *')
-                    ->write(' * @return '.$foreign->getOwningTable()->getNamespace())
+                    ->write(' * @return '.$typeEntity)
                     ->write(' */')
-                    ->write('public function get'.$funactionNamePart.'()')
+                    ->write('public function get'.$funactionName.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.$codeGetPart.';')
+                        ->write('return $this->'.$propName.';')
                     ->outdent()
                     ->write('}')
                 ;
@@ -660,11 +677,11 @@ class Column extends BaseColumn
 
                 if($filedNameMapped = $this->local->getForeign()->parseComment('field-mapped')) {
                     $funactionName = ucfirst(Inflector::singularize($filedNameMapped));
-                    $varName       = $filedNameMapped;
+                    $propName = $varName       = $filedNameMapped;
 
                 } else {
                     $funactionName = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).$related;
-                    $varName       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
+                    $propName = $varName       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
                 }
 
                 if(!$this->isNotNull()) {
@@ -680,7 +697,7 @@ class Column extends BaseColumn
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Set '.$varName.$related_text.' entity (many to one).')
+                    ->write(' * Set '.trim($varName.' '.$related_text).' entity (many to one).')
                     ->write(' *')
                     ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
                     ->write(' * @return '.$table->getNamespace())
@@ -688,7 +705,7 @@ class Column extends BaseColumn
                     ->write('public function set'.$funactionName.'('.$typeEntity.' $'.$varName.$defaultValue.')')
                     ->write('{')
                     ->indent()
-                        ->write('$this->'.$varName.' = $'.$varName.';')
+                        ->write('$this->'.$propName.' = $'.$varName.';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -696,14 +713,14 @@ class Column extends BaseColumn
                     ->write('')
                     // getter
                     ->write('/**')
-                    ->write(' * Get '.$varName.$related_text.' entity (many to one).')
+                    ->write(' * Get '.trim($varName.' '.$related_text).' entity (many to one).')
                     ->write(' *')
-                    ->write(' * @return '.$nullType.$this->local->getReferencedTable()->getNamespace())
+                    ->write(' * @return '.$nullType.$typeEntity)
                     ->write(' */')
                     ->write('public function get'.$funactionName.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.$varName.';')
+                        ->write('return $this->'.$propName.';')
                     ->outdent()
                     ->write('}')
                     ->write('')
@@ -714,22 +731,24 @@ class Column extends BaseColumn
                 $modelName = $this->local->getReferencedTable()->getModelName();
 
                 if($v = $this->local->getForeign()->parseComment('field-mapped')) {
-
-                    $varName            = $v;
-                    $funactionName      = $this->columnNameBeautifier(Inflector::singularize($v));
-                    $setterFunactionName = $this->columnNameBeautifier($this->local->getForeign()->parseComment('field-inversed'));
+                    $propName = $varName       = $v;
+                    $funactionName = $this->columnNameBeautifier(Inflector::singularize($v));
 
                 } else {
-                    $varName            = lcfirst($this->local->getReferencedTable()->getModelName());
-                    $funactionName      = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName());
-                    $setterFunactionName  = $this->columnNameBeautifier($this->local->getOwningTable()->getModelName());
+                    $propName = $varName       = lcfirst($this->local->getReferencedTable()->getModelName());
+                    $funactionName = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName());
+                }
 
+                if($v = $this->local->getForeign()->parseComment('field-inversed')) {
+                    $setterFunactionName = $this->columnNameBeautifier($v);
+                } else {
+                    $setterFunactionName  = $this->columnNameBeautifier($this->local->getOwningTable()->getModelName());
                 }
 
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Set '.$varName.' entity (one to one).')
+                    ->write(' * Set '.$propName.' entity (one to one).')
                     ->write(' *')
                     ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
                     ->write(' * @return '.$table->getNamespace())
@@ -742,7 +761,7 @@ class Column extends BaseColumn
                             ->writeIf(!$unidirectional, '$'.$varName.'->set'.$setterFunactionName.'($this);')
                         ->outdent()
                         ->write('}')
-                        ->write('$this->'.$varName.' = $'.$varName.';')
+                        ->write('$this->'.$propName.' = $'.$varName.';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
@@ -750,14 +769,14 @@ class Column extends BaseColumn
                     ->write('')
                     // getter
                     ->write('/**')
-                    ->write(' * Get '.$modelName.' entity (one to one).')
+                    ->write(' * Get '.$propName.' entity (one to one).')
                     ->write(' *')
                     ->write(' * @return '.$nullType.$typeEntity)
                     ->write(' */')
                     ->write('public function get'.$funactionName.'()')
                     ->write('{')
                     ->indent()
-                        ->write('return $this->'.$varName.';')
+                        ->write('return $this->'.$propName.';')
                     ->outdent()
                     ->write('}')
                     ->write('')
