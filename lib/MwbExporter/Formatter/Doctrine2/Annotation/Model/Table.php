@@ -443,7 +443,7 @@ class Table extends BaseTable
 
             } else if(in_array($column->asAnnotation()['type'], ['dateinterval'])) {
 
-                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('P%y%m%dT%h%i%s') : \$this->%s";
+                $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('P%%y%%m%%dT%%h%%i%%s') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
 
             } else {
