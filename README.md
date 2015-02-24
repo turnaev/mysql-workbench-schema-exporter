@@ -1,6 +1,6 @@
 forked from johmue/mysql-workbench-schema-exporter.
 Supported only Doctrine 2.0
-README  
+README   
 ======
 
 ATTENTION
