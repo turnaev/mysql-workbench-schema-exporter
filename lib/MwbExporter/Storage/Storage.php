@@ -47,7 +47,8 @@ abstract class Storage implements StorageInterface
     /**
      * Set the output directory.
      *
-     * @param string $dir  The directory name
+     * @param string $dir The directory name
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function setOutdir($dir)
@@ -71,8 +72,9 @@ abstract class Storage implements StorageInterface
 
     /**
      * Create directory.
-     * 
+     *
      * @param string $path
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function mkdir($path)
@@ -87,7 +89,8 @@ abstract class Storage implements StorageInterface
     /**
      * Check file if already exist and do backup if necessary.
      *
-     * @param string $filename  The file name
+     * @param string $filename The file name
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function getFile($filename)
@@ -124,11 +127,12 @@ abstract class Storage implements StorageInterface
     /**
      * Save the buffer content.
      *
-     * @param string $filename  The filename
-     * @param string $content   The content
+     * @param string $filename The filename
+     * @param string $content  The content
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
-    abstract function save($filename, $content);
+    abstract public function save($filename, $content);
 
     /**
      * Get result file name.

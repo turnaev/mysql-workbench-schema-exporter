@@ -103,7 +103,7 @@ class ForeignKey extends Base
 
     /**
      * Get local column.
-     * 
+     *
      * @return \MwbExporter\Model\Column
      */
     public function getLocal()
@@ -122,10 +122,11 @@ class ForeignKey extends Base
     }
 
     /**
-     * get the a boolean option for a relation
+     * get the a boolean option for a relation.
      *
      * @param $booleanValue string boolean option (true or false)
-     * @return boolean or null, if booleanValue was invalid
+     *
+     * @return bool or null, if booleanValue was invalid
      */
     private function getBooleanOption($booleanValue)
     {
@@ -144,12 +145,12 @@ class ForeignKey extends Base
     /**
      * Check relation if it is a many to one relation.
      *
-     * @return boolean
+     * @return bool
      */
     public function isManyToOne()
     {
         $o2o = $this->foreign->parseComment('o2o');
-        if(!is_null($o2o)) {
+        if (!is_null($o2o)) {
             $isMany = !(bool) $this->getBooleanOption($o2o);
         } else {
             $isMany = (bool) $this->parameters->get('many');

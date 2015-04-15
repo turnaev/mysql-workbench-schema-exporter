@@ -43,6 +43,7 @@ class Table extends BaseTable
      * Get the array collection class name.
      *
      * @param bool $useFQCN return full qualified class name
+     *
      * @return string
      */
     public function getCollectionClass($useFQCN = true)
@@ -59,6 +60,7 @@ class Table extends BaseTable
      * Get collection interface class name.
      *
      * @param bool $absolute Use absolute class name
+     *
      * @return string
      */
     public function getCollectionInterface($absolute = true)
@@ -70,6 +72,7 @@ class Table extends BaseTable
      * Get annotation prefix.
      *
      * @param string $annotation Annotation type
+     *
      * @return string
      */
     public function addPrefix($annotation = null)
@@ -85,7 +88,8 @@ class Table extends BaseTable
      * Quote identifier if necessary. Quoting is enabled if configuration `CFG_QUOTE_IDENTIFIER` is set
      * to true.
      *
-     * @param string $value  The identifier to quote
+     * @param string $value The identifier to quote
+     *
      * @return string
      */
     public function quoteIdentifier($value)
@@ -96,9 +100,10 @@ class Table extends BaseTable
     /**
      * Get annotation object.
      *
-     * @param string $annotation  The annotation name
-     * @param mixed  $content     The annotation content
-     * @param array  $options     The annotation options
+     * @param string $annotation The annotation name
+     * @param mixed  $content    The annotation content
+     * @param array  $options    The annotation options
+     *
      * @return \MwbExporter\Object\Annotation
      */
     public function getAnnotation($annotation, $content = null, $options = array())
@@ -115,7 +120,7 @@ class Table extends BaseTable
     {
         $indices = array();
         foreach ($this->indexes as $index) {
-            if($index->isIndex()){
+            if ($index->isIndex()) {
                 $indices[] = $this->getAnnotation('Index', $index->asAnnotation());
             }
         }
@@ -132,7 +137,7 @@ class Table extends BaseTable
     {
         $uniques = array();
         foreach ($this->indexes as $index) {
-            if($index->isUnique()){
+            if ($index->isUnique()) {
                 $uniques[] = $this->getAnnotation('UniqueConstraint', $index->asAnnotation());
             }
         }
@@ -143,10 +148,11 @@ class Table extends BaseTable
     /**
      * Get join annotation.
      *
-     * @param string $joinType    Join type
-     * @param string $entity      Entity name
-     * @param string $mappedBy    Column mapping
-     * @param string $inversedBy  Reverse column mapping
+     * @param string $joinType   Join type
+     * @param string $entity     Entity name
+     * @param string $mappedBy   Column mapping
+     * @param string $inversedBy Reverse column mapping
+     *
      * @return \MwbExporter\Object\Annotation
      */
     public function getJoinAnnotation($joinType, $entity, $mappedBy = null, $inversedBy = null)
@@ -157,30 +163,29 @@ class Table extends BaseTable
     /**
      * Get column join annotation.
      *
-     * @param string $local       Local column name
-     * @param string $foreign     Reference column name
-     * @param string $deleteRule  On delete rule
+     * @param string $local      Local column name
+     * @param string $foreign    Reference column name
+     * @param string $deleteRule On delete rule
+     *
      * @return \MwbExporter\Object\Annotation
      */
     public function getJoinColumnAnnotation($local, $foreign, $deleteRule = null)
     {
         return $this->getAnnotation('JoinColumn', array('name' => $local, 'referencedColumnName' => $foreign,
-                                                       'onDelete' => $this->getDocument()->getFormatter()->getDeleteRule($deleteRule)));
+                                                       'onDelete' => $this->getDocument()->getFormatter()->getDeleteRule($deleteRule), ));
     }
 
     public function writeTable(WriterInterface $writer)
     {
         if (!$this->isExternal()) {
-
-            if(strpos( $this->quoteIdentifier($this->getRawTableName()), '_2_') !== false ) {
+            if (strpos($this->quoteIdentifier($this->getRawTableName()), '_2_') !== false) {
                 return self::WRITE_M2M;
             }
-
 
             $namespace = $this->getEntityNamespace();
             if ($repositoryNamespace = $this->getDocument()->getConfig()->get(Formatter::CFG_REPOSITORY_NAMESPACE)) {
                 $base = $this->getDocument()->getConfig()->get(Formatter::CFG_BUNDELE_NAMESPACE_TO);
-                $repositoryNamespace = $base. '\\'.  $repositoryNamespace. '\\';
+                $repositoryNamespace = $base.'\\'.$repositoryNamespace.'\\';
             }
             $skipGetterAndSetter = $this->getDocument()->getConfig()->get(Formatter::CFG_SKIP_GETTER_SETTER);
             $serializableEntity  = $this->getDocument()->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_SERIALIZATION);
@@ -189,12 +194,13 @@ class Table extends BaseTable
             $lifecycleCallbacks  = $this->getLifecycleCallbacks();
 
             $comment = $this->getComment();
+
             $writer
                 ->open($this->getTableFileName())
                 ->write('<?php')
                 ->write('')
                 ->write('namespace %s;', $namespace)
-                ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
+                ->writeCallback(function (WriterInterface $writer, Table $_this = null) {
                     $_this->writeUsedClasses($writer);
                 })
                 ->write('/**')
@@ -208,7 +214,7 @@ class Table extends BaseTable
                 ->write('class '.$this->getModelName().(($implements = $this->getClassImplementations()) ? ' implements '.$implements : ''))
                 ->write('{')
                 ->indent()
-                    ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($skipGetterAndSetter, $serializableEntity, $toArrrabeEntity, $lifecycleCallbacks) {
+                    ->writeCallback(function (WriterInterface $writer, Table $_this = null) use ($skipGetterAndSetter, $serializableEntity, $toArrrabeEntity, $lifecycleCallbacks) {
                         $_this->writePreClassHandler($writer);
                         $_this->getColumns()->write($writer);
                         $_this->writeManyToMany($writer);
@@ -234,7 +240,6 @@ class Table extends BaseTable
                                     ->write('')
                                 ;
                             }
-
                         }
                         if ($serializableEntity) {
                             $_this->writeSerialization($writer);
@@ -245,7 +250,7 @@ class Table extends BaseTable
                         }
 
                         $_this->writeToString($writer);
-                        if($this->getColumns()->columnExits('id')) {
+                        if ($this->getColumns()->columnExits('id')) {
                             $writer->write('');
                             $_this->writeIsNew($writer);
                         }
@@ -267,13 +272,14 @@ class Table extends BaseTable
         $name = $column->getPhpColumnName();
         $writer
             ->write('/**')
-            ->write(' * check is new object')
-            ->write(' * @return boolean')
+            ->write(' * Check is new object.')
+            ->write(' *')
+            ->write(' * @return bool')
             ->write(' */')
             ->write('public function isNew()')
             ->write('{')
                 ->indent()
-                ->write("return !(boolean)\$this->{$name};")
+                ->write("return !(boolean) \$this->{$name};")
                 ->outdent()
             ->write('}')
         ;
@@ -285,7 +291,6 @@ class Table extends BaseTable
     {
         $uses = $this->getUsedClasses();
         if (count($uses)) {
-
             $writer->write('');
             foreach ($uses as $use) {
                 $writer->write('use %s;', $use);
@@ -300,14 +305,14 @@ class Table extends BaseTable
     {
         $writer
             ->write('/**')
-            ->write(' * only construct object')
+            ->write(' * Only construct object.')
             ->write(' */')
             ->write('public function __construct()')
             ->write('{')
             ->indent()
-                ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
+                ->writeCallback(function (WriterInterface $writer, Table $_this = null) {
 
-                    $maxLen=0;
+                    $maxLen = 0;
 
                     $fields = [];
                     foreach ($_this->getManyToManyRelations() as $relation) {
@@ -319,8 +324,8 @@ class Table extends BaseTable
                     $_this->getColumns()->writeArrayCollections($writer, $maxLen);
 
                     foreach ($fields as $field) {
-                       $format = "\$this->%-{$maxLen}s = new %s();";
-                       $writer->write($format, $field, $_this->getCollectionClass(false));
+                        $format = "\$this->%-{$maxLen}s = new %s();";
+                        $writer->write($format, $field, $_this->getCollectionClass(false));
                     }
                 })
             ->outdent()
@@ -335,52 +340,46 @@ class Table extends BaseTable
     {
         $throwException = false;
 
-        if($this->getColumns()->columnExits('name')) {
-
+        if ($this->getColumns()->columnExits('name')) {
             $column = $this->getColumns()->getColumnByName('name');
-
-        } else if($this->getColumns()->columnExits('id')) {
-
+        } elseif ($this->getColumns()->columnExits('id')) {
             $column = $this->getColumns()->getColumnByName('id');
-
         } else {
             $throwException = true;
             $column         = null;
         }
 
-
         //* @throws MethodNotImplementedException
         $writer
             ->write('/**')
-            ->write(' * to string entity')
+            ->write(' * To string entity.')
+            ->write(' *')
             ->write(' * @return string');
 
-        if($throwException) {
-            $writer->write(' * @throws \Symfony\Component\Intl\Exception\MethodNotImplementedException');
+        if ($throwException) {
+            $writer->write(' *')
+                   ->write(' * @throws \Symfony\Component\Intl\Exception\MethodNotImplementedException');
         }
 
         $writer->write(' */')
             ->write('public function __toString()')
             ->write('{');
 
-        if(!isset($column) && $throwException) {
-
+        if (!isset($column) && $throwException) {
             $writer->indent()
                 ->write('throw new \Symfony\Component\Intl\Exception\MethodNotImplementedException(__METHOD__);')
+                ->write('')
                 ->write("return '';")
                 ->outdent();
-
         } else {
-
             $name = $column->getPhpColumnName();
             $writer->indent()
-                ->write("return (string)\$this->{$name};")
+                ->write("return (string) \$this->{$name};")
                 ->outdent();
         }
 
         $writer->write('}')
         ;
-
 
         return $this;
     }
@@ -396,7 +395,7 @@ class Table extends BaseTable
             ->write('public function __sleep()')
             ->write('{')
             ->indent()
-                ->write('return [%s];', implode(', ', array_map(function($column) {
+                ->write('return [%s];', implode(', ', array_map(function ($column) {
                     return sprintf('\'%s\'', $column->getPhpColumnName());
                 }, $columns)))
             ->outdent()
@@ -411,12 +410,12 @@ class Table extends BaseTable
     {
         $columns = $this->getColumns()->getColumns();
 
-        $columns = array_filter($columns, function($column) {
+        $columns = array_filter($columns, function ($column) {
                 return !preg_match('/_id$/', $column->getColumnName());
             });
 
         $maxLen = 0;
-        foreach($columns as $column) {
+        foreach ($columns as $column) {
             $maxLen = max($maxLen, strlen($column->getPhpColumnName()));
         }
 
@@ -426,48 +425,43 @@ class Table extends BaseTable
         foreach ($columns as $column) {
             $columnKey = $column->getPhpColumnName();
 
-            if(in_array($column->asAnnotation()['type'], ['datetime'])) {
-
+            if (in_array($column->asAnnotation()['type'], ['datetime'])) {
                 $format       = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d H:i:s') : \$this->%s";
-                $columnsArr[] = sprintf($format, '\'' . $columnKey . '\'', $columnKey, $columnKey, $columnKey);
-
-            } else if(in_array($column->asAnnotation()['type'], ['datetime_with_millisecond'])) {
-
+                $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
+            } elseif (in_array($column->asAnnotation()['type'], ['datetime_with_millisecond'])) {
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d H:i:s.u') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
-
-            } else if(in_array($column->asAnnotation()['type'], ['date'])) {
-
+            } elseif (in_array($column->asAnnotation()['type'], ['date'])) {
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
-
-            } else if(in_array($column->asAnnotation()['type'], ['dateinterval'])) {
-
+            } elseif (in_array($column->asAnnotation()['type'], ['dateinterval'])) {
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('P%%yY%%mM%%dDT%%hH%%iI%%sS') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
-
             } else {
-
                 $format = "    %-{$maxLen}s => \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey);
             }
         }
 
+        $columnsArr = implode(",\n", $columnsArr);
+        $columnsArr = ($columnsArr) ? $columnsArr.',' : '';
+
         $writer
             ->write('/**')
-            ->write(' * get data as array')
+            ->write(' * Get data as array.')
+            ->write(' *')
             ->write(' * @return array')
             ->write(' */')
             ->write('public function toArray()')
             ->write('{')
             ->indent()
-                ->write("return [")
-                ->write(join(",\n", $columnsArr))
-                ->write("];")
+                ->write('return [')
+                ->write($columnsArr)
+                ->write('];')
             ->outdent()
             ->write('}')
             ->write('')
-        
+
             //->write('')
             //->write('/**')
             //->write(' * @param array $data')
@@ -480,7 +474,7 @@ class Table extends BaseTable
             //    ->write('$map = $this->toArray();')
             //    ->write('foreach($data as $key => $value) {')
             //    ->indent()
-            //        ->write('if(array_key_exists($key, $map)) {')
+            //        ->write('if (array_key_exists($key, $map)) {')
             //        ->indent()
             //            ->write('$this->$key = $value;')
             //        ->outdent()
@@ -498,7 +492,6 @@ class Table extends BaseTable
 
         return $this;
     }
-
 
     public function writeManyToMany(WriterInterface $writer)
     {
@@ -527,7 +520,8 @@ class Table extends BaseTable
 
                 $writer
                     ->write('/**')
-                    ->write(' * collection of '.$targetEntity)
+                    ->write(' * Collection of '.$targetEntity.'.')
+                    ->write(' *')
                     ->write(' * @var '.$nativeType.'|\\'.$relation['refTable']->getModelNameAsFQCN().'[]')
                     ->write(' * '.$this->getAnnotation('ManyToMany', $annotationOptions))
                     ->write(' * '.$this->getAnnotation('JoinTable',
@@ -538,15 +532,15 @@ class Table extends BaseTable
                                     $relation['reference']->getForeign()->getColumnName(),
                                     $relation['reference']->getLocal()->getColumnName(),
                                     $relation['reference']->getParameters()->get('deleteRule')
-                                )
+                                ),
                             ),
                             'inverseJoinColumns' => array(
                                 $this->getJoinColumnAnnotation(
                                     $mappedRelation->getForeign()->getColumnName(),
                                     $mappedRelation->getLocal()->getColumnName(),
                                     $mappedRelation->getParameters()->get('deleteRule')
-                                )
-                            )
+                                ),
+                            ),
                         ), array('multiline' => true, 'wrapper' => ' * %s')))
                     ->write(' */')
                 ;
@@ -563,7 +557,8 @@ class Table extends BaseTable
 
                 $writer
                     ->write('/**')
-                    ->write(' * collection of '.$targetEntity)
+                    ->write(' * Collection of '.$targetEntity.'.')
+                    ->write(' *')
                     ->write(' * @var '.$nativeType.'|\\'.$relation['refTable']->getModelNameAsFQCN().'[]')
                     ->write(' * '.$this->getAnnotation('ManyToMany', $annotationOptions))
                     ->write(' */')
@@ -592,13 +587,14 @@ class Table extends BaseTable
                 ->write('/**')
                 ->write(' * Add '.$relation['refTable']->getModelName().' entity to collection (many to many).')
                 ->write(' *')
-                ->write(' * @param '. $typeEntity.' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' * @param '.$typeEntity.' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' *')
                 ->write(' * @return '.$this->getNamespace($this->getModelName()))
                 ->write(' */')
                 ->write('public function add'.$relation['refTable']->getModelName().'('.$typeEntity.' $'.lcfirst($relation['refTable']->getModelName()).')')
                 ->write('{')
                 ->indent()
-                    ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
+                    ->writeCallback(function (WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
                         if ($isOwningSide) {
                             $writer->write('$%s->add%s($this);', lcfirst($relation['refTable']->getModelName()), $_this->getModelName());
                         }
@@ -616,13 +612,14 @@ class Table extends BaseTable
                 ->write('/**')
                 ->write(' * Remove '.$relation['refTable']->getModelName().' entity to collection (many to many).')
                 ->write(' *')
-                ->write(' * @param '. $typeEntity.' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' * @param '.$typeEntity.' $'.lcfirst($relation['refTable']->getModelName()))
+                ->write(' *')
                 ->write(' * @return '.$this->getNamespace($this->getModelName()))
                 ->write(' */')
                 ->write('public function remove'.$relation['refTable']->getModelName().'('.$typeEntity.' $'.lcfirst($relation['refTable']->getModelName()).')')
                 ->write('{')
                 ->indent()
-                ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
+                ->writeCallback(function (WriterInterface $writer, Table $_this = null) use ($isOwningSide, $relation, $mappedRelation) {
                         if ($isOwningSide) {
                             $writer->write('$%s->remove%s($this);', lcfirst($relation['refTable']->getModelName()), $_this->getModelName());
                         }
@@ -668,7 +665,7 @@ class Table extends BaseTable
      *
      * @return array
      */
-    public  function getUsedClasses()
+    public function getUsedClasses()
     {
         $uses = array();
         if ('@ORM\\' === $this->addPrefix()) {
@@ -685,6 +682,7 @@ class Table extends BaseTable
      * Write pre class handler.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
+     *
      * @return \MwbExporter\Formatter\Doctrine2\Annotation\Model\Table
      */
     public function writePreClassHandler(WriterInterface $writer)
@@ -696,6 +694,7 @@ class Table extends BaseTable
      * Write post class handler.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
+     *
      * @return \MwbExporter\Formatter\Doctrine2\Annotation\Model\Table
      */
     public function writePostClassHandler(WriterInterface $writer)

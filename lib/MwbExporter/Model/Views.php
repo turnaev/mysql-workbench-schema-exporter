@@ -36,7 +36,7 @@ class Views extends Base implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     protected $views = array();
 
-    protected  function init()
+    protected function init()
     {
         // iterate on views
         foreach ($this->node->value as $key => $node) {
@@ -79,7 +79,8 @@ class Views extends Base implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)

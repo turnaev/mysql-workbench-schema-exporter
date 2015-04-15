@@ -40,7 +40,7 @@ class Base
 
     /**
      * Constructor.
-     * 
+     *
      * @param mixed $content
      * @param array $options
      */
@@ -61,7 +61,8 @@ class Base
     /**
      * Check if array keys is all numeric.
      *
-     * @param array $array  The input array
+     * @param array $array The input array
+     *
      * @return bool
      */
     public function isKeysNumeric($array)
@@ -78,7 +79,8 @@ class Base
     /**
      * Set options from array.
      *
-     * @param array $options  The options array
+     * @param array $options The options array
+     *
      * @return \MwbExporter\Object\Base
      */
     public function setOptions($options)
@@ -93,8 +95,9 @@ class Base
     /**
      * Get option value.
      *
-     * @param string $key      Option name
-     * @param mixed  $default  Default value
+     * @param string $key     Option name
+     * @param mixed  $default Default value
+     *
      * @return mixed
      */
     public function getOption($key, $default = null)
@@ -105,8 +108,9 @@ class Base
     /**
      * Set option value.
      *
-     * @param string $key    Option name
-     * @param mixed  $value  Option value
+     * @param string $key   Option name
+     * @param mixed  $value Option value
+     *
      * @return \MwbExporter\Object\Base
      */
     public function setOption($key, $value)
@@ -119,19 +123,21 @@ class Base
     /**
      * Decorate generated code.
      *
-     * @param string $code  The generated code
+     * @param string $code The generated code
+     *
      * @return string
      */
     protected function decorateCode($code)
     {
-        return $code; 
+        return $code;
     }
 
     /**
      * Wrap text.
      *
-     * @param string $lines      The text
-     * @param int    $indent     Indent line
+     * @param string $lines  The text
+     * @param int    $indent Indent line
+     *
      * @return string
      */
     protected function wrapLines($lines, $indent = 0)
@@ -158,7 +164,8 @@ class Base
     /**
      * Convert value as code equivalent.
      *
-     * @param mixed $value  The value
+     * @param mixed $value The value
+     *
      * @return string
      */
     public function asCode($value)

@@ -55,6 +55,7 @@ class Table extends BaseTable
      * Get namespace of a class.
      *
      * @param string $class The class name
+     *
      * @return string
      */
     public function getNamespace($class = null, $absolute = true)
@@ -67,6 +68,7 @@ class Table extends BaseTable
      * is equal then relative model name returned instead.
      *
      * @param string $referenceNamespace The reference namespace
+     *
      * @return string
      */
     public function getModelNameAsFQCN($referenceNamespace = null)

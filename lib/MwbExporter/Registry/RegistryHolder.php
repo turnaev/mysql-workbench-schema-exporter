@@ -34,8 +34,9 @@ class RegistryHolder implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Store value in the registry data.
      *
-     * @param string $key    The registry key
-     * @param mixed  $value  The value to store
+     * @param string $key   The registry key
+     * @param mixed  $value The value to store
+     *
      * @return \MwbExporter\Registry\RegistryHolder
      */
     public function set($key, $value)
@@ -48,8 +49,9 @@ class RegistryHolder implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Get stored value from registry data.
      *
-     * @param string $key      The registry key
-     * @param mixed  $default  The default value if not set
+     * @param string $key     The registry key
+     * @param mixed  $default The default value if not set
+     *
      * @return mixed
      */
     public function get($key, $default = null)
@@ -60,7 +62,8 @@ class RegistryHolder implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Check if data is stored in the registry data.
      *
-     * @param string $key      The registry key
+     * @param string $key The registry key
+     *
      * @return bool
      */
     public function has($key)

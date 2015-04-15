@@ -38,7 +38,7 @@ class Schemas extends Base implements \ArrayAccess, \IteratorAggregate, \Countab
 
     protected function init()
     {
-        foreach ($this->node->xpath("value") as $key => $node) {
+        foreach ($this->node->xpath('value') as $key => $node) {
             $this->schemas[] = $this->getDocument()->getFormatter()->createSchema($this, $node);
         }
     }
@@ -78,7 +78,8 @@ class Schemas extends Base implements \ArrayAccess, \IteratorAggregate, \Countab
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)

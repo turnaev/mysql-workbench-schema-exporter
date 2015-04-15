@@ -40,7 +40,7 @@ class Column extends BaseColumn
             'type' => $this->getDocument()->getFormatter()->getDatatypeConverter()->getMappedType($this),
         ];
 
-        if($type = $this->parseComment('type')) {
+        if ($type = $this->parseComment('type')) {
             $attributes['type'] = $type;
         }
 
@@ -53,24 +53,22 @@ class Column extends BaseColumn
         }
         if (!$this->isNotNull()) {
             $attributes['nullable'] = true;
-        }  else {
+        } else {
             $attributes['nullable'] = false;
         }
 
         $attributes['options']['comment'] = $this->getComment(false);
 
         $defaultValue = $this->parameters->get('defaultValue');
-        if($defaultValue !== '' && $defaultValue !== 'NULL') {
-
+        if ($defaultValue !== '' && $defaultValue !== 'NULL') {
             $defaultValue = trim($defaultValue, '"\'');
-            if($attributes['type'] === 'boolean') {
-                $defaultValue = $defaultValue?'true':'false';
+            if ($attributes['type'] === 'boolean') {
+                $defaultValue = $defaultValue ? 'true' : 'false';
             }
 
             $attributes['options']['default'] = $defaultValue;
-
-
         }
+
         return $attributes;
     }
 
@@ -85,59 +83,56 @@ class Column extends BaseColumn
         $asAnnotation = $this->asAnnotation();
 
         $value = '';
-        if(!is_null($this->getDefaultValue())) {
-
-            switch($nativeType) {
-                case 'boolean':
-                    $map = [true=>'true', false=>'false'];
-                    $value = " = ".$map[(boolean)$this->getDefaultValue()];
+        if (!is_null($this->getDefaultValue())) {
+            switch ($nativeType) {
+                case 'bool':
+                    $map = [true => 'true', false => 'false'];
+                    $value = ' = '.$map[(boolean) $this->getDefaultValue()];
                     break;
-                case 'integer':
-                    $value = " = ".intval($this->getDefaultValue());
+                case 'int':
+                    $value = ' = '.intval($this->getDefaultValue());
                     break;
                 case 'float':
-                    $value = " = ".floatval($this->getDefaultValue());
+                    $value = ' = '.floatval($this->getDefaultValue());
                     break;
                 default:
                     $value = " = '{$this->getDefaultValue()}'";
             }
         }
 
-
-        if($asAnnotation['type'] == 'array') {
+        if ($asAnnotation['type'] == 'array') {
             $nativeType = $converter->getNativeType('array');
 
-            if(!$this->isNotNull()) {
+            if (!$this->isNotNull()) {
                 $nativeType = 'null|'.$nativeType;
             } else {
                 $value = ' = []';
             }
         }
 
-        if($asAnnotation['type'] == 'string_array') {
+        if ($asAnnotation['type'] == 'string_array') {
             $nativeType = $converter->getNativeType('string[]');
 
-            if(!$this->isNotNull()) {
+            if (!$this->isNotNull()) {
                 $nativeType = 'null|'.$nativeType;
             } else {
                 $value = ' = []';
             }
         }
 
-        if($asAnnotation['type'] == 'integer_array') {
+        if ($asAnnotation['type'] == 'integer_array') {
             $nativeType = $converter->getNativeType('integer[]');
 
-            if(!$this->isNotNull()) {
+            if (!$this->isNotNull()) {
                 $nativeType = 'null|'.$nativeType;
             } else {
                 $value = ' = []';
             }
         }
 
-
-        if(in_array($asAnnotation['type'], ['datetime', 'dateinterval', 'datetime_with_millisecond'])) {
+        if (in_array($asAnnotation['type'], ['datetime', 'dateinterval', 'datetime_with_millisecond'])) {
             $nativeType = $converter->getDataType($asAnnotation['type']);
-            if(!$this->isNotNull()) {
+            if (!$this->isNotNull()) {
                 $nativeType = 'null|'.$nativeType;
             }
         }
@@ -150,7 +145,7 @@ class Column extends BaseColumn
                     ' * '.$this->getTable()->getAnnotation('Id'))
             ->write(' * '.$this->getTable()->getAnnotation('Column', $asAnnotation))
             ->writeIf($this->isAutoIncrement(),
-                    ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => ($val = $this->parseComment('generator-strategy'))?$val:'AUTO']))
+                    ' * '.$this->getTable()->getAnnotation('GeneratedValue', ['strategy' => ($val = $this->parseComment('generator-strategy')) ? $val : 'AUTO']))
             ->write(' */')
             ->write('protected $'.$filedName.$value.';')
             ->write('')
@@ -170,7 +165,7 @@ class Column extends BaseColumn
 
             if ($foreign->isManyToOne() && $foreign->parseComment('unidirectional') !== 'true') { // is ManyToOne
 
-                if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
+                if ($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
                     $field = $filedNameInversed;
                 } else {
                     $related = $this->getRelatedName($foreign);
@@ -180,11 +175,11 @@ class Column extends BaseColumn
             }
         }
 
-        foreach($fields as $field) {
+        foreach ($fields as $field) {
             $maxLen = max($maxLen, strlen($field));
         }
 
-        foreach($fields as $field) {
+        foreach ($fields as $field) {
             $format = "\$this->%-{$maxLen}s = new %s();";
             $writer->write($format, $field, $this->getTable()->getCollectionClass(false));
         }
@@ -199,7 +194,7 @@ class Column extends BaseColumn
         foreach ($this->foreigns as $foreign) {
 
             /**
-             * @var \MwbExporter\Model\ForeignKey $foreign
+             * @var \MwbExporter\Model\ForeignKey
              */
             if ($foreign->getForeign()->getTable()->isManyToMany()) {
                 // do not create entities for many2many tables
@@ -214,12 +209,12 @@ class Column extends BaseColumn
             $targetEntityFQCN = $foreign->getOwningTable()->getModelNameAsFQCN($foreign->getReferencedTable()->getEntityNamespace());
             $mappedBy = $foreign->getReferencedTable()->getModelName();
 
-            if($filedNameMapped = $foreign->getForeign()->parseComment('field-mapped')) {
+            if ($filedNameMapped = $foreign->getForeign()->parseComment('field-mapped')) {
                 $mappedBy = $filedNameMapped;
             }
 
-            $cascade = ($d = $foreign->getForeign()->parseComment('cascade')) ? $d:$foreign->parseComment('cascade');
-            $orphanRemoval = ($d = $foreign->getForeign()->parseComment('orphanRemoval')) ? $d:$foreign->parseComment('orphanRemoval');
+            $cascade = ($d = $foreign->getForeign()->parseComment('cascade')) ? $d : $foreign->parseComment('cascade');
+            $orphanRemoval = ($d = $foreign->getForeign()->parseComment('orphanRemoval')) ? $d : $foreign->parseComment('orphanRemoval');
 
             $annotationOptions = [
                 'targetEntity'  => $targetEntityFQCN,
@@ -239,12 +234,10 @@ class Column extends BaseColumn
             $orderByAnnotationOptions = [];
             $orderBy = $foreign->getForeign()->parseComment('orderBy');
 
-            if(!is_null($orderBy)) {
-
+            if (!is_null($orderBy)) {
                 $orderBy = $foreign->getForeign()->parseComment('orderBy');
-                $orderByAnnotationOptions=[null=>[$orderBy]];
+                $orderByAnnotationOptions = [null => [$orderBy]];
             }
-
 
             //check for OneToOne or OneToMany relationship
             if ($foreign->isManyToOne()) { // is OneToMany
@@ -258,13 +251,13 @@ class Column extends BaseColumn
                 $writer
                     ->write('/**')
                     ->writeIf($comment, $comment)
-                    ->write(' * collection of '.$targetEntity)
-                    ->write(' * @var '.$nativeType.'|'.$foreign->getOwningTable()->getNamespace().'[]')
+                    ->write(' * Collection of '.$targetEntity.'.')
                     ->write(' * ')
+                    ->write(' * @var '.$nativeType.'|'.$foreign->getOwningTable()->getNamespace().'[]')
                     ->write(' * '.$this->getTable()->getAnnotation('OneToMany', $annotationOptions))
                     ->write(' * '.$this->getTable()->getAnnotation('JoinColumn', $joinColumnAnnotationOptions));
 
-                if($orderByAnnotationOptions) {
+                if ($orderByAnnotationOptions) {
                     $writer->write(' * '.$this->getTable()->getAnnotation('OrderBy', $orderByAnnotationOptions));
                 }
 
@@ -298,8 +291,8 @@ class Column extends BaseColumn
             $targetEntityFQCN = $this->local->getReferencedTable()->getModelNameAsFQCN($this->local->getOwningTable()->getEntityNamespace());
             $inversedBy = $this->local->getOwningTable()->getModelName();
 
-            if($filedNameInversed = $this->local->getForeign()->parseComment('field-inversed')) {
-               $inversedBy = $filedNameInversed;
+            if ($filedNameInversed = $this->local->getForeign()->parseComment('field-inversed')) {
+                $inversedBy = $filedNameInversed;
             }
 
             $annotationOptions = [
@@ -318,10 +311,9 @@ class Column extends BaseColumn
                 'nullable'             => !$this->local->getForeign()->isNotNull() ? true : false,
             ];
             $onDelete = $formatter->getDeleteRule($this->local->getParameters()->get('deleteRule'));
-            if($onDelete) {
+            if ($onDelete) {
                 $joinColumnAnnotationOptions['onDelete'] = $onDelete;
             }
-
 
             //check for OneToOne or ManyToOne relationship
             if ($this->local->isManyToOne()) { // is ManyToOne
@@ -331,17 +323,17 @@ class Column extends BaseColumn
                 $refRelated = $this->local->getLocal()->getRelatedName($this->local);
                 if ($this->local->parseComment('unidirectional') === 'true') {
                     $annotationOptions['inversedBy'] = null;
-                } else if($filedNameInversed) {
+                } elseif ($filedNameInversed) {
                     null;
                 } else {
-                    $annotationOptions['inversedBy'] = lcfirst(Inflector::pluralize($annotationOptions['inversedBy'])) . $refRelated;
+                    $annotationOptions['inversedBy'] = lcfirst(Inflector::pluralize($annotationOptions['inversedBy'])).$refRelated;
                 }
 
                 $comment = $this->local->getForeign()->getComment();
 
                 $filedNameMapped = ($d = $this->local->getForeign()->parseComment('field-mapped')) ? $d : lcfirst($targetEntity).$related;
                 $nullType = '';
-                if(!$this->isNotNull()) {
+                if (!$this->isNotNull()) {
                     $nullType = 'null|';
                 }
                 $writer
@@ -362,16 +354,18 @@ class Column extends BaseColumn
                     $annotationOptions['inversedBy'] = lcfirst($annotationOptions['inversedBy']);
                 }
 
-                if($filedNameInversed = $this->local->getForeign()->parseComment('field-inversed')) {
+                if ($filedNameInversed = $this->local->getForeign()->parseComment('field-inversed')) {
                     $annotationOptions['inversedBy'] = $filedNameInversed;
                 }
 
                 $annotationOptions['cascade'] = $formatter->getCascadeOption($this->local->parseComment('cascade'));
 
                 $comment = $this->local->getForeign()->getComment();
-
                 $filedNameMapped = ($d = $this->local->getForeign()->parseComment('field-mapped')) ? $d : lcfirst($targetEntity);
 
+                if ($comment = trim($comment) && (substr($comment, -1) !== '.')) {
+                    $comment .= '.';
+                }
                 $writer
                     ->write('/**')
                     ->writeIf($comment, $comment)
@@ -396,7 +390,7 @@ class Column extends BaseColumn
 
         $defaultValue = null;
 
-        switch($asAnnotation['type']) {
+        switch ($asAnnotation['type']) {
             case 'array':
                     $nativeType = $converter->getNativeType('array');
                     $hint = 'array ';
@@ -428,16 +422,15 @@ class Column extends BaseColumn
             default;
         }
 
-        if(is_null($defaultValue)) {
-
-            if($this->isNotNull()) {
+        if (is_null($defaultValue)) {
+            if ($this->isNotNull()) {
                 $defaultValue = '';
             } else {
                 $defaultValue = ' = null'; //allow null for form working
             }
         }
 
-        return isset($nativeType)?[$nativeType, $hint, $defaultValue]:null;
+        return isset($nativeType) ? [$nativeType, $hint, $defaultValue] : null;
     }
 
     public function writeGetterAndSetter(WriterInterface $writer)
@@ -450,15 +443,14 @@ class Column extends BaseColumn
         $defaultValue = null;
         $nullType = '';
 
-        if($res = $this->getColumnTypeData()) {
-
+        if ($res = $this->getColumnTypeData()) {
             list($nativeType, $hint, $defaultValue) = $res;
-            if(!$this->isNotNull()) {
+            if (!$this->isNotNull()) {
                 $nullType = 'null|';
             }
         }
 
-        $propName = $varName =$this->getPhpColumnName();
+        $propName = $varName = $this->getPhpColumnName();
         $funactionName = $this->columnNameBeautifier($this->getColumnName());
 
         $writer
@@ -467,6 +459,7 @@ class Column extends BaseColumn
             ->write(' * Set the value of '.$varName.'.')
             ->write(' *')
             ->write(' * @param '.$nullType.$nativeType.' $'.$varName)
+            ->write(' *')
             ->write(' * @return '.$table->getNamespace())
             ->write(' */')
             ->write('public function set'.$funactionName.'('.$hint.'$'.$varName.$defaultValue.')')
@@ -516,16 +509,14 @@ class Column extends BaseColumn
                 $related = $this->getRelatedName($foreign);
                 $related_text = $this->getRelatedName($foreign, false);
 
-                if($v = $foreign->getForeign()->parseComment('field-inversed')) {
+                if ($v = $foreign->getForeign()->parseComment('field-inversed')) {
                     //v($v);
                     $propName =   $v;
                     $varName = Inflector::singularize($v);
 
                     $funactionName    = ucfirst(Inflector::singularize($propName));
                     $funactionGetName = ucfirst($v);
-
                 } else {
-
                     $funactionName    = $this->columnNameBeautifier($foreign->getOwningTable()->getModelName()).$related;
                     $funactionGetName = $this->columnNameBeautifier(Inflector::pluralize($foreign->getOwningTable()->getModelName())).$related;
 
@@ -533,7 +524,7 @@ class Column extends BaseColumn
                     $varName = lcfirst($foreign->getOwningTable()->getModelName());
                 }
 
-                if($v = $foreign->getForeign()->parseComment('field-mapped')) {
+                if ($v = $foreign->getForeign()->parseComment('field-mapped')) {
                     $funactionSetName = ucfirst($v);
                 } else {
                     $funactionSetName = ucfirst($table->getModelName());
@@ -543,7 +534,7 @@ class Column extends BaseColumn
                 $nullType = 'null|';
                 $defaultValue = ' = null';
 
-//                ->write('if($'.$varName.') {')
+//                ->write('if ($'.$varName.') {')
 //                    ->indent()
 //                    ->writeIf(!$unidirectional, '$'.$varName.'->set'.$setterFunactionName.'($this);')
 //                    ->outdent()
@@ -555,15 +546,16 @@ class Column extends BaseColumn
                 $writer
                     // setter
                     ->write('/**')
-                    ->write(' * Add '.trim($varName.' '.$related_text). ' entity to collection (one to many).')
+                    ->write(' * Add '.trim($varName.' '.$related_text).' entity to collection (one to many).')
                     ->write(' *')
                     ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
+                    ->write(' *')
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                 ->write('public function add'.$funactionName.'('.$typeEntity.' $'.$varName.$defaultValue.')')
                     ->write('{')
                     ->indent()
-                        ->write('if($'.$varName.') {')
+                        ->write('if ($'.$varName.') {')
                             ->indent()
                                 ->write('$'.$varName.'->set'.$funactionSetName.'($this);')
                                 ->write('$this->'.$propName.'[] = $'.$varName.';')
@@ -578,15 +570,16 @@ class Column extends BaseColumn
 
                     // remove
                  ->write('/**')
-                    ->write(' * remove '.trim($varName.' '.$related_text). ' entity from collection (one to many).')
+                    ->write(' * remove '.trim($varName.' '.$related_text).' entity from collection (one to many).')
                     ->write(' *')
                     ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
+                    ->write(' *')
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                     ->write('public function remove'.$funactionName.'('.$typeEntity.' $'.$varName.$defaultValue.')')
                         ->write('{')
                         ->indent()
-                            ->write('if($'.$varName.') {')
+                            ->write('if ($'.$varName.') {')
                             ->indent()
                                 ->write('$this->'.$propName.'->removeElement($'.$varName.');')
                             ->outdent()
@@ -610,16 +603,12 @@ class Column extends BaseColumn
                         ->outdent()
                         ->write('}')
                     ;
-
             } else { // OneToOne
 
-                if($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
-
+                if ($filedNameInversed = $foreign->getForeign()->parseComment('field-inversed')) {
                     $funactionName = ucfirst(Inflector::singularize($filedNameInversed));
                     $propName = $varName = $filedNameInversed;
-
                 } else {
-
                     $funactionName = ucfirst($this->columnNameBeautifier($foreign->getOwningTable()->getModelName()));
                     $propName = $varName  = lcfirst($foreign->getOwningTable()->getModelName());
                 }
@@ -632,6 +621,7 @@ class Column extends BaseColumn
                     ->write(' * Set '.$varName.' entity (one to one).')
                     ->write(' *')
                     ->write(' * @param '.$typeEntity.' $'.$propName)
+                    ->write(' *')
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                     ->write('public function set'.$funactionName.'('.$typeEntity.' $'.$varName.')')
@@ -666,7 +656,7 @@ class Column extends BaseColumn
             $unidirectional = ($this->local->parseComment('unidirectional') === 'true');
 
             $nullType = '';
-            if(!$this->isNotNull()) {
+            if (!$this->isNotNull()) {
                 $nullType = 'null|';
             }
 
@@ -675,18 +665,16 @@ class Column extends BaseColumn
                 $related = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName());
                 $related_text = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName(), false);
 
-                if($filedNameMapped = $this->local->getForeign()->parseComment('field-mapped')) {
+                if ($filedNameMapped = $this->local->getForeign()->parseComment('field-mapped')) {
                     $funactionName = ucfirst(Inflector::singularize($filedNameMapped));
                     $propName = $varName       = $filedNameMapped;
-
                 } else {
                     $funactionName = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName()).$related;
                     $propName = $varName       = lcfirst($this->local->getReferencedTable()->getModelName()).$related;
                 }
 
-                if(!$this->isNotNull()) {
-
-                    if(!$this->isNotNull()) {
+                if (!$this->isNotNull()) {
+                    if (!$this->isNotNull()) {
                         $nullType = 'null|';
                     }
                 }
@@ -700,6 +688,7 @@ class Column extends BaseColumn
                     ->write(' * Set '.trim($varName.' '.$related_text).' entity (many to one).')
                     ->write(' *')
                     ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
+                    ->write(' *')
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                     ->write('public function set'.$funactionName.'('.$typeEntity.' $'.$varName.$defaultValue.')')
@@ -730,16 +719,15 @@ class Column extends BaseColumn
                 $typeEntity = $this->local->getReferencedTable()->getNamespace();
                 $modelName = $this->local->getReferencedTable()->getModelName();
 
-                if($v = $this->local->getForeign()->parseComment('field-mapped')) {
+                if ($v = $this->local->getForeign()->parseComment('field-mapped')) {
                     $propName = $varName       = $v;
                     $funactionName = $this->columnNameBeautifier(Inflector::singularize($v));
-
                 } else {
                     $propName = $varName       = lcfirst($this->local->getReferencedTable()->getModelName());
                     $funactionName = $this->columnNameBeautifier($this->local->getReferencedTable()->getModelName());
                 }
 
-                if($v = $this->local->getForeign()->parseComment('field-inversed')) {
+                if ($v = $this->local->getForeign()->parseComment('field-inversed')) {
                     $setterFunactionName = $this->columnNameBeautifier($v);
                 } else {
                     $setterFunactionName  = $this->columnNameBeautifier($this->local->getOwningTable()->getModelName());
@@ -751,12 +739,13 @@ class Column extends BaseColumn
                     ->write(' * Set '.$propName.' entity (one to one).')
                     ->write(' *')
                     ->write(' * @param '.$nullType.$typeEntity.' $'.$varName)
+                    ->write(' *')
                     ->write(' * @return '.$table->getNamespace())
                     ->write(' */')
                     ->write('public function set'.$funactionName.'('.$typeEntity.' $'.$varName.' = null)')
                     ->write('{')
                     ->indent()
-                        ->write('if($'.$varName.') {')
+                        ->write('if ($'.$varName.') {')
                         ->indent()
                             ->writeIf(!$unidirectional, '$'.$varName.'->set'.$setterFunactionName.'($this);')
                         ->outdent()

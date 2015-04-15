@@ -63,9 +63,9 @@ class Index extends Base
     }
 
     /**
-     * Is a unique index
+     * Is a unique index.
      *
-     * @return boolean
+     * @return bool
      */
     public function isUnique()
     {
@@ -73,9 +73,9 @@ class Index extends Base
     }
 
     /**
-     * Is a normal index
+     * Is a normal index.
      *
-     * @return boolean
+     * @return bool
      */
     public function isIndex()
     {
@@ -83,9 +83,9 @@ class Index extends Base
     }
 
     /**
-     * Is a primary index
+     * Is a primary index.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPrimary()
     {

@@ -53,7 +53,8 @@ class Catalog extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)

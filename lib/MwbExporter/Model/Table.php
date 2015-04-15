@@ -29,7 +29,6 @@ namespace MwbExporter\Model;
 
 use MwbExporter\Formatter\FormatterInterface;
 use Doctrine\Common\Inflector\Inflector;
-use MwbExporter\Helper\Singularizer;
 use MwbExporter\Writer\WriterInterface;
 
 class Table extends Base
@@ -143,6 +142,7 @@ class Table extends Base
      *
      * @param \MwbExporter\Model\ForeignKey $fk1
      * @param \MwbExporter\Model\ForeignKey $fk2
+     *
      * @return \MwbExporter\Model\Table
      */
     protected function injectManyToMany(ForeignKey $fk1, ForeignKey $fk2)
@@ -203,8 +203,7 @@ class Table extends Base
     }
 
     /**
-     *
-     * @return boolean
+     * @return bool
      */
     public function isExternal()
     {
@@ -220,6 +219,7 @@ class Table extends Base
      * Check if this table is a many to many table.
      *
      * @param bool $deep True to check many to many relation for referenced tables
+     *
      * @return bool
      */
     public function isManyToMany($deep = true)
@@ -288,7 +288,8 @@ class Table extends Base
     /**
      * Add a many to many relation.
      *
-     * @param array $rel  The relation
+     * @param array $rel The relation
+     *
      * @return \MwbExporter\Model\Table
      */
     public function setManyToManyRelation($rel)
@@ -326,7 +327,7 @@ class Table extends Base
             $tableName = $singular;
         }
 
-        if($this->parseComment('className')) {
+        if ($this->parseComment('className')) {
             $tableName = $this->parseComment('className');
         }
 
@@ -335,7 +336,7 @@ class Table extends Base
     }
 
     /**
-     * Return the model in the plural form
+     * Return the model in the plural form.
      *
      * @return string
      */
@@ -375,7 +376,6 @@ class Table extends Base
     }
 
     /**
-     *
      * @return array
      */
     public function getRelations()
@@ -384,9 +384,10 @@ class Table extends Base
     }
 
     /**
-     * Return relation betweens the current table and the $rawTableName table
+     * Return relation betweens the current table and the $rawTableName table.
      *
      * @param string $rawTableName
+     *
      * @return \MwbExporter\Model\ForeignKey|null
      */
     public function getRelationToTable($rawTableName)
@@ -399,24 +400,25 @@ class Table extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::getVars()
      */
     protected function getVars()
     {
-      return array('%schema%' => $this->getSchema()->getName(), '%table%' => $this->getRawTableName(), '%entity%' => $this->getModelName(), '%extension%' => $this->getDocument()->getFormatter()->getFileExtension());
+        return array('%schema%' => $this->getSchema()->getName(), '%table%' => $this->getRawTableName(), '%entity%' => $this->getModelName(), '%extension%' => $this->getDocument()->getFormatter()->getFileExtension());
     }
 
     /**
      * Get table file name.
      *
      * @throws \Exception
+     *
      * @return string
      */
     public function getTableFileName()
     {
-        if (0 === strlen($filename = $this->getDocument()->translateFilename($this)))
-        {
+        if (0 === strlen($filename = $this->getDocument()->translateFilename($this))) {
             $filename = $this->getSchema()->getName().'.'.$this->getRawTableName().'.'.$this->getDocument()->getFormatter()->getFileExtension();
         }
 
@@ -424,7 +426,8 @@ class Table extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)
@@ -460,6 +463,7 @@ class Table extends Base
      * Write table entity as code.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
+     *
      * @return string
      */
     public function writeTable(WriterInterface $writer)

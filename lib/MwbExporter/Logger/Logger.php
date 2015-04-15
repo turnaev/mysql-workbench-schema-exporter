@@ -47,7 +47,7 @@ class Logger implements LoggerInterface
     /**
      * Constructor.
      *
-     * @param array $options  Logger options
+     * @param array $options Logger options
      */
     public function __construct($options = array())
     {
@@ -79,7 +79,7 @@ class Logger implements LoggerInterface
     /**
      * Send message log.
      *
-     * @param string $message  The log message
+     * @param string $message The log message
      */
     protected function sendLog($message)
     {

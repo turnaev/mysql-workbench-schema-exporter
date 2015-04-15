@@ -32,7 +32,8 @@ interface StorageInterface
     /**
      * Set writer output directory.
      *
-     * @param string $dir  Directory name
+     * @param string $dir Directory name
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function setOutdir($dir);
@@ -46,8 +47,9 @@ interface StorageInterface
 
     /**
      * Create directory.
-     * 
+     *
      * @param string $path
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function mkdir($path);
@@ -55,7 +57,8 @@ interface StorageInterface
     /**
      * Check file if already exist and do backup if necessary.
      *
-     * @param string $filename  The file name
+     * @param string $filename The file name
+     *
      * @return string
      */
     public function getFile($filename);
@@ -77,8 +80,9 @@ interface StorageInterface
     /**
      * Save the buffer content.
      *
-     * @param string $filename  The filename
-     * @param string $content   The content
+     * @param string $filename The filename
+     * @param string $content  The content
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function save($filename, $content);

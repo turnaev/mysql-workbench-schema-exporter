@@ -67,8 +67,7 @@ class View extends Base
     }
 
     /**
-     *
-     * @return boolean
+     * @return bool
      */
     public function isExternal()
     {
@@ -76,11 +75,13 @@ class View extends Base
         if ($external === 'true') {
             return true;
         }
+
         return false;
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)

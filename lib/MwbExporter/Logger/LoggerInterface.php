@@ -34,5 +34,5 @@ interface LoggerInterface
     const WARNING = 'WARNING';
     const ERROR = 'ERROR';
 
-    public function log($message, $level = LoggerInterface::INFO);
+    public function log($message, $level = self::INFO);
 }

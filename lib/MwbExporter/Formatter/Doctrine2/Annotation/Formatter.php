@@ -32,7 +32,6 @@ use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
 {
-
     const CFG_ANNOTATION_PREFIX             = 'useAnnotationPrefix';
     const CFG_SKIP_GETTER_SETTER            = 'skipGetterAndSetter';
     const CFG_GENERATE_ENTITY_SERIALIZATION = 'generateEntitySerialization';
@@ -42,7 +41,6 @@ class Formatter extends BaseFormatter
     const CFG_BASE_NAMESPASE       = 'baseNamespace';
     const CFG_BUNDELE_NAMESPACE    = 'bundleNamespace';
     const CFG_BUNDELE_NAMESPACE_TO = 'bundleNamespaceTo';
-
 
     protected function init()
     {
@@ -64,7 +62,8 @@ class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
      */
     protected function createDatatypeConverter()
@@ -73,7 +72,8 @@ class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\Formatter::createTable()
      */
     public function createTable(Base $parent, $node)
@@ -82,7 +82,8 @@ class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createColumns()
      */
     public function createColumns(Base $parent, $node)
@@ -91,7 +92,8 @@ class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createColumn()
      */
     public function createColumn(Base $parent, $node)
@@ -100,7 +102,8 @@ class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createIndex()
      */
     public function createIndex(Base $parent, $node)

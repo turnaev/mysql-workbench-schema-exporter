@@ -49,7 +49,6 @@ class Columns extends BaseColumns
         }
         // display column relations
         foreach ($this->columns as $column) {
-
             $column->writeRelations($writer);
         }
 

@@ -27,7 +27,6 @@
 
 namespace MwbExporter\Model;
 
-use MwbExporter\Registry\Registry;
 use MwbExporter\Registry\RegistryHolder;
 use MwbExporter\Writer\WriterInterface;
 
@@ -73,11 +72,11 @@ abstract class Base
 
     protected function underscoreToCamelCase($string, $firstCharCaps = false)
     {
-        if( $firstCharCaps == true )
-        {
+        if ($firstCharCaps == true) {
             $string[0] = strtoupper($string[0]);
         }
         $func = create_function('$c', 'return strtoupper($c[1]);');
+
         return preg_replace_callback('/_([a-z])/', $func, $string);
     }
 
@@ -86,8 +85,8 @@ abstract class Base
     }
 
     /**
-     * Return the internal ID of the MySQL Workbench object
-     * 
+     * Return the internal ID of the MySQL Workbench object.
+     *
      * @return string
      */
     public function getId()
@@ -96,8 +95,8 @@ abstract class Base
     }
 
     /**
-     * Returns the attributes of the current MySQL Workbench object
-     * 
+     * Returns the attributes of the current MySQL Workbench object.
+     *
      * @return \SimpleXmlElement
      */
     public function getAttributes()
@@ -106,8 +105,8 @@ abstract class Base
     }
 
     /**
-     * Returns current MySQL Workbench object
-     * 
+     * Returns current MySQL Workbench object.
+     *
      * @return \SimpleXmlElement
      */
     public function getNode()
@@ -116,8 +115,8 @@ abstract class Base
     }
 
     /**
-     * Returns the parent object
-     * 
+     * Returns the parent object.
+     *
      * @return object
      */
     public function getParent()
@@ -127,7 +126,7 @@ abstract class Base
 
     /**
      * Get parameters holder.
-     * 
+     *
      * @return \MwbExporter\Registry\RegistryHolder
      */
     public function getParameters()
@@ -158,10 +157,11 @@ abstract class Base
     }
 
     /**
-     * Filters given comment for embedded code by a given keyword
-     * 
+     * Filters given comment for embedded code by a given keyword.
+     *
      * @param string $needle_raw
      * @param string $comment
+     *
      * @return string
      */
     public function parseComment($needle_raw, $comment = null)
@@ -177,9 +177,10 @@ abstract class Base
     }
 
     /**
-     * get the comment of this object (without the hints for the exporter)
+     * get the comment of this object (without the hints for the exporter).
      *
-     * @param boolean $asPhpComment add * infront of the lines and indent according to current indentation level
+     * @param bool $asPhpComment add * infront of the lines and indent according to current indentation level
+     *
      * @return string
      */
     protected function getComment($asPhpComment = true)
@@ -190,11 +191,15 @@ abstract class Base
         // or {doctrine:keyword} and ending with {/d:keyword}
         if ($comment = trim(preg_replace(sprintf('/\{(%s):([^\}]+)\}(.+?)\{\/\1:\2\}/si', $this->getDocument()->getFormatter()->getCommentParserIdentifierPrefix()), '', $comment))) {
             if ($asPhpComment) {
+                if ((substr($comment, -1) !== '.')) {
+                    $comment .= '.';
+                }
+
                 // start the comment with a "*"" and add a " * " after each newline
                 $comment = str_replace("\n", "\n * ", $comment);
-    
+
                 // comments are wrapped at 80 chars and will end with a newline
-                $comment = ' * ' . wordwrap($comment, 77, "\n * ") . "\n *";
+                $comment = ' * '.wordwrap($comment, 77, "\n * ")."\n *";
             }
 
             return $comment;
@@ -202,8 +207,8 @@ abstract class Base
     }
 
     /**
-     * Returns XML of the current MySQL Workbench object
-     * 
+     * Returns XML of the current MySQL Workbench object.
+     *
      * @return string
      */
     public function debug()
@@ -215,6 +220,7 @@ abstract class Base
      * Write document as generated code.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
+     *
      * @return \MwbExporter\Model\Base
      */
     public function write(WriterInterface $writer)
@@ -225,7 +231,8 @@ abstract class Base
     /**
      * Translate text with object contextual data.
      *
-     * @param string $text  The text to translate
+     * @param string $text The text to translate
+     *
      * @return string
      */
     public function translateVars($text)
@@ -242,6 +249,6 @@ abstract class Base
      */
     protected function getVars()
     {
-      return array();
+        return array();
     }
 }

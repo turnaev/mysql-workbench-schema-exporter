@@ -64,7 +64,8 @@ class Buffer implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Set EOL delimeter.
      *
-     * @param string $eol  The EOL delimeter
+     * @param string $eol The EOL delimeter
+     *
      * @return \MwbExporter\Buffer\Buffer
      */
     public function setEol($eol)

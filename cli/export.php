@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/autoload.php';
+
+require_once __DIR__.'/autoload.php';
 
 /*
  * Copyright (c) 2012-2013 Toha <tohenk@yahoo.com>
@@ -142,7 +143,7 @@ function mergeFormatter(&$setup, $configs)
     $keys = array_keys($setup);
     for ($i = 0; $i < count($keys); $i++) {
         if (isset($configs[$keys[$i]])) {
-          $setup[$keys[$i]] = $configs[$keys[$i]];
+            $setup[$keys[$i]] = $configs[$keys[$i]];
         }
     }
 }
@@ -164,7 +165,6 @@ function main($filename, $dir, $params, $options)
         $setup = array();
         $configs = array();
 
-
         // bootstrap
         $bootstrap = new Bootstrap();
         if ($options[CMD_OPT_LIST_EXPORTER]) {
@@ -174,7 +174,7 @@ function main($filename, $dir, $params, $options)
             echo "Supported exporter:\n";
             foreach ($formatters as $name => $class) {
                 $formatter = $bootstrap->getFormatter($name);
-                echo sprintf("- %-".$len."s %s\n", $name, $formatter->getTitle());
+                echo sprintf('- %-'.$len."s %s\n", $name, $formatter->getTitle());
             }
             die(0);
         }
@@ -217,7 +217,7 @@ function main($filename, $dir, $params, $options)
 
         //get formatter after getting the parameter export either from command line or config file
         if (!$formatter = $bootstrap->getFormatter($params[CMD_PARAM_EXPORT])) {
-            echo sprintf("Unsupported exporter %s. Use --%s option to show all available exporter.", $params[CMD_PARAM_EXPORT], CMD_OPT_LIST_EXPORTER);
+            echo sprintf('Unsupported exporter %s. Use --%s option to show all available exporter.', $params[CMD_PARAM_EXPORT], CMD_OPT_LIST_EXPORTER);
             die(1);
         }
 
@@ -238,9 +238,9 @@ function main($filename, $dir, $params, $options)
         if ($options[CMD_OPT_SAVE_CONFIG]) {
             file_put_contents('export.json', json_encode(
                 array(
-                    CMD_PARAM_EXPORT => $params[CMD_PARAM_EXPORT], 
-                    CMD_OPT_ZIP => $options[CMD_OPT_ZIP], 
-                    'dir' => $dir, 'params' => $setup
+                    CMD_PARAM_EXPORT => $params[CMD_PARAM_EXPORT],
+                    CMD_OPT_ZIP => $options[CMD_OPT_ZIP],
+                    'dir' => $dir, 'params' => $setup,
                 )
             ));
         }

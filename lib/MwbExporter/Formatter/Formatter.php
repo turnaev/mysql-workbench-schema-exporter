@@ -90,12 +90,12 @@ abstract class Formatter implements FormatterInterface
      * Add configurations data.
      *
      * @param string $configurations Configurations data
+     *
      * @return \MwbExporter\Formatter\Formatter
      */
     protected function addConfigurations($configurations = array())
     {
-        foreach ($configurations as $key => $value)
-        {
+        foreach ($configurations as $key => $value) {
             $this->registry->config->set($key, $value);
         }
 
@@ -116,15 +116,15 @@ abstract class Formatter implements FormatterInterface
      * Setup formatter.
      *
      * @param array $configurations
+     *
      * @throws \RuntimeException
+     *
      * @return \MwbExporter\Formatter\Formatter
      */
     public function setup($configurations = array())
     {
-        foreach ($configurations as $key => $value)
-        {
-            if (!$this->registry->config->has($key))
-            {
+        foreach ($configurations as $key => $value) {
+            if (!$this->registry->config->has($key)) {
                 throw new \RuntimeException(sprintf('Unknown setup key "%s".', $key));
             }
             $this->registry->config->set($key, $value);
@@ -146,6 +146,7 @@ abstract class Formatter implements FormatterInterface
      * Set data type converter.
      *
      * @param \MwbExporter\Formatter\DatatypeConverterInterface $datatypeConverter
+     *
      * @return \MwbExporter\Formatter\Formatter
      */
     protected function setDatatypeConverter(DatatypeConverterInterface $datatypeConverter)
@@ -184,7 +185,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createCatalog()
      */
     public function createCatalog(Base $parent = null, $node)
@@ -193,7 +195,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createSchemas()
      */
     public function createSchemas(Base $parent = null, $node)
@@ -202,7 +205,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createSchema()
      */
     public function createSchema(Base $parent = null, $node)
@@ -211,7 +215,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createTables()
      */
     public function createTables(Base $parent = null, $node)
@@ -220,7 +225,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createTable()
      */
     public function createTable(Base $parent = null, $node)
@@ -229,7 +235,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createForeignKeys()
      */
     public function createForeignKeys(Base $parent = null, $node)
@@ -238,7 +245,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createForeignKey()
      */
     public function createForeignKey(Base $parent = null, $node)
@@ -247,7 +255,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createIndices()
      */
     public function createIndices(Base $parent = null, $node)
@@ -256,7 +265,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createIndex()
      */
     public function createIndex(Base $parent = null, $node)
@@ -265,7 +275,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createColumns()
      */
     public function createColumns(Base $parent = null, $node)
@@ -274,7 +285,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createColumn()
      */
     public function createColumn(Base $parent = null, $node)
@@ -283,7 +295,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createViews()
      */
     public function createViews(Base $parent = null, $node)
@@ -292,7 +305,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::createView()
      */
     public function createView(Base $parent = null, $node)
@@ -301,7 +315,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::getPreferredWriter()
      */
     public function getPreferredWriter()
@@ -310,7 +325,8 @@ abstract class Formatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\FormatterInterface::getCommentParserIdentifierPrefix()
      */
     public function getCommentParserIdentifierPrefix()

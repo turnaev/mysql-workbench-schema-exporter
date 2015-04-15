@@ -6,9 +6,7 @@ use MwbExporter\Formatter\FormatterInterface;
 use MwbExporter\Model\Document;
 
 /**
- * Class Compiler
- *
- * @package MwbExporter
+ * Class Compiler.
  */
 class Compiler
 {
@@ -26,7 +24,7 @@ class Compiler
      * @var array
      */
     private $quoteWords = [
-        'order'
+        'order',
     ];
 
     /**
@@ -45,7 +43,6 @@ class Compiler
     public function preCompileModels()
     {
         if ($this->formatter->getFileExtension() == 'php') {
-
             $fromDir = $this->document
                 ->getWriter()
                 ->getStorage()
@@ -62,17 +59,14 @@ class Compiler
                 ->getStorage()
                 ->getResult());
             foreach ($dir as $fileinfo) {
-
-                $fromFile = $fromDir . '/' . $fileinfo->getFilename();
-                $toFile   = $toDir . '/' . $fileinfo->getFilename();
+                $fromFile = $fromDir.'/'.$fileinfo->getFilename();
+                $toFile   = $toDir.'/'.$fileinfo->getFilename();
 
                 if (!$fileinfo->isDot()) {
-
                     if ($fileinfo->getExtension() == 'php') {
-
+                        $this->setEndOf($fromFile);
                         $this->createWorkModelClass($fromFile, $toFile);
-
-                    } else if ($fileinfo->getExtension() == 'bak') {
+                    } elseif ($fileinfo->getExtension() == 'bak') {
                         unlink($fromFile);
                     }
                 }
@@ -86,7 +80,6 @@ class Compiler
     public function postCompileModels()
     {
         if ($this->formatter->getFileExtension() == 'php') {
-
             $modelDir = $this->document
                 ->getWriter()
                 ->getStorage()
@@ -98,16 +91,12 @@ class Compiler
                 ->getResult());
 
             foreach ($dir as $fileinfo) {
-
                 if (!$fileinfo->isDot()) {
-
-                    $modelFile = $modelDir . '/' . $fileinfo->getFilename();
+                    $modelFile = $modelDir.'/'.$fileinfo->getFilename();
 
                     if ($fileinfo->getExtension() == 'php') {
-
                         $this->changeModelClassDef($modelFile);
-
-                    } else if ($fileinfo->getExtension() == 'bak') {
+                    } elseif ($fileinfo->getExtension() == 'bak') {
                         unlink($modelFile);
                     }
                 }
@@ -120,20 +109,17 @@ class Compiler
                             ->getStorage()
                             ->getResult()
                     )
-                ) . '/Resources/config';
-            $configFromDirXml = $configDir . '/doctrine-xml';
-            $configToDirXml   = $configDir . '/doctrine';
+                ).'/Resources/config';
+            $configFromDirXml = $configDir.'/doctrine-xml';
+            $configToDirXml   = $configDir.'/doctrine';
 
             if (is_dir($configFromDirXml)) {
-
                 $this->createDir($configToDirXml);
 
                 $dir = new \DirectoryIterator($configFromDirXml);
                 foreach ($dir as $fileinfo) {
-
                     if (!$fileinfo->isDot()) {
-
-                        $fromXmlFile = $configFromDirXml . '/' . $fileinfo->getFilename();
+                        $fromXmlFile = $configFromDirXml.'/'.$fileinfo->getFilename();
 
                         $this->changeXmlMetaModel($fromXmlFile, $configToDirXml);
                     }
@@ -150,17 +136,14 @@ class Compiler
      */
     private function changeNamenamespaceModel(\RecursiveDirectoryIterator $dir, $namenamespaceFrom, $namenamespaceTo)
     {
-        $namenamespaceFromRgx = preg_quote($namenamespaceFrom, "%");
+        $namenamespaceFromRgx = preg_quote($namenamespaceFrom, '%');
 
         foreach ($dir as $fileinfo) {
             if (!in_array($fileinfo->getFilename(), ['.', '..'])) {
-
                 if (!$dir->hasChildren()) {
-
                     $content = file_get_contents($fileinfo->getPathname());
                     $content = preg_replace("%$namenamespaceFromRgx%", $namenamespaceTo, $content);
                     file_put_contents($fileinfo->getPathname(), $content);
-
                 } else {
                     $dirInner = $dir->getChildren();
                     $this->changeNamenamespaceModel($dirInner, $namenamespaceFrom, $namenamespaceTo);
@@ -188,10 +171,9 @@ class Compiler
                         ->getStorage()
                         ->getResult()
                 )
-            ) . '/Resources/config/doctrine';
+            ).'/Resources/config/doctrine';
 
         if ($namenamespaceTo) {
-
             $namenamespaceFrom
                 = $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BUNDELE_NAMESPACE);
 
@@ -231,19 +213,19 @@ class Compiler
         $fromFileContent = file_get_contents($fromXmlFile);
 
         if (preg_match('/.*\.Model\.(.*?)$/', pathinfo($fromXmlFile)['filename'], $m)) {
-
-            $toXmlFile = $configToDirXml . '/' . $m[1] . '.xml';
+            $toXmlFile = $configToDirXml.'/'.$m[1].'.xml';
 
             $toFileContent   = preg_replace('/Model\\\/', '', $fromFileContent);
             $toFileContent   = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);
             $toFileContent   = preg_replace('/nullable="1"/', 'nullable="true"', $toFileContent);
             $toFileContent   = preg_replace('/ precision="0" scale="0"/', '', $toFileContent);
 
-            $toFileContent = preg_replace_callback('/(column=|table=)("|\')([^\2]*?)(\2)/', function($m){
+            $toFileContent = preg_replace_callback('/(column=|table=)("|\')([^\2]*?)(\2)/', function ($m) {
 
-                if(in_array($m[3], $this->quoteWords)) {
+                if (in_array($m[3], $this->quoteWords)) {
                     $m[3] = '`'.$m[3].'`';
                 }
+
                 return $m[1].$m[2].$m[3].$m[4];
 
             }, $toFileContent);
@@ -251,33 +233,32 @@ class Compiler
             $toFileContent = $this->prettyXml(
                 $toFileContent, [
 
-                    '/(\s+<entity)/'              => "\n" . '\1',
-                    '/(\s+<\/entity>)/'           => "\n" . '\1' . "\n",
-                    '/(\s+<field)/'               => "\n" . '\1',
-                    '/(\s+<one-to-one)/'          => "\n" . '\1',
-                    '/(\s+<many-to-one)/'         => "\n" . '\1',
-                    '/(\s+<one-to-many)/'         => "\n" . '\1',
-                    '/(\s+<many-to-many)/'        => "\n" . '\1',
-                    '/(\s+<id)/'                  => "\n" . '\1',
-                    '/(\s+<indexes)/'             => "\n" . '\1',
-                    '/(\s+<unique-constraints)/'  => "\n" . '\1',
-                    '/(\s+<unique-constraints)/'  => "\n" . '\1',
-                    '/(\s+<lifecycle-callbacks)/' => "\n" . '\1',
+                    '/(\s+<entity)/'              => "\n".'\1',
+                    '/(\s+<\/entity>)/'           => "\n".'\1'."\n",
+                    '/(\s+<field)/'               => "\n".'\1',
+                    '/(\s+<one-to-one)/'          => "\n".'\1',
+                    '/(\s+<many-to-one)/'         => "\n".'\1',
+                    '/(\s+<one-to-many)/'         => "\n".'\1',
+                    '/(\s+<many-to-many)/'        => "\n".'\1',
+                    '/(\s+<id)/'                  => "\n".'\1',
+                    '/(\s+<indexes)/'             => "\n".'\1',
+                    '/(\s+<unique-constraints)/'  => "\n".'\1',
+                    '/(\s+<unique-constraints)/'  => "\n".'\1',
+                    '/(\s+<lifecycle-callbacks)/' => "\n".'\1',
 
-                    '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n" . '       \1',
-                    '/( repository-class=".*?")( name=".*?")( table=".*?")/' => "\n" . '         \2' . "\n" . '         \1' . "\n" . '         \3',
+                    '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n".'       \1',
+                    '/( repository-class=".*?")( name=".*?")( table=".*?")/' => "\n".'         \2'."\n".'         \1'."\n".'         \3',
 
-                    "/<options\W.*?\/>/i" => function($m) {
+                    "/<options\W.*?\/>/i" => function ($m) {
 
                         $out = $m[0];
-                        if(preg_match_all('/(\w+)=(\'|\")(.*?)(\2)/', $m[0], $r)) {
-
+                        if (preg_match_all('/(\w+)=(\'|\")(.*?)(\2)/', $m[0], $r)) {
                             $options = [];
-                            foreach($r[1] as $k=>$name) {
+                            foreach ($r[1] as $k => $name) {
                                 $value = $r[3][$k];
                                 $options[] = "<option name=\"{$name}\">{$value}</option>";
                             }
-                            $options = join("\n          ", $options);
+                            $options = implode("\n          ", $options);
 
                             $out = <<<XML
 <options>
@@ -285,6 +266,7 @@ class Compiler
       </options>
 XML;
                         }
+
                         return $out;
                     },
                 ]
@@ -302,7 +284,6 @@ XML;
      */
     private function prettyXml($xmlStringIn, array $regulations = [])
     {
-
         $dom                     = new \DOMDocument();
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput       = true;
@@ -311,7 +292,7 @@ XML;
         $xmlStringOut = $dom->saveXML();
 
         foreach ($regulations as $from => $to) {
-            if(is_callable($to)) {
+            if (is_callable($to)) {
                 $xmlStringOut = preg_replace_callback($from, $to, $xmlStringOut);
             } else {
                 $xmlStringOut = preg_replace($from, $to, $xmlStringOut);
@@ -331,7 +312,6 @@ XML;
 
         $toFileContent = preg_replace('/Model\\\/', '', $fromFileContent);
         $toFileContent = preg_replace('/\\\Model/', '', $toFileContent);
-
         $toFileContent = preg_replace('/(class) ([^\s]+)/', '\1 \2 extends Model\\\\\2', $toFileContent);
 
         file_put_contents($toFile, $toFileContent);
@@ -339,6 +319,7 @@ XML;
         $this->removeUse($toFile);
         $this->removeORMAnatation($toFile);
         $this->removeClassBody($toFile);
+        $this->setEndOf($toFile);
 
         $this->createRepository($toFile, $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BASE_NAMESPASE));
     }
@@ -358,7 +339,7 @@ XML;
      */
     private function createValidators($configDir)
     {
-        $validationFile = dirname($configDir) . '/validation.xml';
+        $validationFile = dirname($configDir).'/validation.xml';
         $dir            = new \DirectoryIterator($configDir);
         $files = [];
         foreach ($dir as $fileinfo) {
@@ -383,22 +364,20 @@ XML;
         $dom->loadXML($xml);
 
         foreach ($files as $filePath) {
-
             $model = simplexml_load_file($filePath);
 
             $root   = $dom->documentElement;
             $classE = $dom->createElement('class');
 
-            $className = $model->entity->attributes()['name'] . '';
+            $className = $model->entity->attributes()['name'].'';
             $classE->setAttribute('name', $className);
 
             $uniqueConstraints = $model->entity->{'unique-constraints'};
-            if(count($uniqueConstraints)) {
-
-                foreach($uniqueConstraints->{'unique-constraint'} as $uniqueConstraint) {
+            if (count($uniqueConstraints)) {
+                foreach ($uniqueConstraints->{'unique-constraint'} as $uniqueConstraint) {
                     $columns = $uniqueConstraint->attributes()['columns'];
                     $columns = explode(',', $columns);
-                    array_walk($columns, function(&$v) {
+                    array_walk($columns, function (&$v) {
                         $v = trim($v);
                         $v  = preg_replace('/_id$/', '', $v);
                         $v  = preg_replace('/_/', ' ', $v);
@@ -414,13 +393,13 @@ XML;
                     $optionE->setAttribute('name', 'fields');
                     $constraintE->appendChild($optionE);
 
-                    foreach($columns as $column) {
+                    foreach ($columns as $column) {
                         $valueE = $dom->createElement('value', $column);
                         $optionE->appendChild($valueE);
                     }
 
                     $objName = 'Object';
-                    if(preg_match('/[^\\\]*?$/', $className, $m)) {
+                    if (preg_match('/[^\\\]*?$/', $className, $m)) {
                         $objName = $m[0];
                     }
 
@@ -440,17 +419,15 @@ XML;
             $fields = $this->getSortedFields($model->entity->field);
 
             foreach ($fields as $field) {
-
                 $constrainsFields = [];
 
                 $fieldAttrs = $field->attributes();
 
                 $propertyE = $dom->createElement('property');
-                $fieldName = $fieldAttrs['name'] . '';
+                $fieldName = $fieldAttrs['name'].'';
                 $propertyE->setAttribute('name', $fieldName);
 
                 if ($fieldAttrs['nullable'] == 'false' && !in_array($fieldAttrs['type'], ['boolean', 'bool'])) {
-
                     $constraintE = $dom->createElement('constraint');
                     $constraintE->setAttribute('name', 'NotBlank');
                     $propertyE->appendChild($constraintE);
@@ -461,15 +438,13 @@ XML;
                 }
 
                 if (in_array($fieldAttrs['type'], ['dateinterval', 'date', 'datetime', 'datetime_with_millisecond'])) {
-
                     $constraintE = $dom->createElement('constraint');
 
-                    if($fieldAttrs['type'] == 'dateinterval') {
+                    if ($fieldAttrs['type'] == 'dateinterval') {
                         $constraintE->setAttribute('name', 'DateInterval');
-
-                    } else if (in_array($fieldAttrs['type'], ['datetime', 'datetime_with_millisecond'])) {
+                    } elseif (in_array($fieldAttrs['type'], ['datetime', 'datetime_with_millisecond'])) {
                         $constraintE->setAttribute('name', 'DateTime');
-                    } else if ($fieldAttrs['type'] == 'date') {
+                    } elseif ($fieldAttrs['type'] == 'date') {
                         $constraintE->setAttribute('name', 'Date');
                     }
 
@@ -480,9 +455,8 @@ XML;
                     $constrainsFields[] = $constrains[] = $constraintE;
                 }
 
-                if (in_array($fieldAttrs['type'] . '', ['decimal', 'float', 'boolean', 'integer'])) {
-
-                    $type    = $fieldAttrs['type'] . '';
+                if (in_array($fieldAttrs['type'].'', ['decimal', 'float', 'boolean', 'integer'])) {
+                    $type    = $fieldAttrs['type'].'';
                     $typeMap = [
                         'decimal' => 'float',
                         'float'   => 'float',
@@ -504,16 +478,15 @@ XML;
                     $constrainsFields[] = $constrains[] = $constraintE;
                 }
 
-                if (is_numeric($fieldAttrs['length'] . '')) {
-
-                    if($fieldAttrs['type'] == 'dateinterval') {
+                if (is_numeric($fieldAttrs['length'].'')) {
+                    if ($fieldAttrs['type'] == 'dateinterval') {
                         continue;
                     }
 
                     $constraintE = $dom->createElement('constraint');
                     $constraintE->setAttribute('name', 'Length');
 
-                    $optionE = $dom->createElement('option', $fieldAttrs['length'] . '');
+                    $optionE = $dom->createElement('option', $fieldAttrs['length'].'');
                     $optionE->setAttribute('name', 'max');
 
                     $constraintE->appendChild($optionE);
@@ -529,7 +502,6 @@ XML;
             $fields = $this->getSortedFields($model->entity->{'one-to-one'});
 
             foreach ($fields as $field) {
-
                 $fieldAttrs = $field->attributes();
 
                 $propertyE = $dom->createElement('property');
@@ -542,7 +514,6 @@ XML;
                 $joinFieldAttrs = $field->{'join-columns'}->{'join-column'}->attributes();
 
                 if ($joinFieldAttrs['nullable'] == 'false') {
-
                     $constraintE = $dom->createElement('constraint');
                     $constraintE->setAttribute('name', 'NotBlank');
                     $propertyE->appendChild($constraintE);
@@ -565,7 +536,6 @@ XML;
             $fields = $this->getSortedFields($model->entity->{'many-to-one'});
 
             foreach ($fields as $field) {
-
                 $fieldAttrs = $field->attributes();
 
                 $propertyE = $dom->createElement('property');
@@ -578,7 +548,6 @@ XML;
                 $joinFieldAttrs = $field->{'join-columns'}->{'join-column'}->attributes();
 
                 if ($joinFieldAttrs['nullable'] == 'false') {
-
                     $constraintE = $dom->createElement('constraint');
                     $constraintE->setAttribute('name', 'NotBlank');
                     $propertyE->appendChild($constraintE);
@@ -599,15 +568,14 @@ XML;
             }
 
             if (count($constrains)) {
-
                 $root->appendChild($classE);
             }
         }
 
         $xmlString = $this->prettyXml(
             $dom->saveXML(), [
-                '/(xmlns=|xmlns:xsi=|xsi:schemaLocation=)/' => "\n" . '        \1',
-                '/(\s+<class)/'                             => "\n" . '\1',
+                '/(xmlns=|xmlns:xsi=|xsi:schemaLocation=)/' => "\n".'        \1',
+                '/(\s+<class)/'                             => "\n".'\1',
                 //'/(\s+<\/class)/'                           => "\n" . '\1',
                 //'/(\s+<property name)/'                          => "\n" . '\1',
                // '/(\s+<property)/'                          => "\n" . '\1',
@@ -629,7 +597,7 @@ XML;
             $fields[] = $field;
         }
 
-        usort($fields, function($a, $b) {
+        usort($fields, function ($a, $b) {
             return strcmp($a->attributes()['name'], $b->attributes()['name']);
         });
 
@@ -642,19 +610,14 @@ XML;
     {
         $toFileContent = file($file);
         foreach ($toFileContent as $k => $line) {
-
             if (preg_match('/\s+\*\s+@ORM/', $line, $m) ||
                 preg_match('/\s+as\s+ORM/', $line, $m)) {
-
                 unset($toFileContent[$k]);
             }
         }
 
-        $toFileContent = join('', $toFileContent);
-
-        $toFileContent = preg_replace("/\s+?\*\s*?\n/", "\n", $toFileContent);
-
-        $toFileContent = preg_replace("/\\/\*\*\n \*\\//s", '', $toFileContent);
+        $toFileContent = implode('', $toFileContent);
+        $toFileContent = preg_replace("/\/\*\*\n \*\n \*\//", '', $toFileContent);
         $toFileContent = preg_replace("/(\n+)(\nabstract class)/", "\n".'\2', $toFileContent);
         $toFileContent = preg_replace("/(\n+)(\nclass)/", "\n".'\2', $toFileContent);
 
@@ -668,16 +631,15 @@ XML;
     private function createRepository($eFile, $baseNamespace = 'VN')
     {
         $pathinfo  = pathinfo($eFile);
-        $className = $pathinfo['filename'] . 'Repository';
-        $repoDir   = $pathinfo['dirname'] . '/Repository';
-        $repoFile  = $repoDir . '/' . $className . '.php';
+        $className = $pathinfo['filename'].'Repository';
+        $repoDir   = $pathinfo['dirname'].'/Repository';
+        $repoFile  = $repoDir.'/'.$className.'.php';
 
         $toFileContent = file($eFile);
 
         $namespace = null;
         foreach ($toFileContent as $line) {
             if (preg_match('/^namespace\s/', $line, $m)) {
-
                 $namespace = preg_replace('/namespace\s(.*);/', '\1', $line);
                 $namespace = trim($namespace);
                 break;
@@ -695,6 +657,7 @@ use Common\DoctrineBundle\ORM\EntityRepository;
 class ${className} extends EntityRepository
 {
 }
+
 PHP;
 
         $this->createDir($repoDir);
@@ -711,15 +674,14 @@ PHP;
         $toFileContentTmp = file($file);
 
         foreach ($toFileContentTmp as $k => $line) {
-
             $toFileContent[] = $line;
             if (preg_match('/^class\s/', $line, $m)) {
                 $toFileContent[] = "{\n";
-                $toFileContent[] = "}";
+                $toFileContent[] = '}';
                 break;
             }
         }
-        $toFileContent = join('', $toFileContent);
+        $toFileContent = implode('', $toFileContent);
         file_put_contents($file, $toFileContent);
     }
 
@@ -735,7 +697,18 @@ PHP;
                 unset($toFileContent[$k]);
             }
         }
-        $toFileContent = join('', $toFileContent);
+        $toFileContent = implode('', $toFileContent);
+        file_put_contents($file, $toFileContent);
+    }
+
+    /**
+     * @param $file
+     */
+    private function setEndOf($file)
+    {
+        $toFileContent = file_get_contents($file);
+        $toFileContent = trim($toFileContent)."\n";
+
         file_put_contents($file, $toFileContent);
     }
 }

@@ -48,7 +48,8 @@ abstract class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
      */
     protected function createDatatypeConverter()
@@ -61,7 +62,8 @@ abstract class Formatter extends BaseFormatter
      *
      * @param array $relation
      * @param array $mappedRelation
-     * @return boolean
+     *
+     * @return bool
      */
     public function isOwningSide($relation, &$mappedRelation)
     {
@@ -79,13 +81,14 @@ abstract class Formatter extends BaseFormatter
         return $relation['reference']->getLocal()->getId() < $mappedRelation->getLocal()->getId();
     }
 
-    public function test() {
-
+    public function test()
+    {
     }
     /**
      * get the cascade option as array. Only returns values allowed by Doctrine.
      *
      * @param $cascadeValue string cascade options separated by comma
+     *
      * @return array array with the values or null, if no cascade values are available
      */
     public function getCascadeOption($cascadeValue)
@@ -102,9 +105,10 @@ abstract class Formatter extends BaseFormatter
     }
 
     /**
-     * get the fetch option for a relation
+     * get the fetch option for a relation.
      *
      * @param $fetchValue string fetch option as given in comment for foreign key
+     *
      * @return string valid fetch value or null
      */
     public function getFetchOption($fetchValue)
@@ -118,15 +122,15 @@ abstract class Formatter extends BaseFormatter
     }
 
     /**
-     * get the a boolean option for a relation
+     * get the a boolean option for a relation.
      *
      * @param $booleanValue string boolean option (true or false)
-     * @return boolean or null, if booleanValue was invalid
+     *
+     * @return bool or null, if booleanValue was invalid
      */
     public function getBooleanOption($booleanValue)
     {
         if ($booleanValue) {
-
             switch (strtolower($booleanValue)) {
                 case 'true':
                     return true;
@@ -153,7 +157,8 @@ abstract class Formatter extends BaseFormatter
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Formatter\Formatter::getCommentParserIdentifierPrefix()
      */
     public function getCommentParserIdentifierPrefix()

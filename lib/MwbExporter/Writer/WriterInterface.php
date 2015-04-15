@@ -35,7 +35,8 @@ interface WriterInterface
     /**
      * Set the storage used for writer.
      *
-     * @param \MwbExporter\Storage\StorageInterface $storage  The storage
+     * @param \MwbExporter\Storage\StorageInterface $storage The storage
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function setStorage(StorageInterface $storage);
@@ -50,14 +51,15 @@ interface WriterInterface
     /**
      * Set document model.
      *
-     * @param \MwbExporter\Model\Document $document  The document
+     * @param \MwbExporter\Model\Document $document The document
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function setDocument(Document $document);
 
     /**
      * Mark the beginning of the writer.
-     * 
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function begin();
@@ -66,6 +68,7 @@ interface WriterInterface
      * Open writer for a new file.
      *
      * @param string $filename
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function open($filename);
@@ -79,7 +82,7 @@ interface WriterInterface
 
     /**
      * Mark the end of the writer.
-     * 
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function end();
@@ -101,7 +104,8 @@ interface WriterInterface
     /**
      * Write content to buffer via callback.
      *
-     * @param \Closure $callback  The callback
+     * @param \Closure $callback The callback
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function writeCallback($callback);

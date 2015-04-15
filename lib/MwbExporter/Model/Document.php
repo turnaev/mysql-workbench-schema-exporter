@@ -72,7 +72,7 @@ class Document extends Base
      * Constructor.
      *
      * @param FormatterInterface $formatter
-     * @param string $filename
+     * @param string             $filename
      */
     public function __construct(FormatterInterface $formatter, $filename)
     {
@@ -117,6 +117,7 @@ class Document extends Base
      * Set logger object.
      *
      * @param \MwbExporter\Logger\LoggerInterface $logger
+     *
      * @return \MwbExporter\Model\Document
      */
     public function setLogger(LoggerInterface $logger)
@@ -129,8 +130,9 @@ class Document extends Base
     /**
      * Log a message.
      *
-     * @param string $message  Log message
-     * @param string $level    Log level
+     * @param string $message Log message
+     * @param string $level   Log level
+     *
      * @return \MwbExporter\Model\Document
      */
     public function addLog($message, $level = LoggerInterface::INFO)
@@ -173,7 +175,8 @@ class Document extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::getDocument()
      */
     public function getDocument()
@@ -193,10 +196,10 @@ class Document extends Base
 
     protected function readXML($filename)
     {
-        $this->xml = simplexml_load_file("zip://".str_replace("\\", "/", realpath($filename))."#document.mwb.xml");
+        $this->xml = simplexml_load_file('zip://'.str_replace('\\', '/', realpath($filename)).'#document.mwb.xml');
         if (false === $this->xml) {
             throw new \RuntimeException(sprintf('Can\'t load "%s", may be it not MySQL Workbench document.', $filename));
-        } 
+        }
     }
 
     protected function parse()
@@ -206,7 +209,8 @@ class Document extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)
@@ -244,15 +248,16 @@ class Document extends Base
      * By default, the translated filename will be checked against the variables provided by the object
      * to ensure no variables tag ('%var%') left.
      *
-     * @param \MwbExporter\Model\Base $object  The object to translate
-     * @param bool                    $check   True to check the translated filename
+     * @param \MwbExporter\Model\Base $object The object to translate
+     * @param bool                    $check  True to check the translated filename
+     *
      * @throws \Exception
+     *
      * @return string
      */
     public function translateFilename(Base $object, $check = true)
     {
-        if ($object && ($filename = $object->translateVars($this->getConfig()->get(FormatterInterface::CFG_FILENAME))))
-        {
+        if ($object && ($filename = $object->translateVars($this->getConfig()->get(FormatterInterface::CFG_FILENAME)))) {
             if ($check && false !== strpos($filename, '%')) {
                 throw new \Exception(sprintf('All filename variable where not converted. Perhaps a misstyped name (%s) ?', substr($filename, strpos($filename, '%'), strrpos($filename, '%'))));
             }

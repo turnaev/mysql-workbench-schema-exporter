@@ -35,10 +35,10 @@ class Annotation extends Base
 
     /**
      * Constructor.
-     * 
-     * @param string $annotation  Annotation name
-     * @param mixed  $content     Object content
-     * @param array  $options     Object options
+     *
+     * @param string $annotation Annotation name
+     * @param mixed  $content    Object content
+     * @param array  $options    Object options
      */
     public function __construct($annotation, $content = null, $options = array())
     {
@@ -52,27 +52,21 @@ class Annotation extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Object\Base::asCode()
      */
     public function asCode($value)
     {
-        if ($value instanceof Annotation) {
-
+        if ($value instanceof self) {
             $value = (string) $value;
-
         } elseif (is_bool($value)) {
-
             $value = $value ? 'true' : 'false';
-
         } elseif (is_string($value)) {
-
             $value = str_replace('"', "'", $value);
             $value = '"'.$value.'"';
             $value = str_replace('=', '"="', $value);
-
         } elseif (is_array($value) && array_key_exists('comment', $value)) {
-
             $tmp = array();
 
             foreach ($value as $k => $v) {
@@ -88,9 +82,7 @@ class Annotation extends Base
             $value = sprintf('{%s}', $value);
 
             return $value;
-
         } elseif (is_array($value)) {
-
             $tmp = array();
             $useKey = !$this->isKeysNumeric($value);
 
@@ -100,12 +92,11 @@ class Annotation extends Base
                     continue;
                 }
                 $v = $this->asCode($v);
-                if($k == '') {
+                if ($k == '') {
                     $tmp[] = $useKey ? sprintf('%s', $v) : $v;
                 } else {
                     $tmp[] = $useKey ? sprintf('%s=%s', $k, $v) : $v;
                 }
-
             }
 
             $value = implode(', ', $tmp);
@@ -115,7 +106,6 @@ class Annotation extends Base
             } else {
                 $value = sprintf('{%s}', $value);
             }
-
         }
 
         return $value;

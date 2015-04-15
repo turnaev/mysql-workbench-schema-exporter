@@ -67,7 +67,8 @@ class Bootstrap
     /**
      * Get formatter.
      *
-     * @param string $name  The formatter name
+     * @param string $name The formatter name
+     *
      * @return \MwbExporter\Formatter\FormatterInterface
      */
     public function getFormatter($name)
@@ -83,8 +84,9 @@ class Bootstrap
 
     /**
      * Get writer.
-     * 
-     * @param string $name  The writer name
+     *
+     * @param string $name The writer name
+     *
      * @return \MwbExporter\Writer\WriterInterface
      */
     public function getWriter($name)
@@ -101,8 +103,9 @@ class Bootstrap
 
     /**
      * Get storage.
-     * 
-     * @param string $name  The storage name
+     *
+     * @param string $name The storage name
+     *
      * @return \MwbExporter\Storage\StorageInterface
      */
     public function getStorage($name)
@@ -121,17 +124,17 @@ class Bootstrap
      * Load workbench schema and generate the code.
      *
      * @param \MwbExporter\Formatter\FormatterInterface $formatter
-     * @param string $filename
-     * @param string $outDir
-     * @param string $storage
+     * @param string                                    $filename
+     * @param string                                    $outDir
+     * @param string                                    $storage
+     *
      * @return \MwbExporter\Model\Document
      */
     public function export(FormatterInterface $formatter, $filename, $outDir, $storage = 'file')
     {
         if ($formatter && $storage = $this->getStorage($storage)) {
-
             if ($formatter->getRegistry()->config->get(FormatterInterface::CFG_USE_LOGGED_STORAGE)) {
-                $storage = new LoggedStorage($storage); 
+                $storage = new LoggedStorage($storage);
             }
 
             $storage->setOutdir(realpath($outDir) ? realpath($outDir) : $outDir);
@@ -163,7 +166,7 @@ class Bootstrap
 
     /**
      * @param FormatterInterface $formatter
-     * @param Document $document
+     * @param Document           $document
      */
     public function preCompileModels(FormatterInterface $formatter, Document $document)
     {
@@ -173,7 +176,7 @@ class Bootstrap
 
     /**
      * @param FormatterInterface $formatter
-     * @param Document $document
+     * @param Document           $document
      */
     public function postCompileModels(FormatterInterface $formatter, Document $document)
     {

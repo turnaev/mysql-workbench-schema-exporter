@@ -43,7 +43,7 @@ class LoggedStorage extends Storage
 
     public function __construct(StorageInterface $storage)
     {
-        if ($storage instanceof LoggedStorage) {
+        if ($storage instanceof self) {
             throw new \InvalidArgumentException('Inner storage must not a LoggedStorage instance.');
         }
         $this->storage = $storage;
@@ -52,7 +52,8 @@ class LoggedStorage extends Storage
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Storage\Storage::setOutdir()
      */
     public function setOutdir($dir)
@@ -64,7 +65,8 @@ class LoggedStorage extends Storage
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Storage\Storage::setBackup()
      */
     public function setBackup($value)
@@ -76,7 +78,8 @@ class LoggedStorage extends Storage
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Storage\Storage::initialize()
      */
     public function initialize()
@@ -88,7 +91,8 @@ class LoggedStorage extends Storage
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Storage\Storage::save()
      */
     public function save($filename, $content)
@@ -100,7 +104,8 @@ class LoggedStorage extends Storage
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Storage\Storage::finalize()
      */
     public function finalize()
@@ -111,7 +116,8 @@ class LoggedStorage extends Storage
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Storage\Storage::getResult()
      */
     public function getResult()

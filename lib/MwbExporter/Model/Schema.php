@@ -87,7 +87,8 @@ class Schema extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)
@@ -101,6 +102,7 @@ class Schema extends Base
      * Write schema entity as code.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
+     *
      * @return \MwbExporter\Model\Schema
      */
     public function writeSchema(WriterInterface $writer)
@@ -115,11 +117,12 @@ class Schema extends Base
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::getVars()
      */
     protected function getVars()
     {
-      return array('%schema%' => $this->getName());
+        return array('%schema%' => $this->getName());
     }
 }

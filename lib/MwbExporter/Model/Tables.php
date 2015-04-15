@@ -40,7 +40,7 @@ class Tables extends Base implements \ArrayAccess, \IteratorAggregate, \Countabl
     public function init()
     {
         // collect tables
-        foreach ($this->node->xpath("value") as $key => $node) {
+        foreach ($this->node->xpath('value') as $key => $node) {
             $table = $this->getDocument()->getFormatter()->createTable($this, $node);
             // skip translation tables
             if ($table->isTranslationTable()) {
@@ -48,7 +48,7 @@ class Tables extends Base implements \ArrayAccess, \IteratorAggregate, \Countabl
             }
             $this->tables[] = $table;
         }
-        usort($this->tables, function($a, $b) {
+        usort($this->tables, function ($a, $b) {
             return strcmp($a->getModelName(), $b->getModelName());
         });
         /*
@@ -113,13 +113,13 @@ class Tables extends Base implements \ArrayAccess, \IteratorAggregate, \Countabl
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)
     {
         foreach ($this->tables as $table) {
-
             if ($table->parseComment('skip') == 'true') {
                 continue;
             }

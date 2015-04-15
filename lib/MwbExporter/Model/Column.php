@@ -60,12 +60,12 @@ class Column extends Base
     {
         $this->links = new RegistryHolder();
         // iterate on column configuration
-        foreach ($this->node->xpath("value") as $key => $node) {
+        foreach ($this->node->xpath('value') as $key => $node) {
             $attributes         = $node->attributes();
             $this->parameters->set((string) $attributes['key'], (string) $node[0]);
         }
         // iterate on links to other wb objects
-        foreach ($this->node->xpath("link") as $key => $node) {
+        foreach ($this->node->xpath('link') as $key => $node) {
             $attributes         = $node->attributes();
             $key                = (string) $attributes['key'];
             $this->links->set((string) $attributes['key'], (string) $node[0]);
@@ -101,6 +101,7 @@ class Column extends Base
     {
         $name = $this->columnNameBeautifier($this->getColumnName());
         $name = lcfirst($name);
+
         return $name;
     }
 
@@ -119,7 +120,7 @@ class Column extends Base
     }
 
     /**
-     * Set the column as primary key
+     * Set the column as primary key.
      */
     public function markAsPrimary()
     {
@@ -127,9 +128,9 @@ class Column extends Base
     }
 
     /**
-     * return true if the column is a primary key
+     * return true if the column is a primary key.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPrimary()
     {
@@ -137,7 +138,7 @@ class Column extends Base
     }
 
     /**
-     * Set the column as unique
+     * Set the column as unique.
      */
     public function markAsUnique()
     {
@@ -175,8 +176,8 @@ class Column extends Base
     }
 
     /**
-     *
      * @param string $columnName
+     *
      * @return string
      */
     protected function columnNameBeautifier($columnName)
@@ -188,8 +189,9 @@ class Column extends Base
     /**
      * Check if foreign key owner tablename matched.
      *
-     * @param ForeignKey $foreign    The foreign key
-     * @param string     $tablename  The table name
+     * @param ForeignKey $foreign   The foreign key
+     * @param string     $tablename The table name
+     *
      * @return bool
      */
     protected function checkForeignKeyOwnerTableName($foreign, $tablename)
@@ -200,8 +202,9 @@ class Column extends Base
     /**
      * Check if reference tablename matched.
      *
-     * @param Table   $table      The reference table
-     * @param string  $tablename  The table name
+     * @param Table  $table     The reference table
+     * @param string $tablename The table name
+     *
      * @return bool
      */
     protected function checkReferenceTableName($table, $tablename)
@@ -212,8 +215,9 @@ class Column extends Base
     /**
      * Get the foreign key reference count.
      *
-     * @param ForeignKey $fkey   The foreign key
-     * @param int        $max    The maximum count
+     * @param ForeignKey $fkey The foreign key
+     * @param int        $max  The maximum count
+     *
      * @return int
      */
     protected function getForeignKeyReferenceCount($fkey, $max = null)
@@ -235,8 +239,9 @@ class Column extends Base
     /**
      * Get the relation reference count.
      *
-     * @param ForeignKey $fkey   The foreign key
-     * @param int        $max    The maximum count
+     * @param ForeignKey $fkey The foreign key
+     * @param int        $max  The maximum count
+     *
      * @return int
      */
     protected function getRelationReferenceCount($fkey, $max = null)
@@ -259,7 +264,8 @@ class Column extends Base
     /**
      * Check if foreign table reference is referenced by more than one column.
      *
-     * @param ForeignKey $reference   The foreign key to check
+     * @param ForeignKey $reference The foreign key to check
+     *
      * @return bool
      */
     public function isMultiReferences($reference)
@@ -278,8 +284,9 @@ class Column extends Base
     /**
      * Format column name as relation to foreign table.
      *
-     * @param string $column  The column name
-     * @param bool   $code    If true, use result as PHP code or false, use as comment
+     * @param string $column The column name
+     * @param bool   $code   If true, use result as PHP code or false, use as comment
+     *
      * @return string
      */
     public function formatRelatedName($column, $code = true)
@@ -290,8 +297,9 @@ class Column extends Base
     /**
      * Get the related name for one-to-many relation.
      *
-     * @param ForeignKey $reference   The foreign key
-     * @param bool       $code        If true, use result as PHP code or false, use as comment
+     * @param ForeignKey $reference The foreign key
+     * @param bool       $code      If true, use result as PHP code or false, use as comment
+     *
      * @return string
      */
     public function getRelatedName($reference, $code = true)
@@ -302,9 +310,10 @@ class Column extends Base
     /**
      * Get the related name for many-to-many relation.
      *
-     * @param string $tablename   The foreign tablename
-     * @param string $column      The foreign column name
-     * @param bool   $code        If true, use result as PHP code or false, use as comment
+     * @param string $tablename The foreign tablename
+     * @param string $column    The foreign column name
+     * @param bool   $code      If true, use result as PHP code or false, use as comment
+     *
      * @return string
      */
     public function getManyToManyRelatedName($tablename, $column, $code = true)
@@ -331,7 +340,7 @@ class Column extends Base
     /**
      * Is column not null (aka. required).
      *
-     * @return boolean
+     * @return bool
      */
     public function isNotNull()
     {
@@ -341,7 +350,7 @@ class Column extends Base
     /**
      * Is column auto increment.
      *
-     * @return boolean
+     * @return bool
      */
     public function isAutoIncrement()
     {
@@ -356,11 +365,9 @@ class Column extends Base
     public function getDefaultValue()
     {
         if (1 != $this->parameters->get('defaultValueIsNull')) {
-
             $defaultValue = trim($this->parameters->get('defaultValue'), '\'"');
 
             if (!(is_null($defaultValue) || ('NULL' == $defaultValue) || $defaultValue == '')) {
-
                 return $defaultValue;
             }
         }

@@ -116,7 +116,8 @@ class Columns extends Base implements \ArrayAccess, \IteratorAggregate, \Countab
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc).
+     *
      * @see \MwbExporter\Model\Base::write()
      */
     public function write(WriterInterface $writer)
@@ -128,28 +129,26 @@ class Columns extends Base implements \ArrayAccess, \IteratorAggregate, \Countab
         return $this;
     }
 
-
     /**
      * @param $columnName
      *
      * @return Column|null
      */
-    public function getColumnByName($columnName) {
-
+    public function getColumnByName($columnName)
+    {
         $out = null;
-        foreach($this->columns as $column) {
-
-           if($column->getPhpColumnName() == $columnName) {
-               $out = $column;
-               break;
-           }
+        foreach ($this->columns as $column) {
+            if ($column->getPhpColumnName() == $columnName) {
+                $out = $column;
+                break;
+            }
         }
+
         return $out;
     }
 
-
     /**
-     * @param string $columnNameIn
+     * @param string      $columnNameIn
      * @param null|string $columnType
      *
      * @return bool
@@ -159,13 +158,10 @@ class Columns extends Base implements \ArrayAccess, \IteratorAggregate, \Countab
         $matched = false;
         $column = $this->getColumnByName($columnNameIn);
 
-        if($column) {
-
-            if($columnType) {
-
+        if ($column) {
+            if ($columnType) {
                 $datatypeConverter = $this->getDocument()->getFormatter()->getDatatypeConverter();
                 $matched = ($datatypeConverter->getMappedType($column) == $columnType);
-
             } else {
                 $matched = true;
             }
