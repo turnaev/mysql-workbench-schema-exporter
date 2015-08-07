@@ -324,6 +324,7 @@ class Table extends BaseTable
                     $_this->getColumns()->writeArrayCollections($writer, $maxLen);
 
                     foreach ($fields as $field) {
+
                         $format = "\$this->%-{$maxLen}s = new %s();";
                         $writer->write($format, $field, $_this->getCollectionClass(false));
                     }
@@ -347,6 +348,11 @@ class Table extends BaseTable
         } else {
             $throwException = true;
             $column         = null;
+        }
+
+        /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
+        if ($column && $column->parseComment('skip') == 'true') {
+            return;
         }
 
         //* @throws MethodNotImplementedException
@@ -423,6 +429,11 @@ class Table extends BaseTable
         $columnsArr = [];
 
         foreach ($columns as $column) {
+            /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
+            if ($column->parseComment('skip') == 'true') {
+                continue;
+            }
+
             $columnKey = $column->getPhpColumnName();
 
             if (in_array($column->asAnnotation()['type'], ['datetime'])) {

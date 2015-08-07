@@ -453,6 +453,10 @@ class Column extends BaseColumn
         $propName = $varName = $this->getPhpColumnName();
         $funactionName = $this->columnNameBeautifier($this->getColumnName());
 
+        if ($this->parseComment('skip') == 'true') {
+            return;
+        }
+
         $writer
             // setter
             ->write('/**')
