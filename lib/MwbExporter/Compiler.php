@@ -10,6 +10,8 @@ use MwbExporter\Model\Document;
  */
 class Compiler
 {
+    use XmlPrettyTrait;
+
     /**
      * @var FormatterInterface
      */
@@ -43,21 +45,16 @@ class Compiler
     public function preCompileModels()
     {
         if ($this->formatter->getFileExtension() == 'php') {
+
             $fromDir = $this->document
                 ->getWriter()
                 ->getStorage()
                 ->getResult();
-            $toDir   = dirname(
-                $this->document
-                    ->getWriter()
-                    ->getStorage()
-                    ->getResult()
-            );
 
-            $dir = new \DirectoryIterator($this->document
-                ->getWriter()
-                ->getStorage()
-                ->getResult());
+            $toDir   = dirname($fromDir);
+
+            $dir = new \DirectoryIterator($fromDir);
+
             foreach ($dir as $fileinfo) {
                 $fromFile = $fromDir.'/'.$fileinfo->getFilename();
                 $toFile   = $toDir.'/'.$fileinfo->getFilename();
@@ -158,20 +155,14 @@ class Compiler
     private function finalCompileModels()
     {
         $namenamespaceTo = $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BUNDELE_NAMESPACE_TO);
+
         $modeDir         = dirname(
             $this->document
                 ->getWriter()
                 ->getStorage()
                 ->getResult()
         );
-        $metaModeDir     = dirname(
-                dirname(
-                    $this->document
-                        ->getWriter()
-                        ->getStorage()
-                        ->getResult()
-                )
-            ).'/Resources/config/doctrine';
+        $metaModeDir     = dirname($modeDir).'/Resources/config/doctrine';
 
         if ($namenamespaceTo) {
             $namenamespaceFrom
@@ -232,25 +223,7 @@ class Compiler
 
             $toFileContent = $this->prettyXml(
                 $toFileContent, [
-
-                    '/(\s+<entity)/'              => "\n".'\1',
-                    '/(\s+<\/entity>)/'           => "\n".'\1'."\n",
-                    '/(\s+<field)/'               => "\n".'\1',
-                    '/(\s+<one-to-one)/'          => "\n".'\1',
-                    '/(\s+<many-to-one)/'         => "\n".'\1',
-                    '/(\s+<one-to-many)/'         => "\n".'\1',
-                    '/(\s+<many-to-many)/'        => "\n".'\1',
-                    '/(\s+<id)/'                  => "\n".'\1',
-                    '/(\s+<indexes)/'             => "\n".'\1',
-                    '/(\s+<unique-constraints)/'  => "\n".'\1',
-                    '/(\s+<unique-constraints)/'  => "\n".'\1',
-                    '/(\s+<lifecycle-callbacks)/' => "\n".'\1',
-
-                    '/( xmlns=| xmlns:xsi=| xsi:schemaLocation=)/'  => "\n".'       \1',
-                    '/( repository-class=".*?")( name=".*?")( table=".*?")/' => "\n".'         \2'."\n".'         \1'."\n".'         \3',
-
                     "/<options\W.*?\/>/i" => function ($m) {
-
                         $out = $m[0];
                         if (preg_match_all('/(\w+)=(\'|\")(.*?)(\2)/', $m[0], $r)) {
                             $options = [];
@@ -276,31 +249,6 @@ XML;
         }
     }
 
-    /**
-     * @param       $xmlStringIn
-     * @param array $regulations
-     *
-     * @return mixed
-     */
-    private function prettyXml($xmlStringIn, array $regulations = [])
-    {
-        $dom                     = new \DOMDocument();
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput       = true;
-        $dom->loadXML($xmlStringIn);
-
-        $xmlStringOut = $dom->saveXML();
-
-        foreach ($regulations as $from => $to) {
-            if (is_callable($to)) {
-                $xmlStringOut = preg_replace_callback($from, $to, $xmlStringOut);
-            } else {
-                $xmlStringOut = preg_replace($from, $to, $xmlStringOut);
-            }
-        }
-
-        return $xmlStringOut;
-    }
 
     /**
      * @param $fromFile
@@ -339,15 +287,19 @@ XML;
      */
     private function createValidators($configDir)
     {
-        $validationFile = dirname($configDir).'/validation.xml';
-        $dir            = new \DirectoryIterator($configDir);
+        $validationsDir = dirname($configDir).'/validation';
+        mkdir($validationsDir);
+
+        $dir = new \DirectoryIterator($configDir);
         $files = [];
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot()) {
-                $files[$fileinfo->getFileName()] = $fileinfo->getPathName();
+                $fileName = $fileinfo->getFileName();
+                $fileName = preg_replace('/\.orm\.xml$/', '.xml', $fileName);
+                $files[$fileinfo->getPathName()] = $fileName;
             }
         }
-        ksort($files);
+        asort($files);
 
         $xml
                         = <<<XML
@@ -359,12 +311,15 @@ XML;
         xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping http://symfony.com/schema/dic/services/constraint-mapping-1.0.xsd">
 </constraint-mapping>
 XML;
-        $dom            = new \DOMDocument();
+        $domTpl = new \DOMDocument();
+        $domTpl->loadXML($xml);
 
-        $dom->loadXML($xml);
+        foreach ($files as $modelFilePath => $validationFile) {
+            $dom = clone $domTpl;
 
-        foreach ($files as $filePath) {
-            $model = simplexml_load_file($filePath);
+            $validationFile = $validationsDir.'/'.$validationFile;
+
+            $model = simplexml_load_file($modelFilePath);
 
             $root   = $dom->documentElement;
             $classE = $dom->createElement('class');
@@ -410,7 +365,7 @@ XML;
 
                     $classE->appendChild($constraintE);
 
-                    $constrainsFields[] = $constrains[] = $constraintE;
+                    $constrains[] = $constraintE;
                 }
             }
 
@@ -419,7 +374,6 @@ XML;
             $fields = $this->getSortedFields($model->entity->field);
 
             foreach ($fields as $field) {
-                $constrainsFields = [];
 
                 $fieldAttrs = $field->attributes();
 
@@ -434,7 +388,7 @@ XML;
 
                     $classE->appendChild($propertyE);
 
-                    $constrainsFields[] = $constrains[] = $constraintE;
+                    $constrains[] = $constraintE;
                 }
 
                 if (in_array($fieldAttrs['type'], ['dateinterval', 'date', 'datetime', 'datetime_with_millisecond'])) {
@@ -452,7 +406,7 @@ XML;
 
                     $classE->appendChild($propertyE);
 
-                    $constrainsFields[] = $constrains[] = $constraintE;
+                    $constrains[] = $constraintE;
                 }
 
                 if (in_array($fieldAttrs['type'].'', ['decimal', 'float', 'boolean', 'integer'])) {
@@ -475,7 +429,7 @@ XML;
 
                     $classE->appendChild($propertyE);
 
-                    $constrainsFields[] = $constrains[] = $constraintE;
+                    $constrains[] = $constraintE;
                 }
 
                 if (is_numeric($fieldAttrs['length'].'')) {
@@ -495,7 +449,7 @@ XML;
 
                     $classE->appendChild($propertyE);
 
-                    $constrainsFields[] = $constrains[] = $constraintE;
+                    $constrains[] = $constraintE;
                 }
             }
 
@@ -564,30 +518,17 @@ XML;
 
                 $classE->appendChild($propertyE);
 
-                $constrainsFields[] = $constrains[] = $constraintE;
+                $constrains[] = $constraintE;
             }
 
             if (count($constrains)) {
                 $root->appendChild($classE);
             }
+
+            $xml = $this->prettyXml($dom->saveXML());
+
+            file_put_contents($validationFile, $xml);
         }
-
-        $xmlString = $this->prettyXml(
-            $dom->saveXML(), [
-                '/(xmlns=|xmlns:xsi=|xsi:schemaLocation=)/' => "\n".'        \1',
-                '/(\s+<class)/'                             => "\n".'\1',
-                //'/(\s+<\/class)/'                           => "\n" . '\1',
-                //'/(\s+<property name)/'                          => "\n" . '\1',
-               // '/(\s+<property)/'                          => "\n" . '\1',
-                //'/(\s+<property)/'                          => "\n" . '\1',
-                "/(    <\/property>)\n    (<property)/is"                          => '\1'."\n\n".'    \2',
-                "/(    <\/constraint>)\n    (<property)/is"                          => '\1'."\n\n".'    \2',
-                "/(    <\/constraint>)\n    (<constraint)/is"                          => '\1'."\n\n".'    \2',
-
-            ]
-        );
-
-        file_put_contents($validationFile, $xmlString);
     }
 
     private function getSortedFields($fieldsIn)
