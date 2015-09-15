@@ -270,7 +270,7 @@ PHP
             $content = preg_replace($from, $to, $content);
 
             if(preg_match('/toArray/', $content)) {
-                $content = preg_replace("/(abstract class .*?)(\n\{)/", '\1 implements Type\ArraybleInterface, Type\ModelInterface\2', $content);
+                $content = preg_replace("/(abstract class .*?)(\n\{)/", '\1 implements Type\ArraybleInterface, Type\EntityInterface\2', $content);
             }
 
             if(preg_match('/Type\\\/', $content)) {
