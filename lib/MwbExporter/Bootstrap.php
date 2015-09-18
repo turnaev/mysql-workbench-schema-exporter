@@ -166,21 +166,21 @@ class Bootstrap
 
     /**
      * @param FormatterInterface $formatter
-     * @param Document           $document
+     * @param string           $workDir
      */
-    public function preCompileModels(FormatterInterface $formatter, Document $document)
+    public function preCompileModels(FormatterInterface $formatter, $workDir)
     {
-        $compiler = new Compiler($formatter, $document);
-        $compiler->preCompileModels();
+        $compiler = new Compiler($formatter, $workDir);
+        return $compiler->preCompileModels();
     }
 
     /**
      * @param FormatterInterface $formatter
-     * @param Document           $document
+     * @param string           $workDir
      */
-    public function postCompileModels(FormatterInterface $formatter, Document $document)
+    public function postCompileModels(FormatterInterface $formatter, $workDir)
     {
-        $compiler = new Compiler($formatter, $document);
+        $compiler = new Compiler($formatter, $workDir);
         $compiler->postCompileModels();
     }
 }

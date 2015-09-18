@@ -18,9 +18,9 @@ class Compiler
     private $formatter;
 
     /**
-     * @var Cocument
+     * @var sting
      */
-    private $document;
+    private $workDir;
 
     /**
      * @var array
@@ -31,11 +31,11 @@ class Compiler
 
     /**
      * @param FormatterInterface $formatter
-     * @param Document           $document
+     * @param Document           $workDir
      */
-    public function __construct(FormatterInterface $formatter, Document $document)
+    public function __construct(FormatterInterface $formatter, $workDir)
     {
-        $this->document  = $document;
+        $this->workDir  = $workDir;
         $this->formatter = $formatter;
     }
 
@@ -44,22 +44,47 @@ class Compiler
      */
     public function preCompileModels()
     {
+        $dirs = [];
         if ($this->formatter->getFileExtension() == 'php') {
 
-            $fromDir = $this->document
-                ->getWriter()
-                ->getStorage()
-                ->getResult();
+            $fromDir = $this->workDir;
 
             $toDir   = dirname($fromDir);
 
-            $dir = new \DirectoryIterator($fromDir);
-
-            foreach ($dir as $fileinfo) {
-                $fromFile = $fromDir.'/'.$fileinfo->getFilename();
-                $toFile   = $toDir.'/'.$fileinfo->getFilename();
+            foreach (new \DirectoryIterator($fromDir) as $fileinfo) {
 
                 if (!$fileinfo->isDot()) {
+
+                    $fromFile = $fromDir.'/'.$fileinfo->getFilename();
+
+                    $content = file_get_contents($fromFile);
+                    if(preg_match('#namespace (.*?);#', $content, $m)) {
+
+                        $namespace = preg_replace('/\\\/', '/', $m[1]);
+
+                        if(false === strpos($namespace, $fromFile)) {
+
+                            $newFromFile = preg_replace('#src/.*?Model#', "src/$namespace", $fromFile);
+
+                            $newToDir= dirname($newFromFile);
+
+                            @mkdir($newToDir, 0777, true);
+
+                            rename($fromFile, $newFromFile);
+
+                            $newToDir= dirname(dirname($newFromFile));
+
+                            $fromFile = $newFromFile;
+                            $toDir = $newToDir;
+
+
+                        }
+                    }
+
+                    $toFile   = $toDir.'/'.$fileinfo->getFilename();
+
+                    $dirs[$toDir] = $toDir;
+
                     if ($fileinfo->getExtension() == 'php') {
                         $this->setEndOf($fromFile);
                         $this->createWorkModelClass($fromFile, $toFile);
@@ -69,6 +94,8 @@ class Compiler
                 }
             }
         }
+
+        return $dirs;
     }
 
     /**
@@ -77,17 +104,10 @@ class Compiler
     public function postCompileModels()
     {
         if ($this->formatter->getFileExtension() == 'php') {
-            $modelDir = $this->document
-                ->getWriter()
-                ->getStorage()
-                ->getResult();
+            $modelDir = $this->workDir;
 
-            $dir = new \DirectoryIterator($this->document
-                ->getWriter()
-                ->getStorage()
-                ->getResult());
+            foreach (new \DirectoryIterator($modelDir) as $fileinfo) {
 
-            foreach ($dir as $fileinfo) {
                 if (!$fileinfo->isDot()) {
                     $modelFile = $modelDir.'/'.$fileinfo->getFilename();
 
@@ -99,22 +119,15 @@ class Compiler
                 }
             }
 
-            $configDir        = dirname(
-                    dirname(
-                        $this->document
-                            ->getWriter()
-                            ->getStorage()
-                            ->getResult()
-                    )
-                ).'/Resources/config';
+            $configDir = dirname(dirname($modelDir)).'/Resources/config';
+
             $configFromDirXml = $configDir.'/doctrine-xml';
             $configToDirXml   = $configDir.'/doctrine';
 
             if (is_dir($configFromDirXml)) {
                 $this->createDir($configToDirXml);
 
-                $dir = new \DirectoryIterator($configFromDirXml);
-                foreach ($dir as $fileinfo) {
+                foreach (new \DirectoryIterator($configFromDirXml) as $fileinfo) {
                     if (!$fileinfo->isDot()) {
                         $fromXmlFile = $configFromDirXml.'/'.$fileinfo->getFilename();
 
@@ -156,12 +169,7 @@ class Compiler
     {
         $namenamespaceTo = $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BUNDELE_NAMESPACE_TO);
 
-        $modeDir         = dirname(
-            $this->document
-                ->getWriter()
-                ->getStorage()
-                ->getResult()
-        );
+        $modeDir         = dirname($this->workDir);
         $metaModeDir     = dirname($modeDir).'/Resources/config/doctrine';
 
         if ($namenamespaceTo) {
@@ -288,7 +296,7 @@ XML;
     private function createValidators($configDir)
     {
         $validationsDir = dirname($configDir).'/validation';
-        mkdir($validationsDir);
+        @ mkdir($validationsDir);
 
         $dir = new \DirectoryIterator($configDir);
         $files = [];
@@ -569,7 +577,7 @@ XML;
      * @param        $eFile
      * @param string $baseNamespace
      */
-    private function createRepository($eFile, $baseNamespace = 'VN')
+    private function createRepository($eFile, $baseNamespace)
     {
         $pathinfo  = pathinfo($eFile);
         $className = $pathinfo['filename'].'Repository';

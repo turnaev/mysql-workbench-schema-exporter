@@ -13,14 +13,14 @@ trait XmlPrettyTrait
     private function prettyXml($xml, array $regulations = [])
     {
         $config = [
-            'input-xml' => true,
-            'output-xml' => true,
-            'indent' => true,
-            'wrap'=>false,
-            'indent-spaces' => 4,
-            'vertical-space'=>true,
-            'sort-attributes'=>'alpha',
-            'indent-attributes'=>false,
+            'input-xml'         => true,
+            'output-xml'        => true,
+            'indent'            => true,
+            'wrap'              => false,
+            'indent-spaces'     => 4,
+            'vertical-space'    => true,
+            'sort-attributes'   => 'alpha',
+            'indent-attributes' => false,
         ];
 
         $tidy = new \tidy;

@@ -40,23 +40,23 @@ class Patcher
     {
         try {
 
-            foreach (new \DirectoryIterator($this->baseDir . 'Resources/config/doctrine') as $fileInfo) {
+            foreach (new \DirectoryIterator($this->baseDir . '/Resources/config/doctrine') as $fileInfo) {
                 $this->patchXml($fileInfo);
             }
 
-            foreach (new \DirectoryIterator($this->baseDir . 'Entity/Repository') as $fileInfo) {
+            foreach (new \DirectoryIterator($this->baseDir . '/Entity/Repository') as $fileInfo) {
                 $this->patchRepository($fileInfo);
             }
 
-            foreach (new \DirectoryIterator($this->baseDir . 'Entity') as $fileInfo) {
+            foreach (new \DirectoryIterator($this->baseDir . '/Entity') as $fileInfo) {
                 $this->patchEntity($fileInfo);
             }
 
-            foreach (new \DirectoryIterator($this->baseDir . 'Entity/Model') as $fileInfo) {
+            foreach (new \DirectoryIterator($this->baseDir . '/Entity/Model') as $fileInfo) {
                 $this->patchEntityModel($fileInfo);
             }
 
-            foreach (new \DirectoryIterator($this->baseDir . 'Resources/config') as $fileInfo) {
+            foreach (new \DirectoryIterator($this->baseDir . '/Resources/config/validation') as $fileInfo) {
                 $this->patchValidatorXml($fileInfo);
             }
 
@@ -70,22 +70,20 @@ class Patcher
      * Resources/config/validation.xml
      * @param DirectoryIterator $fileInfo
      */
-    private function patchValidatorXml(\DirectoryIterator $fileInfo)
+    private function patchValidatorXml($fileInfo)
     {
         if ($fileInfo->isFile()) {
+            $contentMap = [
+                '"DateInterval"' => '"\Common\CoreBundle\Validator\Constraints\DateInterval"',
+            ];
 
-            if ($fileInfo->getFilename() == 'validation.xml') {
-                $contentMap = [
-                    '"DateInterval"' => '"\Common\CoreBundle\Validator\Constraints\DateInterval"',
-                ];
+            $filePath = $fileInfo->getRealPath();
+            $content = file_get_contents($filePath);
+            $content = str_replace(array_keys($contentMap), array_values($contentMap), $content);
 
-                $filePath = $fileInfo->getPathname();
-                $content = file_get_contents($filePath);
-                $content = str_replace(array_keys($contentMap), array_values($contentMap), $content);
-
-                file_put_contents($filePath, $content);
-            }
+            file_put_contents($filePath, $content);
         }
+
     }
 
     /**
