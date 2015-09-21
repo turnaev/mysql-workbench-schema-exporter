@@ -211,10 +211,17 @@ class Compiler
     {
         $fromFileContent = file_get_contents($fromXmlFile);
 
+
         if (preg_match('/.*\.Model\.(.*?)$/', pathinfo($fromXmlFile)['filename'], $m)) {
             $toXmlFile = $configToDirXml.'/'.$m[1].'.xml';
+            $toFileContent = $fromFileContent;
 
-            $toFileContent   = preg_replace('/Model\\\/', '', $fromFileContent);
+            preg_match('/name="(.*?)Model(.*?)"/', $fromFileContent, $r);
+            $ns = $r[1];
+
+            $toFileContent   = preg_replace('/(repository-class=")(App\\\CoreBundle\\\Entity)(\\\Repository\\\.*?")/', '\1'.$ns.'3', $toFileContent);
+
+            $toFileContent   = preg_replace('/Model\\\/', '', $toFileContent);
             $toFileContent   = preg_replace('/nullable=""/', 'nullable="false"', $toFileContent);
             $toFileContent   = preg_replace('/nullable="1"/', 'nullable="true"', $toFileContent);
             $toFileContent   = preg_replace('/ precision="0" scale="0"/', '', $toFileContent);

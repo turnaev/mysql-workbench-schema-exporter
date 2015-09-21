@@ -93,6 +93,7 @@ class DatatypeConverter extends BaseDatatypeConverter
             static::USERDATATYPE_DATETIME_NATIVE                  => '\DateTime',
             static::USERDATATYPE_DATETIME_WITH_MILLISECOND_NATIVE => '\DateTime',
             static::USERDATATYPE_DATEINTERVAL_NATIVE              => '\DateInterval',
+            static::USERDATATYPE_TIMESTAMP        => 'datetime_with_millisecond',
 
         ));
     }
