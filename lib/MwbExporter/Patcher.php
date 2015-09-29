@@ -67,18 +67,19 @@ class Patcher
     }
 
     /**
-     * Resources/config/validation.xml
      * @param DirectoryIterator $fileInfo
      */
     private function patchValidatorXml($fileInfo)
     {
         if ($fileInfo->isFile()) {
+
+            $filePath = $fileInfo->getRealPath();
+            $content = file_get_contents($filePath);
+
             $contentMap = [
                 '"DateInterval"' => '"\Common\CoreBundle\Validator\Constraints\DateInterval"',
             ];
 
-            $filePath = $fileInfo->getRealPath();
-            $content = file_get_contents($filePath);
             $content = str_replace(array_keys($contentMap), array_values($contentMap), $content);
 
             file_put_contents($filePath, $content);
@@ -87,7 +88,6 @@ class Patcher
     }
 
     /**
-     * Resources/config/doctrine
      * @param DirectoryIterator $fileInfo
      */
     private function patchXml(\DirectoryIterator $fileInfo)
@@ -170,10 +170,10 @@ class Patcher
         }
 
         $xml = $this->prettyXml($dom->saveXML(), [
-            '/( xmlns:gedmo=)/'  => "\n".'       \1',
-            '/(\s+<gedmo:loggable.*?\/>)/' => "\n".'\1',
-            '/>(<gedmo:versioned\/>)/' => ">\n      ".'\1'."\n    ",
-            "/\n    (<gedmo:versioned\/>)/" => "\n      ".'\1'."\n    ",
+            '/( xmlns:gedmo=)/'             => "\n       \\1",
+            '/(\s+<gedmo:loggable.*?\/>)/'  => "\n\\1",
+            '/>(<gedmo:versioned\/>)/'      => ">\n      \\1\n    ",
+            "/\n    (<gedmo:versioned\/>)/" => "\n      \\1\n    ",
         ]);
 
         return $xml;
