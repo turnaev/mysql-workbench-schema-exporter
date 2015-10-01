@@ -84,7 +84,6 @@ class Patcher
 
             file_put_contents($filePath, $content);
         }
-
     }
 
     /**
@@ -267,12 +266,28 @@ PHP
             $to      = array_values($contentMap);
             $content = preg_replace($from, $to, $content);
 
-            if(preg_match('/toArray/', $content)) {
-                $content = preg_replace("/(abstract class .*?)(\n\{)/", '\1 implements Type\ArraybleInterface, Type\EntityInterface\2', $content);
+            $imeplements = ['\Common\CoreBundle\Type\EntityInterface'];
+            if(preg_match('#(abstract class [^\\\]*?\s+?implements\s+?)(.*)#', $content, $m)) {
+
+                $m = explode(',', $m[2]);
+                array_walk($m, 'trim');
+                $imeplements = array_merge($imeplements, $m);
+
             }
 
+            if(preg_match('/toArray/', $content)) {
+                $imeplements[] = '\Common\CoreBundle\Type\ArraybleInterface';
+            }
+
+            $imeplements = array_values($imeplements);
+            $imeplements = implode(', ', $imeplements);
+            $content = preg_replace("#(abstract class [^\\\]*?)(\s+?implements\s+?)(.*)(\n\{)#", '\1\4', $content);
+            $content = preg_replace("/(abstract class .*?)(\n\{)/", '\1 implements '.$imeplements.'\2', $content);
+
             if(preg_match('/Type\\\/', $content)) {
+                $content = preg_replace('#\\\Common\\\CoreBundle\\\Type#', 'Type', $content);
                 $content = preg_replace('/namespace (.*?);/', 'namespace \1;'."\n\n".'use Common\\CoreBundle\\Type;', $content);
+
             }
 
             $content = preg_replace("/(use .*?;)\n{2}(use .*?;)/", '\1'."\n".'\2', $content);

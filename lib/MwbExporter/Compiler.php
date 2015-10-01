@@ -217,7 +217,6 @@ class Compiler
     {
         $fromFileContent = file_get_contents($fromXmlFile);
 
-
         if (preg_match('/.*\.Model\.(.*?)$/', pathinfo($fromXmlFile)['filename'], $m)) {
             $toXmlFile = $configToDirXml.'/'.$m[1].'.xml';
             $toFileContent = $fromFileContent;
@@ -286,9 +285,11 @@ XML;
         file_put_contents($toFile, $toFileContent);
 
         $this->removeUse($toFile);
+
         $this->removeORMAnatation($toFile);
         $this->removeClassBody($toFile);
         $this->setEndOf($toFile);
+        $this->removeImplements($toFile);
 
         $this->createRepository($toFile, $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BASE_NAMESPASE));
     }
@@ -398,6 +399,16 @@ PHP;
             }
         }
         $toFileContent = implode('', $toFileContent);
+        file_put_contents($file, $toFileContent);
+    }
+
+    /**
+     * @param $file
+     */
+    private function removeImplements($file)
+    {
+        $toFileContent = file_get_contents($file);
+        $toFileContent = preg_replace("#(\s+implements\s+.*?)(\n)#", '\2', $toFileContent);
         file_put_contents($file, $toFileContent);
     }
 

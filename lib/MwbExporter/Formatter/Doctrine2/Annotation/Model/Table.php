@@ -663,12 +663,35 @@ class Table extends BaseTable
     }
 
     /**
+     * Get lifecycleCallbacks.
+     *
+     * @return array
+     */
+    public function getInterfaces()
+    {
+        $result = [];
+        if ($interfaces = trim($this->parseComment('interfaces'))) {
+
+            $interfaces = explode(',', $interfaces);
+            array_walk($interfaces, 'trim');
+            $result = $interfaces;
+        }
+        return $result;
+    }
+
+    /**
      * Get the class name to implements.
      *
      * @return string
      */
     protected function getClassImplementations()
     {
+        $out = null;
+        if($r = $this->getInterfaces()) {
+            $out = implode(', ', $r);
+        }
+
+        return $out;
     }
 
     /**
