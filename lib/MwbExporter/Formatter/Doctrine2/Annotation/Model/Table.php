@@ -250,10 +250,6 @@ class Table extends BaseTable
                         }
 
                         $_this->writeToString($writer);
-                        if ($this->getColumns()->columnExits('id')) {
-                            $writer->write('');
-                            $_this->writeIsNew($writer);
-                        }
                     })
                 ->outdent()
                 ->write('}')
@@ -264,27 +260,6 @@ class Table extends BaseTable
         }
 
         return self::WRITE_EXTERNAL;
-    }
-
-    public function writeIsNew(WriterInterface $writer)
-    {
-        $column = $this->getColumns()->getColumnByName('id');
-        $name = $column->getPhpColumnName();
-        $writer
-            ->write('/**')
-            ->write(' * Check is new object.')
-            ->write(' *')
-            ->write(' * @return bool')
-            ->write(' */')
-            ->write('public function isNew()')
-            ->write('{')
-                ->indent()
-                ->write("return !(boolean) \$this->{$name};")
-                ->outdent()
-            ->write('}')
-        ;
-
-        return $this;
     }
 
     public function writeUsedClasses(WriterInterface $writer)
@@ -416,9 +391,21 @@ class Table extends BaseTable
     {
         $columns = $this->getColumns()->getColumns();
 
-        $columns = array_filter($columns, function ($column) {
-                return !preg_match('/_id$/', $column->getColumnName());
-            });
+        $columns = array_filter($columns, function (\MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column) {
+
+
+            if(preg_match('/_id$/', $column->getColumnName())) {
+                if($column->getLocalForeignKey()) {
+                    return false;
+                }
+
+
+            }
+
+            return true;
+
+
+        });
 
         $maxLen = 0;
         foreach ($columns as $column) {
@@ -429,6 +416,7 @@ class Table extends BaseTable
         $columnsArr = [];
 
         foreach ($columns as $column) {
+
             /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
             if ($column->parseComment('skip') == 'true') {
                 continue;
@@ -672,9 +660,11 @@ class Table extends BaseTable
         $result = [];
         if ($interfaces = trim($this->parseComment('interfaces'))) {
 
-            $interfaces = explode(',', $interfaces);
-            array_walk($interfaces, 'trim');
+            $interfaces = preg_split('/[^\w\\\]/', $interfaces);
+            $interfaces = array_map('trim', $interfaces);
+            $interfaces = array_filter($interfaces, 'trim');
             $result = $interfaces;
+
         }
         return $result;
     }

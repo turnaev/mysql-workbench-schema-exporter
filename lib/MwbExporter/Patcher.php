@@ -207,6 +207,8 @@ class Patcher
     {
         if ($fileInfo->isFile()) {
 
+            $this->patchEntityModel($fileInfo);
+
             $filePath = $fileInfo->getPathname();
             $content = file_get_contents($filePath);
 
@@ -223,7 +225,7 @@ class Patcher
     {
         \$res = parent::toArray();
 
-        return [\$this->getShortClassName()=>\$res];
+        return [\$this->getShortClassName() => \$res];
     }
 PHP
                 ,
@@ -248,31 +250,11 @@ PHP
             $filePath = $fileInfo->getPathname();
             $content = file_get_contents($filePath);
 
-            $contentMap = [
-                '/\\\DateInterval/'                                              => 'Type\DateInterval',
-                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d\'\)\s+?:/'                => '? \1->format(Type\Date::DEFAULT_FORMAT) :',
-                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\'\)\s+?:/'          => '? \1->format(Type\DateTime::DEFAULT_FORMAT) :',
-                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\.u\'\)\s+?:/'       => '? Type\DateTime::formatWithMillisecond(\1) :',
-                '/\?\s+?(\$this->.*?)->format\(\'P%yY%mM%dDT%hH%iI%sS\'\)\s+?:/' => '? \1->format(null) :',
-                '/(\s+)(\*)(\s+)\n/'                                             => '\1\2'."\n",
-                '/(abstract class .*?)(\n\{)/'=>'\1\2'.<<<PHP
-
-    use Type\\ModelTrait;
-
-PHP
-            ];
-
-            $from    = array_keys($contentMap);
-            $to      = array_values($contentMap);
-            $content = preg_replace($from, $to, $content);
-
             $imeplements = ['\Common\CoreBundle\Type\EntityInterface'];
             if(preg_match('#(abstract class [^\\\]*?\s+?implements\s+?)(.*)#', $content, $m)) {
-
                 $m = explode(',', $m[2]);
                 array_walk($m, 'trim');
                 $imeplements = array_merge($imeplements, $m);
-
             }
 
             if(preg_match('/toArray/', $content)) {
@@ -280,6 +262,7 @@ PHP
             }
 
             $imeplements = array_values($imeplements);
+            $imeplements = array_map('trim', $imeplements);
             $imeplements = implode(', ', $imeplements);
             $content = preg_replace("#(abstract class [^\\\]*?)(\s+?implements\s+?)(.*)(\n\{)#", '\1\4', $content);
             $content = preg_replace("/(abstract class .*?)(\n\{)/", '\1 implements '.$imeplements.'\2', $content);
@@ -287,12 +270,101 @@ PHP
             if(preg_match('/Type\\\/', $content)) {
                 $content = preg_replace('#\\\Common\\\CoreBundle\\\Type#', 'Type', $content);
                 $content = preg_replace('/namespace (.*?);/', 'namespace \1;'."\n\n".'use Common\\CoreBundle\\Type;', $content);
-
             }
 
-            $content = preg_replace("/(use .*?;)\n{2}(use .*?;)/", '\1'."\n".'\2', $content);
+            $isObservable = (bool)strpos($imeplements, 'ObservableInterface');
 
+            $contentMap = [
+                '/\\\DateInterval/'                                              => 'Type\DateInterval',
+                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d\'\)\s+?:/'                => '? \1->format(Type\Date::DEFAULT_FORMAT) :',
+                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\'\)\s+?:/'          => '? \1->format(Type\DateTime::DEFAULT_FORMAT) :',
+                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\.u\'\)\s+?:/'       => '? Type\DateTime::formatWithMillisecond(\1) :',
+                '/\?\s+?(\$this->.*?)->format\(\'P%yY%mM%dDT%hH%iI%sS\'\)\s+?:/' => '? \1->format(null) :',
+                '/(\s+)(\*)(\s+)\n/'                                             => '\1\2'."\n",
+            ];
+
+            if($isObservable) {
+                $contentMap['/(abstract class .*?)(\n\{)/']='\1\2'.<<<PHP
+
+    use Type\\ModelTrait;
+    use Type\\ObservableTrait;
+
+PHP;
+            } else {
+                $contentMap['/(abstract class .*?)(\n\{)/']='\1\2'.<<<PHP
+
+    use Type\\ModelTrait;
+
+PHP;
+            }
+
+            $from    = array_keys($contentMap);
+            $to      = array_values($contentMap);
+            $content = preg_replace($from, $to, $content);
+
+            $content = preg_replace("/(use .*?;)\n{2}(use .*?;)/", '\1'."\n".'\2', $content);
             file_put_contents($filePath, $content);
+
+            if($isObservable) {
+                $this->removeObservable($filePath);
+            }
         }
+    }
+
+    private $ignoreFeilds = [
+        'realmId',
+        'guid',
+        'version',
+        'createdAt',
+        'createdByUser',
+        'createdByPartyId',
+        'changedAt',
+        'changedByUser',
+        'changedByPartyId'
+    ];
+
+    public function removeObservable($filePath)
+    {
+        //remove field
+        $content = file_get_contents($filePath);
+
+        foreach($this->ignoreFeilds as $field) {
+
+            $from    = "#\n[^\$.]*?\\\$".$field."[^\n]*?;#s";
+            $to      = '';
+            $content = preg_replace($from, $to, $content);
+        }
+
+        //remove methods
+        $content = explode("\n", $content);
+
+        $removePart = function($part) use(&$content) {
+
+            foreach($content as $i=>$string) {
+                if(preg_match("#'$part'#", $string)) {
+                    unset($content[$i]);
+                }
+            }
+
+            foreach($content as $i=>$string) {
+
+                if(preg_match("#Set the value of $part#", $string)) {
+                    $start = $i-1;
+                    $end = $start+24;
+
+                    for($i = $start; $i< $end; $i++) {
+                        unset($content[$i]);
+                    }
+                }
+            }
+        };
+
+        foreach($this->ignoreFeilds as $field) {
+            $removePart($field);
+        }
+
+        $content = implode("\n", $content);
+
+        file_put_contents($filePath, $content);
     }
 }

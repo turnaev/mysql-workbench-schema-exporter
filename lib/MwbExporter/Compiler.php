@@ -6,9 +6,6 @@ use MwbExporter\Formatter\FormatterInterface;
 use MwbExporter\Model\Document;
 use Symfony\Component\Validator\Validation;
 
-/**
- * Class Compiler.
- */
 class Compiler
 {
     use XmlPrettyTrait;
@@ -29,6 +26,7 @@ class Compiler
     private $quoteWords = [
         'order',
         'group',
+        'desc',
         'user',
         'from',
         'to',

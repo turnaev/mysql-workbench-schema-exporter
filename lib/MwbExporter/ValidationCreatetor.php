@@ -22,6 +22,18 @@ class ValidationCreatetor
      */
     private $validationDir;
 
+    private $ignoreFeilds = [
+        'realmId',
+        'guid',
+        'version',
+        'createdAt',
+        'createdByUser',
+        'createdByPartyId',
+        'changedAt',
+        'changedByUser',
+        'changedByPartyId'
+    ];
+
     /**
      * @param string $configDir
      */
@@ -88,6 +100,10 @@ XML;
 
             foreach ($fields as $field) {
 
+                if(in_array($field->name, $this->ignoreFeilds)) {
+                    continue;
+                }
+
                 switch ($field->eType) {
                     case 'field':
                         $this->addField($field, $classE);
@@ -113,6 +129,24 @@ XML;
 
     private function addUq($uniqueConstraint, $classE,  $className)
     {
+        //<constraint name="Common\DoctrineBundle\Validator\Constraints\UuidUnique">
+        //    <option name="strict">false</option>
+        //    <option name="uuidProperty">guid</option>
+        //    <option name="message">Vehicle (with guid) already exists.</option>
+        //</constraint>
+        //<constraint name="Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity">
+        //    <option name="fields">
+        //        <value>email</value>
+        //    </option>
+        //    <option name="message">Person (with email) already exists.</option>
+        //</constraint>
+
+        $origColumns = $uniqueConstraint->attributes()['columns'];
+
+        if(in_array($origColumns, $this->ignoreFeilds)) {
+            return;
+        }
+
         $columns = $uniqueConstraint->attributes()['columns'];
         $columns = explode(',', $columns);
         array_walk($columns, function (&$v) {
@@ -125,15 +159,28 @@ XML;
         });
 
         $constraintE = $this->dom->createElement('constraint');
-        $constraintE->setAttribute('name', 'Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity');
+        if($origColumns == 'guid') {
+            $constraintE->setAttribute('name', 'Common\DoctrineBundle\Validator\Constraints\UuidUnique');
 
-        $optionE = $this->dom->createElement('option');
-        $optionE->setAttribute('name', 'fields');
-        $constraintE->appendChild($optionE);
+            $optionE = $this->dom->createElement('option', 'false');
+            $optionE->setAttribute('name', 'strict');
+            $constraintE->appendChild($optionE);
 
-        foreach ($columns as $column) {
-            $valueE = $this->dom->createElement('value', $column);
-            $optionE->appendChild($valueE);
+            $optionE = $this->dom->createElement('option', $origColumns);
+            $optionE->setAttribute('name', 'uuidProperty');
+            $constraintE->appendChild($optionE);
+
+        } else {
+            $constraintE->setAttribute('name', 'Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity');
+
+            $optionE = $this->dom->createElement('option');
+            $optionE->setAttribute('name', 'fields');
+            $constraintE->appendChild($optionE);
+
+            foreach ($columns as $column) {
+                $valueE = $this->dom->createElement('value', $column);
+                $optionE->appendChild($valueE);
+            }
         }
 
         $objName = 'Object';
@@ -147,6 +194,7 @@ XML;
         $constraintE->appendChild($optionE);
 
         $classE->appendChild($constraintE);
+
     }
 
     private function addField($field, $classE)

@@ -59,7 +59,7 @@ trait XmlPrettyTrait
             "/(    <\/property>)\n    (<property)/is"       => "\\1\n\n    \\2",
             "/(    <\/property>)\n    (<constraint)/is"       => "\\1\n\n    \\2",
             "/(    <\/constraint>)\n    (<property)/is"     => "\1\n\n    \2",
-            "/(    <\/constraint>)\n    (<constraint)/is"   => "\\1\n\n    \\2",
+            "/(    <\/constraint>)\n        (<constraint)/is"   => "\\1\n\n        \\2",
         ];
         $regulationsBase = array_merge($regulationsBase, $regulations);
 
