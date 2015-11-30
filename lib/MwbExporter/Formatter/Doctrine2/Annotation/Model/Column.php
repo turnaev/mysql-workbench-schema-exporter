@@ -200,7 +200,7 @@ class Column extends BaseColumn
                 // do not create entities for many2many tables
                 continue;
             }
-            if ($foreign->parseComment('unidirectional') === 'true') {
+            if ($foreign->isUnidirectional()) {
                 // do not output mapping in foreign table when the unidirectional option is set
                 continue;
             }
@@ -321,7 +321,7 @@ class Column extends BaseColumn
                 $related = $this->getManyToManyRelatedName($this->local->getReferencedTable()->getRawTableName(), $this->local->getForeign()->getColumnName());
 
                 $refRelated = $this->local->getLocal()->getRelatedName($this->local);
-                if ($this->local->parseComment('unidirectional') === 'true') {
+                if ($this->local->isUnidirectional()) {
                     $annotationOptions['inversedBy'] = null;
                 } elseif ($filedNameInversed) {
                     null;
@@ -348,7 +348,7 @@ class Column extends BaseColumn
                 ;
             } else { // is OneToOne
 
-                if ($this->local->parseComment('unidirectional') === 'true') {
+                if ($this->local->isUnidirectional()) {
                     $annotationOptions['inversedBy'] = null;
                 } else {
                     $annotationOptions['inversedBy'] = lcfirst($annotationOptions['inversedBy']);
@@ -433,7 +433,7 @@ class Column extends BaseColumn
         return isset($nativeType) ? [$nativeType, $hint, $defaultValue] : null;
     }
 
-    public function writeGetterAndSetter(WriterInterface $writer)
+    public function writeGetterAndSetter(WriterInterface $writer, $methodName = null)
     {
         $table = $this->getTable();
         $converter = $this->getDocument()->getFormatter()->getDatatypeConverter();
@@ -452,6 +452,9 @@ class Column extends BaseColumn
 
         $propName = $varName = $this->getPhpColumnName();
         $funactionName = $this->columnNameBeautifier($this->getColumnName());
+        if($methodName) {
+            $funactionName = $methodName;
+        }
 
         if ($this->parseComment('skip') == 'true') {
             return;
@@ -503,7 +506,7 @@ class Column extends BaseColumn
                 // do not create entities for many2many tables
                 continue;
             }
-            if ($foreign->parseComment('unidirectional') === 'true') {
+            if ($foreign->isUnidirectional()) {
                 // do not output mapping in foreign table when the unidirectional option is set
                 continue;
             }
@@ -657,7 +660,8 @@ class Column extends BaseColumn
         }
         // many to one references
         if (null !== $this->local) {
-            $unidirectional = ($this->local->parseComment('unidirectional') === 'true');
+            $unidirectional = $this->local->isUnidirectional();
+
 
             $nullType = '';
             if (!$this->isNotNull()) {

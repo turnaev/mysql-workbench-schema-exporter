@@ -249,6 +249,8 @@ class Table extends BaseTable
                             $_this->writeToArray($writer);
                         }
 
+                        $_this->writeIdSetGet($writer);
+                        $_this->writeIsNew($writer);
                         $_this->writeToString($writer);
                     })
                 ->outdent()
@@ -312,22 +314,81 @@ class Table extends BaseTable
         return $this;
     }
 
+    public function writeIdSetGet($writer)
+    {
+        if ($this->getColumns()->columnExits('id')) {
+            return;
+        }
+
+        foreach($this->getColumns() as $c) {
+            /** @var Column $c */
+            if($c->isPrimary()) {
+                $column = $c;
+                break;
+            }
+        }
+
+        $column->writeGetterAndSetter($writer, 'Id');
+
+    }
+
+    public function writeIsNew(WriterInterface $writer)
+    {
+        foreach($this->getColumns() as $c) {
+            /** @var Column $c */
+            if($c->isPrimary()) {
+                $column = $c;
+                break;
+            }
+        }
+
+        $name = $column->getPhpColumnName();
+
+        //* @throws MethodNotImplementedException
+        $writer
+            ->write('/**')
+            ->write(' * Check entity is new.')
+            ->write(' *')
+            ->write(' * @return bool')
+            ->write(' */')
+            ->write('public function isNew()')
+            ->write('{')
+                ->indent()
+                ->write("return is_null(\$this->{$name});")
+                ->outdent()
+            ->write('}')
+            ->write('')
+        ;
+
+        return $this;
+    }
+
     public function writeToString(WriterInterface $writer)
     {
         $throwException = false;
 
         if ($this->getColumns()->columnExits('name')) {
             $column = $this->getColumns()->getColumnByName('name');
-        } elseif ($this->getColumns()->columnExits('id')) {
-            $column = $this->getColumns()->getColumnByName('id');
+
         } else {
-            $throwException = true;
-            $column         = null;
+
+            foreach($this->getColumns() as $c) {
+                /** @var Column $c */
+                if($c->isPrimary()) {
+                    $column = $c;
+                    break;
+                }
+            }
         }
 
-        /** @var \MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column */
+        /** @var \Column $column */
         if ($column && $column->parseComment('skip') == 'true') {
             return;
+        }
+
+        if(!isset($column)) {
+            $throwException = true;
+            $column         = null;
         }
 
         //* @throws MethodNotImplementedException
@@ -392,19 +453,14 @@ class Table extends BaseTable
         $columns = $this->getColumns()->getColumns();
 
         $columns = array_filter($columns, function (\MwbExporter\Formatter\Doctrine2\Annotation\Model\Column $column) {
-
-
-            if(preg_match('/_id$/', $column->getColumnName())) {
-                if($column->getLocalForeignKey()) {
-                    return false;
-                }
-
-
+            if($column->getColumnName() == 'id') {
+                return true;
+            }
+            if($column->getLocalForeignKey()) {
+                return false;
             }
 
             return true;
-
-
         });
 
         $maxLen = 0;
@@ -510,7 +566,7 @@ class Table extends BaseTable
             // if this is the owning side, also output the JoinTable Annotation
             // otherwise use "mappedBy" feature
             if ($isOwningSide) {
-                if ($mappedRelation->parseComment('unidirectional') === 'true') {
+                if ($mappedRelation->isUnidirectional()) {
                     unset($annotationOptions['inversedBy']);
                 }
 
@@ -544,7 +600,7 @@ class Table extends BaseTable
                     ->write(' */')
                 ;
             } else {
-                if ($relation['reference']->parseComment('unidirectional') === 'true') {
+                if ($relation['reference']->isUnidirectional()) {
                     continue;
                 }
 

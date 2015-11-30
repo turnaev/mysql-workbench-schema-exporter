@@ -81,9 +81,6 @@ abstract class Formatter extends BaseFormatter
         return $relation['reference']->getLocal()->getId() < $mappedRelation->getLocal()->getId();
     }
 
-    public function test()
-    {
-    }
     /**
      * get the cascade option as array. Only returns values allowed by Doctrine.
      *

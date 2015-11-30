@@ -150,6 +150,7 @@ class ForeignKey extends Base
     public function isManyToOne()
     {
         $o2o = $this->foreign->parseComment('o2o');
+
         if (!is_null($o2o)) {
             $isMany = !(bool) $this->getBooleanOption($o2o);
         } else {
@@ -157,5 +158,17 @@ class ForeignKey extends Base
         }
 
         return $isMany;
+    }
+
+    /**
+     * Check relation if it is unidirectional
+     *
+     * @return bool
+     */
+    public function isUnidirectional()
+    {
+        $o = $this->foreign->parseComment('unidirectional');
+        $is = (bool) $this->getBooleanOption($o);
+        return $is;
     }
 }

@@ -23,15 +23,15 @@ class ValidationCreatetor
     private $validationDir;
 
     private $ignoreFeilds = [
-        'realmId',
+        'realmCode',
         'guid',
         'version',
         'createdAt',
         'createdByUser',
-        'createdByPartyId',
+        'createdByPartyCode',
         'changedAt',
         'changedByUser',
-        'changedByPartyId'
+        'changedByPartyCode'
     ];
 
     /**
@@ -41,7 +41,6 @@ class ValidationCreatetor
     {
         $this->configDir = $configDir;
         $this->validationDir = dirname($configDir).'/validation';
-
     }
 
     private function initDom()

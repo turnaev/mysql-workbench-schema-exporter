@@ -8,6 +8,18 @@ class Patcher
 {
     use XmlPrettyTrait;
 
+    private $ignoreFeilds = [
+        'realmCode',
+        'guid',
+        'version',
+        'createdAt',
+        'createdByUser',
+        'createdByPartyCode',
+        'changedAt',
+        'changedByUser',
+        'changedByPartyCode'
+    ];
+
     /**
      * root dir
      * @var string
@@ -28,7 +40,7 @@ class Patcher
     /**
      * @param $baseDir
      */
-    function __construct($baseDir)
+    public function __construct($baseDir)
     {
         $this->baseDir = $baseDir;
     }
@@ -278,7 +290,7 @@ PHP
                 '/\\\DateInterval/'                                              => 'Type\DateInterval',
                 '/\?\s+?(\$this->.*?)->format\(\'Y-m-d\'\)\s+?:/'                => '? \1->format(Type\Date::DEFAULT_FORMAT) :',
                 '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\'\)\s+?:/'          => '? \1->format(Type\DateTime::DEFAULT_FORMAT) :',
-                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\.u\'\)\s+?:/'       => '? Type\DateTime::formatWithMillisecond(\1) :',
+                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\.u\'\)\s+?:/'       => '? Type\DateTime::_foramt(\1) :',
                 '/\?\s+?(\$this->.*?)->format\(\'P%yY%mM%dDT%hH%iI%sS\'\)\s+?:/' => '? \1->format(null) :',
                 '/(\s+)(\*)(\s+)\n/'                                             => '\1\2'."\n",
             ];
@@ -311,18 +323,6 @@ PHP;
         }
     }
 
-    private $ignoreFeilds = [
-        'realmId',
-        'guid',
-        'version',
-        'createdAt',
-        'createdByUser',
-        'createdByPartyId',
-        'changedAt',
-        'changedByUser',
-        'changedByPartyId'
-    ];
-
     public function removeObservable($filePath)
     {
         //remove field
@@ -349,8 +349,9 @@ PHP;
             foreach($content as $i=>$string) {
 
                 if(preg_match("#Set the value of $part#", $string)) {
-                    $start = $i-1;
-                    $end = $start+24;
+
+                    $start = $i - 1;
+                    $end = $start + 24;
 
                     for($i = $start; $i< $end; $i++) {
                         unset($content[$i]);
