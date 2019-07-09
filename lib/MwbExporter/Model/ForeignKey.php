@@ -130,7 +130,7 @@ class ForeignKey extends Base
      */
     private function getBooleanOption($booleanValue)
     {
-        if (!is_null($booleanValue)) {
+        if ($booleanValue !== null) {
             switch (strtolower($booleanValue)) {
                 case 'true':
                     return true;
@@ -151,7 +151,7 @@ class ForeignKey extends Base
     {
         $o2o = $this->foreign->parseComment('o2o');
 
-        if (!is_null($o2o)) {
+        if ($o2o !== null) {
             $isMany = !(bool) $this->getBooleanOption($o2o);
         } else {
             $isMany = (bool) $this->parameters->get('many');

@@ -73,7 +73,7 @@ trait XmlPrettyTrait
         }
 
         $xml = preg_replace('/ \/>/','/>', $xml);
-
+        $xml = trim($xml)."\n";
         return $xml;
     }
 }

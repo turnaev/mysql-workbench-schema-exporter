@@ -86,11 +86,13 @@ interface DatatypeConverterInterface
     const USERDATATYPE_DEC             = 'com.mysql.rdbms.mysql.userdatatype.dec';
     const USERDATATYPE_CHARACTER       = 'com.mysql.rdbms.mysql.userdatatype.character';
 
-    const USERDATATYPE_DATETIME_WITH_MILLISECOND_NATIVE = 'datetime_with_millisecond';
-    const USERDATATYPE_TIMESTAMP        = 'com.mysql.rdbms.mysql.datatype.timestamp_f';
+    const USERDATATYPE_TIME            = 'com.mysql.rdbms.mysql.datatype.time_f';
 
-    const USERDATATYPE_DATETIME_NATIVE = 'datetime';
-    const USERDATATYPE_DATEINTERVAL_NATIVE = 'dateinterval';
+    const USERDATATYPE_DATETIME_WITH_MILLISECOND_NATIVE = 'datetime_with_millisecond';
+    const USERDATATYPE_TIMESTAMP                        = 'com.mysql.rdbms.mysql.datatype.timestamp_f';
+
+    const USERDATATYPE_DATETIME_NATIVE                  = 'datetime';
+    const USERDATATYPE_DATEINTERVAL_NATIVE              = 'dateinterval';
 
     public function setup();
     public function getDataType($key);

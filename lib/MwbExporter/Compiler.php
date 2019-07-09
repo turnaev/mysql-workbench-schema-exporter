@@ -289,7 +289,8 @@ XML;
         $this->setEndOf($toFile);
         $this->removeImplements($toFile);
 
-        $this->createRepository($toFile, $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BASE_NAMESPASE));
+        //use generic repository
+        //$this->createRepository($toFile, $this->formatter->getRegistry()->config->get(FormatterInterface::CFG_BASE_NAMESPASE));
     }
 
     /**

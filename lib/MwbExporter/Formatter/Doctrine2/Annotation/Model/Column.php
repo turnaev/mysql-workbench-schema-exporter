@@ -82,18 +82,19 @@ class Column extends BaseColumn
 
         $asAnnotation = $this->asAnnotation();
 
-        $value = '';
-        if (!is_null($this->getDefaultValue())) {
+        $value = null;
+
+        if ($this->getDefaultValue() != null) {
             switch ($nativeType) {
                 case 'bool':
                     $map = [true => 'true', false => 'false'];
                     $value = ' = '.$map[(boolean) $this->getDefaultValue()];
                     break;
                 case 'int':
-                    $value = ' = '.intval($this->getDefaultValue());
+                    $value = ' = '.(int)$this->getDefaultValue();
                     break;
                 case 'float':
-                    $value = ' = '.floatval($this->getDefaultValue());
+                    $value = ' = '.(float)$this->getDefaultValue();
                     break;
                 default:
                     $value = " = '{$this->getDefaultValue()}'";
@@ -131,6 +132,7 @@ class Column extends BaseColumn
         }
 
         if (in_array($asAnnotation['type'], ['datetime', 'dateinterval', 'datetime_with_millisecond'])) {
+
             $nativeType = $converter->getDataType($asAnnotation['type']);
             if (!$this->isNotNull()) {
                 $nativeType = 'null|'.$nativeType;
@@ -234,7 +236,7 @@ class Column extends BaseColumn
             $orderByAnnotationOptions = [];
             $orderBy = $foreign->getForeign()->parseComment('orderBy');
 
-            if (!is_null($orderBy)) {
+            if ($orderBy !== null) {
                 $orderBy = $foreign->getForeign()->parseComment('orderBy');
                 $orderByAnnotationOptions = [null => [$orderBy]];
             }
@@ -422,7 +424,7 @@ class Column extends BaseColumn
             default;
         }
 
-        if (is_null($defaultValue)) {
+        if ($defaultValue === null) {
             if ($this->isNotNull()) {
                 $defaultValue = '';
             } else {
@@ -517,8 +519,8 @@ class Column extends BaseColumn
                 $related_text = $this->getRelatedName($foreign, false);
 
                 if ($v = $foreign->getForeign()->parseComment('field-inversed')) {
-                    //v($v);
-                    $propName =   $v;
+
+                    $propName = $v;
                     $varName = Inflector::singularize($v);
 
                     $funactionName    = ucfirst(Inflector::singularize($propName));

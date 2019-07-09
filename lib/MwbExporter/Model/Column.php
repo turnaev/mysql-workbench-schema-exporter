@@ -367,7 +367,7 @@ class Column extends Base
         if (1 != $this->parameters->get('defaultValueIsNull')) {
             $defaultValue = trim($this->parameters->get('defaultValue'), '\'"');
 
-            if (!(is_null($defaultValue) || ('NULL' == $defaultValue) || $defaultValue == '')) {
+            if (($defaultValue !== null || ('NULL' == $defaultValue) || $defaultValue == '')) {
                 return $defaultValue;
             }
         }

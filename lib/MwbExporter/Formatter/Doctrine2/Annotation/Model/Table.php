@@ -187,6 +187,11 @@ class Table extends BaseTable
                 $base = $this->getDocument()->getConfig()->get(Formatter::CFG_BUNDELE_NAMESPACE_TO);
                 $repositoryNamespace = $base.'\\'.$repositoryNamespace.'\\';
             }
+
+            //use generic repository
+            //$repositoryName = $this->getDocument()->getConfig()->get(Formatter::CFG_AUTOMATIC_REPOSITORY) ? $repositoryNamespace.$this->getModelName().'Repository' : null;
+            $repositoryName = 'Common\DoctrineBundle\ORM\EntityRepository';
+
             $skipGetterAndSetter = $this->getDocument()->getConfig()->get(Formatter::CFG_SKIP_GETTER_SETTER);
             $serializableEntity  = $this->getDocument()->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_SERIALIZATION);
             $toArrrabeEntity  = $this->getDocument()->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_TO_ARRAY);
@@ -208,7 +213,7 @@ class Table extends BaseTable
                 ->write(' *')
                 ->writeIf($comment, $comment)
                 ->write(' * '.$this->getAnnotation('Table', array('name' => $this->quoteIdentifier($this->getRawTableName()), 'indexes' => $this->getIndexesAnnotation(), 'uniqueConstraints' => $this->getUniqueConstraintsAnnotation())))
-                ->write(' * '.$this->getAnnotation('Entity', array('repositoryClass' => $this->getDocument()->getConfig()->get(Formatter::CFG_AUTOMATIC_REPOSITORY) ? $repositoryNamespace.$this->getModelName().'Repository' : null)))
+                ->write(' * '.$this->getAnnotation('Entity', array('repositoryClass' => $repositoryName)))
                 ->writeIf($lifecycleCallbacks, ' * @ORM\HasLifecycleCallbacks')
                 ->write(' */')
                 ->write('class '.$this->getModelName().(($implements = $this->getClassImplementations()) ? ' implements '.$implements : ''))
@@ -354,7 +359,7 @@ class Table extends BaseTable
             ->write('public function isNew()')
             ->write('{')
                 ->indent()
-                ->write("return is_null(\$this->{$name});")
+                ->write("return \$this->{$name} === null;")
                 ->outdent()
             ->write('}')
             ->write('')
@@ -483,15 +488,23 @@ class Table extends BaseTable
             if (in_array($column->asAnnotation()['type'], ['datetime'])) {
                 $format       = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d H:i:s') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
-            } elseif (in_array($column->asAnnotation()['type'], ['datetime_with_millisecond'])) {
+
+            } else if (in_array($column->asAnnotation()['type'], ['time'])) {
+                $format       = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('H:i:s') : \$this->%s";
+                $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
+
+            } else if (in_array($column->asAnnotation()['type'], ['datetime_with_millisecond'])) {
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d H:i:s.u') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
-            } elseif (in_array($column->asAnnotation()['type'], ['date'])) {
+
+            } else if (in_array($column->asAnnotation()['type'], ['date'])) {
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('Y-m-d') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
-            } elseif (in_array($column->asAnnotation()['type'], ['dateinterval'])) {
+
+            } else if (in_array($column->asAnnotation()['type'], ['dateinterval'])) {
                 $format = "    %-{$maxLen}s => \$this->%s ? \$this->%s->format('P%%yY%%mM%%dDT%%hH%%iI%%sS') : \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey, $columnKey, $columnKey);
+
             } else {
                 $format = "    %-{$maxLen}s => \$this->%s";
                 $columnsArr[] = sprintf($format, '\''.$columnKey.'\'', $columnKey);

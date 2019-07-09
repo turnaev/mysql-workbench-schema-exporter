@@ -191,8 +191,7 @@ class Patcher
     }
 
     /**
-     * Entity/Repository
-     * @param DirectoryIterator $fileInfo
+     * @param \DirectoryIterator $fileInfo
      */
     private function patchRepository(\DirectoryIterator $fileInfo)
     {
@@ -208,7 +207,6 @@ class Patcher
 
             file_put_contents($filePath, $content);
         }
-
     }
 
     /**
@@ -288,9 +286,10 @@ PHP
 
             $contentMap = [
                 '/\\\DateInterval/'                                              => 'Type\DateInterval',
+                '/\?\s+?(\$this->.*?)->format\(\'H:i:s\'\)\s+?:/'                => '? \1->format(Type\Time::DEFAULT_FORMAT) :',
                 '/\?\s+?(\$this->.*?)->format\(\'Y-m-d\'\)\s+?:/'                => '? \1->format(Type\Date::DEFAULT_FORMAT) :',
                 '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\'\)\s+?:/'          => '? \1->format(Type\DateTime::DEFAULT_FORMAT) :',
-                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\.u\'\)\s+?:/'       => '? Type\DateTime::_foramt(\1) :',
+                '/\?\s+?(\$this->.*?)->format\(\'Y-m-d H:i:s\.u\'\)\s+?:/'       => '? Type\DateTime::_format(\1) :',
                 '/\?\s+?(\$this->.*?)->format\(\'P%yY%mM%dDT%hH%iI%sS\'\)\s+?:/' => '? \1->format(null) :',
                 '/(\s+)(\*)(\s+)\n/'                                             => '\1\2'."\n",
             ];
@@ -302,6 +301,8 @@ PHP
     use Type\\ObservableTrait;
 
 PHP;
+                $contentMap['/toArray/'] = '_toArray';
+
             } else {
                 $contentMap['/(abstract class .*?)(\n\{)/']='\1\2'.<<<PHP
 

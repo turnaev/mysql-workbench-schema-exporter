@@ -217,11 +217,11 @@ XML;
 
                 $constraintE->setAttribute('name', 'DateInterval');
 
-            } elseif (in_array($field->type, ['datetime', 'datetime_with_millisecond'])) {
+            } else if (in_array($field->type, ['datetime', 'datetime_with_millisecond'])) {
 
                 $constraintE->setAttribute('name', 'DateTime');
 
-            } elseif ($field->type == 'date') {
+            } else if ($field->type == 'date') {
 
                 $constraintE->setAttribute('name', 'Date');
             }
